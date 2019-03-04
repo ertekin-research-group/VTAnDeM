@@ -1,5 +1,5 @@
 
-__name__ = 'Analysis for ThermoElectric Materials Discovery (AnThEM-Delta Code)'
+__name__ = 'VTAnDeM_Visualization-Toolkit-for-Analyzing-Defects-in-Materials'
 __author__ = 'Lidia_Michael'
 
 ##-------------------------------------------------------------------##
@@ -19,7 +19,6 @@ class Phase_Stability_Compounds_Information:
 		self.species = []			# Keep track of all unique elements involved in the system (e.g. for CuGaTe2, the elements would be Cu, Ga, and Te).
 		self.compounds_info = {}	# Keep track of relevant information about all compounds (e.g. for CuGaTe2, compounds may include Cu, CuTe, Ga7Te10, ...)
 		self.project_directory = os.getcwd()
-	
 	
 	
 	###-------------------------------------------------------------------------------###
@@ -103,7 +102,6 @@ class Phase_Stability_Compounds_Information:
 						self.compounds_info[compound][specie] = 0						# If species is not in compound, record 0 in the list.
 	
 	
-	
 	###-------------------------------------------------------------------------------###
 	###-------------------------------------------------------------------------------###
 	###------------------------- Obtain DFT information ------------------------------###
@@ -155,7 +153,6 @@ class Phase_Stability_Compounds_Information:
 			self.compounds_info[compound]["total_energy"] = total_energy
 	
 	
-	
 	###-------------------------------------------------------------------------------###
 	###-------------------------------------------------------------------------------###
 	###-------------- Update compounds list using recorded quantities ----------------###
@@ -173,7 +170,6 @@ class Phase_Stability_Compounds_Information:
 					if self.compounds_info[compound][specie] != 0:
 						self.compounds_info[compound]["formula_units"] = self.compounds_info[compound]["dft_"+specie]/self.compounds_info[compound][specie]
 	
-	
 	def Update_EnergyPerFormulaUnit_Mu0(self):
 		for compound in self.compounds_info.keys():
 			if "total_energy" not in self.compounds_info[compound].keys():
@@ -187,8 +183,6 @@ class Phase_Stability_Compounds_Information:
 			else:
 				self.compounds_info[compound]["mu0"] = self.compounds_info[compound]["total_energy"] / self.compounds_info[compound]["formula_units"]
 	
-	
-	
 	def Update_Enthalpies(self):
 		for compound in self.compounds_info.keys():
 			if "mu0" not in self.compounds_info[compound].keys():
@@ -201,12 +195,6 @@ class Phase_Stability_Compounds_Information:
 					continue
 				enthalpy_tracker -= self.compounds_info[compound][specie]*self.compounds_info[specie]["mu0"]
 			self.compounds_info[compound]["enthalpy"] = enthalpy_tracker
-	
-	
-	
-	
-	
-	
 	
 	def Clear_Unnecessary_Species(self):
 		for specie in self.species:
@@ -222,10 +210,6 @@ class Phase_Stability_Compounds_Information:
 					self.compounds_info[compound].pop("dft_"+specie, "None")
 				self.species = self.species.remove(specie)
 	
-	
-	
-	
-	
 	def Update_All(self):
 		self.Update_POSCAR_Formulas()
 		self.Update_Total_Energies()
@@ -234,24 +218,13 @@ class Phase_Stability_Compounds_Information:
 		self.Update_Enthalpies()
 		self.Clear_Unnecessary_Species()
 	
-	
-	
-	
 	# Update all information about the compounds in a CSV file.
 	def Upload_Compounds_Info(self):
 		compounds_dataframe = pd.DataFrame(self.compounds_info).transpose()
 		compounds_dataframe.to_csv("Compounds_Tracker.csv")
 	
-	
-	
-	
-	
 	def Print_All_Info(self):
 		print pd.DataFrame(self.compounds_info).transpose()
-
-
-
-
 
 
 
