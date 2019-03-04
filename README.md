@@ -8,7 +8,7 @@ diagram, defect diagrams at different chemical environments, and carrier concent
 
 Getting Started
 ---------------
-- Use Compound_Data_Extract.py to generate CSV file needed by the tool
+- Use the necessary scripts in `extract_data` to obtain a VTAnDeM-readable CSV file
 - Choose two elements (First and Second Species) as the axis of phase diagram
 - Press ‘Generate Plot!’ Button, use slide bar in the bottom to change chemical    environment
 - Pick up a point in the shaded stability region
