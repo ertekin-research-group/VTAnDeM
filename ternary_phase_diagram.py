@@ -22,7 +22,7 @@ import matplotlib.pyplot as plt
 
 
 
-class Ternary_Phase_Diagram(object):
+class Ternary_ApplicationWindow(object):
 	
 	def __init__(self, parent = None, main_compound = None, first_species = None, second_species = None, third_species = None):
 		
