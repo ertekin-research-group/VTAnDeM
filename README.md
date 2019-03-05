@@ -9,12 +9,12 @@ diagram, defect diagrams at different chemical environments, and carrier concent
 Getting Started
 ---------------
 - Use the necessary scripts in `extract_data` to obtain a VTAnDeM-readable CSV file
-- Place the generated `Compounds_Tracker.csv` and `plot_defect.py` files in the same directory and call the latter script
+- Place the generated `Compounds_Tracker.csv`, `Defects_Tracker.csv`, and `plot_defect.py` files in the same directory and call the latter script
 - Choose two elements (First and Second Species) as the axis of phase diagram
-- Press ‘Generate Plot!’ Button, use slide bar in the bottom to change chemical    environment
-- Pick up a point in the shaded stability region
-- Presse ‘Defect Diagram’ Button
-- Choose different point in the stability region to explore defect diagrams
+- Press the ‘Generate Plot!’ button, use slide bar on the bottom to change chemical environment
+- Click anywhere on the phase diagram (a red dot should appear)
+- Press ‘Defect Diagram’ Button
+- Choose different points in the phase diagram to explore defect contributions
 
 
 User-provided data input:
