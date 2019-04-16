@@ -15,7 +15,7 @@ The data should be divided by compound into different folders. Each folder shoul
 Syntax
 ------
 
-`Generate_Compounds_Data.py` easily extracts the necessary quantities (e.g. stoichiometries, total energies, etc.) from the provided compounds. The syntax is:
+`Generate_Compounds_Data.py` extracts the necessary quantities (e.g. stoichiometries, total energies, etc.) from the provided compounds. The syntax is:
 
 	python3 Generate_Compounds_Data.py FOLDER_NAME SPECIES1 SPECIES2 ...
 
