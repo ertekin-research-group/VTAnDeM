@@ -1,9 +1,7 @@
 The Visualization Toolkit for Analyzing Defects in Materials (VTAnDeM)
 =======
 
-VTAnDeM (Visualization Toolkit for Analyzing Defects in Materials) is a post-processing plotting toolkit for DFT calculations 
-of defects in semiconductors. For given materials, the script imports DFT data provided by users, and produces phase stability 
-diagram, defect diagrams at different chemical environments, and carrier concentrations. 
+VTAnDeM is a post-processing plotting toolkit for DFT calculations of defects in semiconductors. For given materials, the script imports DFT data provided by users, and produces phase stability diagram, defect diagrams at different chemical environments, and carrier concentrations. 
 
 
 Getting Started
