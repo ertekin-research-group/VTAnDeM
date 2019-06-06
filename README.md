@@ -1,4 +1,4 @@
-VTAnDeM
+The Visualization Toolkit for Analyzing Defects in Materials (VTAnDeM)
 =======
 
 VTAnDeM (Visualization Toolkit for Analyzing Defects in Materials) is a post-processing plotting toolkit for DFT calculations 
