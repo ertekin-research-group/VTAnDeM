@@ -20,15 +20,15 @@ Required Packages
 - PyQt5 == 5.11.3
 - PyPolyhedron (Courtesy of Dr. Pearu Peterson and Dr. Sunghyun Kim, https://github.com/frssp/PyPolyhedron)
 	- Steps:
-		1. git clone https://github.com/frssp/PyPolyhedron
-		2. cd /path/to/PyPolyhedron
-		3. python3 setup.py install
+		1. `git clone https://github.com/frssp/PyPolyhedron`
+		2. `cd /path/to/PyPolyhedron`
+		3. `python3 setup.py install`
 
 
 Getting Started
 ---------------
 - Download all VTAnDeM files.
-	- git clone https://github.com/ertekin-research-group/VTAnDeM
+	- `git clone https://github.com/ertekin-research-group/VTAnDeM`
 - Run `python3 vtandem.py`
 
 
