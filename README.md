@@ -14,7 +14,10 @@ Required Packages
 -----------------
 - Numpy >= 1.16
 - Matplotlib >= 3.0
+- Pymatgen == 2019.5.8
+	- `pip3 install pymatgen==2019.5.8`
 - PyQt5 == 5.11.3
+	- `pip3 install PyQt5==5.11.3`
 - PyPolyhedron (Courtesy of Dr. Pearu Peterson and Dr. Sunghyun Kim, https://github.com/frssp/PyPolyhedron)
 	- Steps:
 		1. `git clone https://github.com/frssp/PyPolyhedron`
