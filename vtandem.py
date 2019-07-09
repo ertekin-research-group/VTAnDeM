@@ -228,18 +228,33 @@ class Import_Data_Window(QMainWindow):
 			self.compound_type = "Compound"
 	
 	def Import_Compounds_Help_Function(self):
-		raw_message = "Adding your VASP data to the VTAnDeM database: \n \
-						\t - Select material type (element/compound). \n \
-						\t - Enter the name of the compound in 'Compound Name'. \n \
-						\t - Browse for the folder where the VASP data is located. \n \
-						Necessary data structure: \n \
-						\t The folder should contain the POSCAR and OUTCAR."
-		self.message = QMessageBox()
-		self.message.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-		self.message.setWindowTitle("Help")
-		self.message.setText(raw_message)
-		self.message.setWindowIcon(QIcon("./logo/LogoSmall.png"))
-		self.message.show()
+		dialog_instructions = 	"""
+Adding your VASP total energy data to the VTAnDeM database: \n \
+	- Select material type (element/compound). \n \
+	- Enter the name of the compound in 'Compound Name' (e.g. Cu2HgGeTe4, case-sensitive). \n \
+	- Browse for the folder where the VASP data is located. \n \
+	- Click on the FOLDER and hit the 'Choose' button. \n\n \
+Necessary data structure: \n \
+	The selected folder should contain the POSCAR and OUTCAR at the very least. \n \
+	For ternary and quaternary materials, the vasprun.xml file is also needed.
+								"""
+		example_file_structure = 	"""
+Example data structure: \n\n \
+    /path/to/compounds_data 	<------ Select as Data Directory \n \
+        |---- OUTCAR \n \
+        |---- POSCAR
+									"""
+		self.message_window = QMainWindow()
+		self.message_window.setWindowTitle("Help")
+		self.message_window.setWindowIcon(QIcon("./logo/LogoSmall.png"))
+		self.message_widget = QWidget()
+		self.message_widget_layout = QVBoxLayout(self.message_widget)
+		self.dialog_instructions = QLabel(dialog_instructions)
+		self.message_widget_layout.addWidget(self.dialog_instructions)
+		self.example_file_structure = QLabel(example_file_structure)
+		self.message_widget_layout.addWidget(self.example_file_structure)
+		self.message_window.setCentralWidget(self.message_widget)
+		self.message_window.show()
 	
 	
 	def Import_Compounds_Function(self):
@@ -329,11 +344,50 @@ class Import_Data_Window(QMainWindow):
 	
 	
 	def Import_Defects_Help_Function(self):
-		self.message = QMessageBox()
-		self.message.setWindowTitle("Help")
-		self.message.setText("Hello this is other troll kbye.")
-		self.message.setWindowIcon(QIcon("./logo/LogoSmall.png"))
-		self.message.show()
+		dialog_instructions = 	"""
+Adding your VASP defects data to the VTAnDeM database: \n \
+	- Enter the name of the compound in 'Compound Name' (e.g. Cu2HgGeTe4, case-sensitive). \n \
+	- Browse for the folder where the defects data is located. \n \
+	- Click on the FOLDER and hit the 'Choose' button. \n\n \
+Necessary defects data structure: \n \
+	- The folder should contain a folder for each defect, split by an underscore (e.g. Cu_Hg for Cu antisite on Hg site). \n \
+	- Within each defect, a folder for each charge state should exist, named 'q#' where # is the charge state. \n \
+	- In each charge state, the OUTCAR or OSZICAR file must be found.
+								"""
+		example_file_structure = 	"""
+Example data structure: \n\n \
+    /path/to/defects_data 	<------ Select as Data Directory \n \
+        |---- Cu_Hg \n \
+                |---- q0 \n \
+                        |---- OUTCAR \n \
+                |---- q+1 \n \
+                        |---- OUTCAR \n \
+                |---- q-1 \n \
+                        |---- OUTCAR \n \
+        |---- V_Cu \n \
+                |---- q0 \n \
+                        |---- OUTCAR \n \
+                |---- q-1 \n \
+                        |---- OUTCAR \n \
+        |---- V_Te \n \
+                |---- q0 \n \
+                        |---- OUTCAR \n \
+                |---- q+1 \n \
+                        |---- OUTCAR \n \
+                |---- q+2 \n \
+                        |---- OUTCAR
+									"""
+		self.message_window = QMainWindow()
+		self.message_window.setWindowTitle("Help")
+		self.message_window.setWindowIcon(QIcon("./logo/LogoSmall.png"))
+		self.message_widget = QWidget()
+		self.message_widget_layout = QVBoxLayout(self.message_widget)
+		self.dialog_instructions = QLabel(dialog_instructions)
+		self.message_widget_layout.addWidget(self.dialog_instructions)
+		self.example_file_structure = QLabel(example_file_structure)
+		self.message_widget_layout.addWidget(self.example_file_structure)
+		self.message_window.setCentralWidget(self.message_widget)
+		self.message_window.show()
 	
 	
 	def Import_Defects_Function(self):
@@ -400,11 +454,21 @@ class Import_Data_Window(QMainWindow):
 	
 	
 	def Import_DOS_Help_Function(self):
-		self.message = QMessageBox()
-		self.message.setWindowTitle("Help")
-		self.message.setText("Hello this is other troll kbye.")
-		self.message.setWindowIcon(QIcon("./logo/LogoSmall.png"))
-		self.message.show()
+		dialog_instructions = 	"""
+Adding your VASP Density of States data to the VTAnDeM database: \n \
+	- Enter the name of the compound in 'Compound Name' (e.g. Cu2HgGeTe4, case-sensitive). \n \
+	- Browse for the DOSCAR file of the compound. \n \
+	- Click on the FILE and hit the 'Choose' button.
+								"""
+		self.message_window = QMainWindow()
+		self.message_window.setWindowTitle("Help")
+		self.message_window.setWindowIcon(QIcon("./logo/LogoSmall.png"))
+		self.message_widget = QWidget()
+		self.message_widget_layout = QVBoxLayout(self.message_widget)
+		self.dialog_instructions = QLabel(dialog_instructions)
+		self.message_widget_layout.addWidget(self.dialog_instructions)
+		self.message_window.setCentralWidget(self.message_widget)
+		self.message_window.show()
 	
 	
 	
@@ -755,29 +819,6 @@ class Quaternary_Main_VTAnDeM_Window(QMainWindow):
 		newappAction.triggered.connect(self.Open_MaterialSelectionWindow)
 		fileMenu.addAction(newappAction)
 		
-		
-		"""
-		# Set up an option where the user can import a CSV file (not functionalized yet)
-		importMenu = QMenu("Import", self)
-		importAction_csv = QAction("&Import CSV", self)
-		importAction_csv.setStatusTip("Import CSV")
-		importAction_other = QAction("&Import other", self)
-		importAction_other.setStatusTip("Import Other Stuff")
-		importMenu.addAction(importAction_csv)
-		importMenu.addAction(importAction_other)
-		fileMenu.addMenu(importMenu)
-		"""
-		
-		
-		"""
-		# Set up an option where the user can exit the current window
-		exitAction = QAction("Exit", self)
-		exitAction.setStatusTip("Exit Application")
-		#exitAction.triggered.connect(qApp.quit)
-		exitAction.triggered.connect(self.closeEvent)
-		fileMenu.addAction(exitAction)
-		"""
-		
 		# Add "About" section
 		aboutMenu = menubar.addMenu("&About")
 		
@@ -904,23 +945,6 @@ class Ternary_Main_VTAnDeM_Window(QMainWindow):
 		newappAction = QAction('New', self)
 		newappAction.triggered.connect(self.Open_MaterialSelectionWindow)
 		fileMenu.addAction(newappAction)
-		
-		"""
-		# Set up an option where the user can import a CSV file (not functionalized yet)
-		importMenu = QMenu('Import', self)
-		importAction_csv = QAction('&Import CSV', self)
-		importAction_other = QAction('&Import other', self)
-		importAction_csv.setStatusTip('Import CSV (Tips by Michael Toriyama TM)')
-		importAction_other.setStatusTip('Import Other Stuff (Tips by Michael Toriyama TM)')
-		importMenu.addAction(importAction_csv)
-		importMenu.addAction(importAction_other)
-		"""
-		
-		"""
-		# Set up an option where the user can exit the current window
-		exitAction = QAction('Exit', self)
-		exitAction.triggered.connect(qApp.quit)
-		"""
 		
 		# Add "About" section
 		aboutMenu = menubar.addMenu("&About")
