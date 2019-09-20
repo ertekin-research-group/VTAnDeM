@@ -15,9 +15,9 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 
-from vtandem.visualization.quaternary.quaternary_scripts.plot_quaternary_phase_diagram import ChemicalPotential_Quaternary_PhaseDiagramProjected2D
-from vtandem.visualization.quaternary.quaternary_scripts.plot_quaternary_defects_diagram import Quaternary_Defects_Diagram
-from vtandem.visualization.quaternary.quaternary_scripts.plot_quaternary_carrier_concentration import Quaternary_Carrier_Concentration
+from quaternary.quaternary_scripts.plot_quaternary_phase_diagram import ChemicalPotential_Quaternary_PhaseDiagramProjected2D
+from quaternary.quaternary_scripts.plot_quaternary_defects_diagram import Quaternary_Defects_Diagram
+from quaternary.quaternary_scripts.plot_quaternary_carrier_concentration import Quaternary_Carrier_Concentration
 
 
 

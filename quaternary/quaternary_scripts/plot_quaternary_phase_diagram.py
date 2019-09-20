@@ -50,7 +50,7 @@ class ChemicalPotential_Quaternary_PhaseDiagramProjected2D(QWidget):
 	
 	def __init__(self, parent = None, main_compound = None, first_element = None, second_element = None, third_element = None, fourth_element = None):
 		
-		# All elements in the periodic table
+		# All elements in periodic table
 		self.all_elements = []
 		for element in periodictable.elements:
 			self.all_elements.append(str(element))
@@ -494,10 +494,12 @@ class ChemicalPotential_Quaternary_PhaseDiagramProjected2D_TripleView(QWidget):
 	
 	def __init__(self, parent = None, main_compound = None, first_element = None, second_element = None, third_element = None, fourth_element = None):
 		
-		# All elements in the periodic table
+		# All elements in periodic table
 		self.all_elements = []
 		for element in periodictable.elements:
 			self.all_elements.append(str(element))
+		
+		#QWidget.__init__(self, parent)
 		
 		# Font description for phase stability diagram plot
 		self.font = {'family': 'sans-serif',

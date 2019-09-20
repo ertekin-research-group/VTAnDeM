@@ -9,15 +9,14 @@ __name__ = 'VTAnDeM_Visualization-Toolkit-for-Analyzing-Defects-in-Materials'
 ###############################################################################################################################
 ###############################################################################################################################
 
-import os
 import sys
 import re
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 
-from vtandem.dft.import_dft import *
-from vtandem.dft.obtain_dft import *
+from import_DFT_data import *
+from obtain_DFT_data import *
 
 
 ###############################################################################################################################
@@ -27,17 +26,13 @@ from vtandem.dft.obtain_dft import *
 ###############################################################################################################################
 
 # Quaternary scripts
-from vtandem.visualization.quaternary.tab_quaternary_phasediagram_defectsdiagram_carrierconcentration import Tab_PhaseDiagram_DefectsDiagram_CarrierConcentration
-from vtandem.visualization.quaternary.tab_quaternary_phasediagram3d import Tab_PhaseDiagram3D
-from vtandem.visualization.quaternary.tab_quaternary_phasediagram3d_composition import Tab_Compositional_PhaseDiagram3D
+from quaternary.tab_quaternary_phasediagram_defectsdiagram_carrierconcentration import Tab_PhaseDiagram_DefectsDiagram_CarrierConcentration
+from quaternary.tab_quaternary_phasediagram3d import Tab_PhaseDiagram3D
+from quaternary.tab_quaternary_phasediagram3d_composition import Tab_Compositional_PhaseDiagram3D
 
 # Ternary scripts
-from vtandem.visualization.ternary.tab_ternary_phasediagram_defectsdiagram_carrierconcentration import Tab_Ternary_PhaseDiagram_DefectsDiagram_CarrierConcentration
-from vtandem.visualization.ternary.tab_ternary_phasediagram3d import Tab_Ternary_PhaseDiagram3D
-from vtandem.visualization.ternary.tab_ternary_phasediagram_composition import Tab_Ternary_Compositional_PhaseDiagram
+from ternary.tab_ternary_phasediagram_defectsdiagram_carrierconcentration import Tab_Ternary_PhaseDiagram_DefectsDiagram_CarrierConcentration
 
-script_path = os.path.dirname(__file__)
-vtandem_source_path = "/".join(script_path.split("/")[:-1])
 
 
 
@@ -56,7 +51,7 @@ class Welcome_VTAnDeM_Window(QMainWindow):
 		QApplication.setStyle(QStyleFactory.create("Cleanlooks"))
 		
 		# Set icon as VTAnDeM logo
-		self.setWindowIcon(QIcon(vtandem_source_path+"/logo/LogoSmall.png"))
+		self.setWindowIcon(QIcon("./logo/LogoSmall.png"))
 		
 		# Set window title
 		initial_window_title = "VTAnDeM: Visualization Toolkit for Analyzing Defects in Materials"
@@ -69,7 +64,7 @@ class Welcome_VTAnDeM_Window(QMainWindow):
 		
 		# Show VTAnDeM logo
 		self.vtandem_logo = QLabel()
-		self.vtandem_pixmap = QPixmap(vtandem_source_path+"/logo/LogoLong.png")
+		self.vtandem_pixmap = QPixmap("./logo/LogoLong.png")
 		self.vtandem_pixmap_scaled = self.vtandem_pixmap.scaled(512, 512, Qt.KeepAspectRatio)
 		self.vtandem_logo.setPixmap( self.vtandem_pixmap_scaled )
 		self.welcome_dialog_widget_layout.addWidget(self.vtandem_logo)
@@ -119,21 +114,21 @@ class Welcome_VTAnDeM_Window(QMainWindow):
 	def Import_Compounds_Data_Function(self):
 		
 		self.import_compounds_window = Import_Data_Window("Compounds")
-		self.import_compounds_window.setWindowIcon(QIcon(vtandem_source_path+"/logo/LogoSmall.png"))
+		self.import_compounds_window.setWindowIcon(QIcon("./logo/LogoSmall.png"))
 		self.import_compounds_window.show()
 	
 	
 	def Import_Defects_Data_Function(self):
 		
 		self.import_defects_window = Import_Data_Window("Defects")
-		self.import_defects_window.setWindowIcon(QIcon(vtandem_source_path+"/logo/LogoSmall.png"))
+		self.import_defects_window.setWindowIcon(QIcon("./logo/LogoSmall.png"))
 		self.import_defects_window.show()
 	
 	
 	def Import_DOS_Data_Function(self):
 		
 		self.import_dos_window = Import_Data_Window("DOS")
-		self.import_dos_window.setWindowIcon(QIcon(vtandem_source_path+"/logo/LogoSmall.png"))
+		self.import_dos_window.setWindowIcon(QIcon("./logo/LogoSmall.png"))
 		self.import_dos_window.show()
 	
 	
@@ -141,7 +136,7 @@ class Welcome_VTAnDeM_Window(QMainWindow):
 		
 		self.hide()
 		self.select_material_window = Material_Selection_Window()
-		self.select_material_window.setWindowIcon(QIcon(vtandem_source_path+"/logo/LogoSmall.png"))
+		self.select_material_window.setWindowIcon(QIcon("./logo/LogoSmall.png"))
 		self.select_material_window.show()
 
 
@@ -198,7 +193,7 @@ class Import_Data_Window(QMainWindow):
 		self.compound_name_prompt = QLineEdit()
 		self.compound_name_widget_layout.addWidget(self.compound_name_prompt)
 		self.question_button = QPushButton()
-		self.question_button.setIcon(QIcon(vtandem_source_path+"/icon/QuestionIcon.png"))
+		self.question_button.setIcon(QIcon("./icon/QuestionIcon.png"))
 		self.question_button.clicked[bool].connect(self.Import_Compounds_Help_Function)
 		self.compound_name_widget_layout.addWidget(self.question_button)
 		self.import_window_layout.addWidget(self.compound_name_widget)
@@ -211,7 +206,7 @@ class Import_Data_Window(QMainWindow):
 		self.data_directory_name_prompt = QLineEdit()
 		self.data_directory_name_widget_layout.addWidget(self.data_directory_name_prompt)
 		self.browser_button = QPushButton()
-		self.browser_button.setIcon(QIcon(vtandem_source_path+"/icon/FolderBrowserIcon.png"))
+		self.browser_button.setIcon(QIcon("./icon/FolderBrowserIcon.png"))
 		self.browser_button.clicked[bool].connect(self.Data_DirectoryBrowser_Function)
 		self.data_directory_name_widget_layout.addWidget(self.browser_button)
 		self.import_window_layout.addWidget(self.data_directory_name_widget)
@@ -251,7 +246,7 @@ Example data structure: \n\n \
 									"""
 		self.message_window = QMainWindow()
 		self.message_window.setWindowTitle("Help")
-		self.message_window.setWindowIcon(QIcon(vtandem_source_path+"/logo/LogoSmall.png"))
+		self.message_window.setWindowIcon(QIcon("./logo/LogoSmall.png"))
 		self.message_widget = QWidget()
 		self.message_widget_layout = QVBoxLayout(self.message_widget)
 		self.dialog_instructions = QLabel(dialog_instructions)
@@ -268,14 +263,14 @@ Example data structure: \n\n \
 		self.Check_Inputs()
 		
 		# Extract relevant phase stability information of compound from directory
-		self.compounds_info = Compounds_Import()
+		self.compounds_info = Phase_Stability_Compounds_Information_Import()
 		compound_name = self.compound_name_prompt.text()
 		data_directory_name = self.data_directory_name_prompt.text()
 		if self.compound_type == "Element":
-			self.compounds_info.Add_Element(compound_name, data_directory_name)
+			self.compounds_info.Add_Element_Info(compound_name, data_directory_name)
 		elif self.compound_type == "Compound":
-			self.compounds_info.Add_Compound(compound_name, data_directory_name)
-		self.compounds_info.Update_Compounds_Database()
+			self.compounds_info.Add_Compound_Info(compound_name, data_directory_name)
+		self.compounds_info.Update_Database()
 		
 		self.close()
 	
@@ -294,7 +289,7 @@ Example data structure: \n\n \
 		self.compound_name_prompt = QLineEdit()
 		self.compound_name_widget_layout.addWidget(self.compound_name_prompt)
 		self.question_button = QPushButton()
-		self.question_button.setIcon(QIcon(vtandem_source_path+"/icon/QuestionIcon.png"))
+		self.question_button.setIcon(QIcon("./icon/QuestionIcon.png"))
 		self.question_button.clicked[bool].connect(self.Import_Defects_Help_Function)
 		self.compound_name_widget_layout.addWidget(self.question_button)
 		self.import_window_layout.addWidget(self.compound_name_widget)
@@ -307,7 +302,7 @@ Example data structure: \n\n \
 		self.data_directory_name_prompt = QLineEdit()
 		self.data_directory_name_widget_layout.addWidget(self.data_directory_name_prompt)
 		self.browser_button = QPushButton()
-		self.browser_button.setIcon(QIcon(vtandem_source_path+"/icon/FolderBrowserIcon.png"))
+		self.browser_button.setIcon(QIcon("./icon/FolderBrowserIcon.png"))
 		self.browser_button.clicked[bool].connect(self.Data_DirectoryBrowser_Function)
 		self.data_directory_name_widget_layout.addWidget(self.browser_button)
 		self.import_window_layout.addWidget(self.data_directory_name_widget)
@@ -384,7 +379,7 @@ Example data structure: \n\n \
 									"""
 		self.message_window = QMainWindow()
 		self.message_window.setWindowTitle("Help")
-		self.message_window.setWindowIcon(QIcon(vtandem_source_path+"/logo/LogoSmall.png"))
+		self.message_window.setWindowIcon(QIcon("./logo/LogoSmall.png"))
 		self.message_widget = QWidget()
 		self.message_widget_layout = QVBoxLayout(self.message_widget)
 		self.dialog_instructions = QLabel(dialog_instructions)
@@ -408,11 +403,11 @@ Example data structure: \n\n \
 			self.close()
 		
 		# Extract relevant compounds information from directory
-		self.defects_data = Defects_Import()
+		self.defects_data = Defects_Diagram_Information_Import()
 		compound_name = self.compound_name_prompt.text()
 		data_directory_name = self.data_directory_name_prompt.text()
-		self.defects_data.Add_Defects(compound_name, data_directory_name, supercell_size)
-		self.defects_data.Update_Defects_Database()
+		self.defects_data.Add_Compound_Defects_Info(compound_name, data_directory_name, supercell_size)
+		self.defects_data.Update_Database()
 		self.close()
 	
 	
@@ -429,7 +424,7 @@ Example data structure: \n\n \
 		self.compound_name_prompt = QLineEdit()
 		self.compound_name_widget_layout.addWidget(self.compound_name_prompt)
 		self.question_button = QPushButton()
-		self.question_button.setIcon(QIcon(vtandem_source_path+"/icon/QuestionIcon.png"))
+		self.question_button.setIcon(QIcon("./icon/QuestionIcon.png"))
 		self.question_button.clicked[bool].connect(self.Import_DOS_Help_Function)
 		self.compound_name_widget_layout.addWidget(self.question_button)
 		self.import_window_layout.addWidget(self.compound_name_widget)
@@ -442,7 +437,7 @@ Example data structure: \n\n \
 		self.data_filename_prompt = QLineEdit()
 		self.data_filename_widget_layout.addWidget(self.data_filename_prompt)
 		self.browser_button = QPushButton()
-		self.browser_button.setIcon(QIcon(vtandem_source_path+"/icon/FolderBrowserIcon.png"))
+		self.browser_button.setIcon(QIcon("./icon/FolderBrowserIcon.png"))
 		self.browser_button.clicked[bool].connect(self.Data_FileBrowser_Function)
 		self.data_filename_widget_layout.addWidget(self.browser_button)
 		self.import_window_layout.addWidget(self.data_filename_widget)
@@ -467,7 +462,7 @@ Adding your VASP Density of States data to the VTAnDeM database: \n \
 								"""
 		self.message_window = QMainWindow()
 		self.message_window.setWindowTitle("Help")
-		self.message_window.setWindowIcon(QIcon(vtandem_source_path+"/logo/LogoSmall.png"))
+		self.message_window.setWindowIcon(QIcon("./logo/LogoSmall.png"))
 		self.message_widget = QWidget()
 		self.message_widget_layout = QVBoxLayout(self.message_widget)
 		self.dialog_instructions = QLabel(dialog_instructions)
@@ -483,11 +478,11 @@ Adding your VASP Density of States data to the VTAnDeM database: \n \
 		self.Check_Inputs()
 		
 		# Extract DOS information of compound from DOSCAR
-		self.dos_data = DOS_Import()
+		self.dos_data = DOS_Information_Import()
 		compound_name = self.compound_name_prompt.text()
 		data_filename = self.data_filename_prompt.text()
-		self.dos_data.Add_DOS(compound_name, data_filename)
-		self.dos_data.Update_DOS_Database()
+		self.dos_data.Add_Compound_DOS_Info(compound_name, data_filename)
+		self.dos_data.Update_Database()
 		
 		self.close()
 	
@@ -520,6 +515,7 @@ Adding your VASP Density of States data to the VTAnDeM database: \n \
 	
 	def Data_FileBrowser_Function(self):
 		filename = QFileDialog.getOpenFileNames(self, "Browse Data File")
+		print(filename[0][0])
 		self.data_filename_prompt.setText(filename[0][0])
 
 
@@ -545,7 +541,7 @@ class Material_Selection_Window(QMainWindow):
 		QApplication.setStyle(QStyleFactory.create("Cleanlooks"))
 		
 		# Set icon for window as VTAnDeM logo
-		self.setWindowIcon(QIcon(vtandem_source_path+"/logo/LogoSmall.png"))
+		self.setWindowIcon(QIcon("./logo/LogoSmall.png"))
 		
 		# Set window title
 		material_selection_window_title = "Material Selection Hub"
@@ -558,7 +554,7 @@ class Material_Selection_Window(QMainWindow):
 		
 		# Show VTAnDeM logo
 		self.vtandem_logo = QLabel()
-		self.vtandem_pixmap = QPixmap(vtandem_source_path+"/logo/LogoLong.png")
+		self.vtandem_pixmap = QPixmap("./logo/LogoLong.png")
 		self.vtandem_pixmap_scaled = self.vtandem_pixmap.scaled(512, 512, Qt.KeepAspectRatio)
 		self.vtandem_logo.setPixmap( self.vtandem_pixmap_scaled )
 		self.initial_dialog_widgets_layout.addWidget(self.vtandem_logo)
@@ -738,7 +734,7 @@ class Quaternary_Main_VTAnDeM_Window(QMainWindow):
 		
 		# Inherit all initial variables from the QMainWindow class
 		QMainWindow.__init__(self)
-		self.setWindowIcon(QIcon(vtandem_source_path+"/logo/LogoSmall.png"))
+		self.setWindowIcon(QIcon("./logo/LogoSmall.png"))
 		
 		
 		# Font description for phase stability diagram plot
@@ -851,10 +847,18 @@ class Quaternary_Main_VTAnDeM_Window(QMainWindow):
 	def Open_MaterialSelectionWindow(self):
 		
 		self.select_material_window = Material_Selection_Window()
-		self.select_material_window.setWindowIcon(QIcon(vtandem_source_path+"/logo/LogoSmall.png"))
+		self.select_material_window.setWindowIcon(QIcon("./logo/LogoSmall.png"))
 		self.select_material_window.show()
 		
 		self.close()
+
+
+
+
+
+
+
+
 
 
 
@@ -872,7 +876,7 @@ class Ternary_Main_VTAnDeM_Window(QMainWindow):
 		
 		# Inherit all initial variables from the QMainWindow class
 		QMainWindow.__init__(self)
-		self.setWindowIcon(QIcon(vtandem_source_path+"/logo/LogoSmall.png"))
+		self.setWindowIcon(QIcon("./logo/LogoSmall.png"))
 		
 		
 		# Set up the framework of the application window (including file menu, exit function, etc.)
@@ -889,8 +893,7 @@ class Ternary_Main_VTAnDeM_Window(QMainWindow):
 		
 		
 		self.Tab1_PhasesDefectsCarriers_Object = Tab_Ternary_PhaseDiagram_DefectsDiagram_CarrierConcentration(self, main_compound = main_compound, first_element = first_element, second_element = second_element, third_element = third_element, compounds_info = self.compounds_info, defects_data = self.defects_data, dos_data = self.dos_data, show_defects_diagram = show_defects_diagram, show_carrier_concentration = show_carrier_concentration)
-		self.Tab2_PhaseDiagram3D_Object = Tab_Ternary_PhaseDiagram3D(self, main_compound = main_compound, first_element = first_element, second_element = second_element, third_element = third_element, compounds_info = self.compounds_info)
-		self.Tab3_PhaseDiagram_Object = Tab_Ternary_Compositional_PhaseDiagram(self, main_compound = main_compound, first_element = first_element, second_element = second_element, third_element = third_element, compounds_info = self.compounds_info)
+		
 		
 		
 		
@@ -913,8 +916,6 @@ class Ternary_Main_VTAnDeM_Window(QMainWindow):
 		
 		
 		self.plot_tabs_widget.addTab(self.Tab1_PhasesDefectsCarriers_Object.tab1, "Phases and Defects")
-		self.plot_tabs_widget.addTab(self.Tab2_PhaseDiagram3D_Object.tab2, "Phase Diagram, Chemical Potential Space")
-		self.plot_tabs_widget.addTab(self.Tab3_PhaseDiagram_Object.tab3, "Phase Diagram, Composition Space")
 		
 		
 		
@@ -974,7 +975,7 @@ class Ternary_Main_VTAnDeM_Window(QMainWindow):
 	def Open_MaterialSelectionWindow(self):
 		
 		self.select_material_window = Material_Selection_Window()
-		self.select_material_window.setWindowIcon(QIcon(vtandem_source_path+"/logo/LogoSmall.png"))
+		self.select_material_window.setWindowIcon(QIcon("./logo/LogoSmall.png"))
 		self.select_material_window.show()
 		
 		self.close()
@@ -983,18 +984,14 @@ class Ternary_Main_VTAnDeM_Window(QMainWindow):
 
 
 
-def Open_Material_Selection_Window():
-	app = QApplication([])
-	ex = Material_Selection_Window()
-	ex.show()
-	sys.exit(app.exec_())
 
 
-def Open_Welcome_VTAnDeM_Window():
-	app = QApplication([])
-	ex = Welcome_VTAnDeM_Window()
-	sys.exit(app.exec_())
 
+
+
+app = QApplication([])
+ex = Welcome_VTAnDeM_Window()
+sys.exit(app.exec_())
 
 
 

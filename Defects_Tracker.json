@@ -1,0 +1,578 @@
+{
+    "AgGaTe2": {
+        "Ag_Ga": {
+            "Extrinsic": "No",
+            "charge": {
+                "-1": {
+                    "ECorr": 0.0,
+                    "Energy": -245.43923053
+                },
+                "-2": {
+                    "ECorr": 0.0,
+                    "Energy": -241.53940143
+                },
+                "0": {
+                    "ECorr": 0.0,
+                    "Energy": -249.15992112
+                }
+            },
+            "n_Ag": 1,
+            "n_Ga": -1,
+            "n_Te": 0
+        },
+        "Ga_Ag": {
+            "Extrinsic": "No",
+            "charge": {
+                "+1": {
+                    "ECorr": 0.0,
+                    "Energy": -255.82747721
+                },
+                "+2": {
+                    "ECorr": 0.0,
+                    "Energy": -260.89627731
+                },
+                "0": {
+                    "ECorr": 0.0,
+                    "Energy": -251.08215832
+                }
+            },
+            "n_Ag": -1,
+            "n_Ga": 1,
+            "n_Te": 0
+        },
+        "V_Ag": {
+            "Extrinsic": "No",
+            "charge": {
+                "-1": {
+                    "ECorr": 0.0,
+                    "Energy": -244.45329539
+                },
+                "0": {
+                    "ECorr": 0.0,
+                    "Energy": -247.9748537
+                }
+            },
+            "n_Ag": -1,
+            "n_Ga": 0,
+            "n_Te": 0
+        },
+        "V_Ga": {
+            "Extrinsic": "No",
+            "charge": {
+                "-1": {
+                    "ECorr": 0.0,
+                    "Energy": -241.31440978
+                },
+                "-2": {
+                    "ECorr": 0.0,
+                    "Energy": -237.61563266
+                },
+                "-3": {
+                    "ECorr": 0.0,
+                    "Energy": -233.83249096
+                },
+                "0": {
+                    "ECorr": 0.0,
+                    "Energy": -244.94840158
+                }
+            },
+            "n_Ag": 0,
+            "n_Ga": -1,
+            "n_Te": 0
+        },
+        "V_Te": {
+            "Extrinsic": "No",
+            "charge": {
+                "+1": {
+                    "ECorr": 0.0,
+                    "Energy": -248.90229283
+                },
+                "+2": {
+                    "ECorr": 0.0,
+                    "Energy": -254.06228146
+                },
+                "0": {
+                    "ECorr": 0.0,
+                    "Energy": -245.39906452
+                }
+            },
+            "n_Ag": 0,
+            "n_Ga": 0,
+            "n_Te": -1
+        },
+        "supercellsize": 8.0
+    },
+    "Cu2HgGeTe4": {
+        "Cu_Hg": {
+            "Extrinsic": "No",
+            "charge": {
+                "+1": {
+                    "ECorr": 0.0,
+                    "Energy": -251.62226
+                },
+                "-1": {
+                    "ECorr": 0.3226,
+                    "Energy": -244.11452
+                },
+                "0": {
+                    "ECorr": 0.0,
+                    "Energy": -248.12575
+                }
+            },
+            "n_Cu": 1,
+            "n_Ge": 0,
+            "n_Hg": -1,
+            "n_Te": 0
+        },
+        "Ge_Hg": {
+            "Extrinsic": "No",
+            "charge": {
+                "+1": {
+                    "ECorr": -0.0877,
+                    "Energy": -253.38516
+                },
+                "+2": {
+                    "ECorr": -0.0799,
+                    "Energy": -257.68181
+                },
+                "0": {
+                    "ECorr": 0.0,
+                    "Energy": -249.00171
+                }
+            },
+            "n_Cu": 0,
+            "n_Ge": 1,
+            "n_Hg": -1,
+            "n_Te": 0
+        },
+        "Hg_Cu": {
+            "Extrinsic": "No",
+            "charge": {
+                "+1": {
+                    "ECorr": -0.1592,
+                    "Energy": -245.76258
+                },
+                "-1": {
+                    "ECorr": 0.0,
+                    "Energy": -235.65249
+                },
+                "0": {
+                    "ECorr": 0.0,
+                    "Energy": -241.09895
+                }
+            },
+            "n_Cu": -1,
+            "n_Ge": 0,
+            "n_Hg": 1,
+            "n_Te": 0
+        },
+        "Hg_Ge": {
+            "Extrinsic": "No",
+            "charge": {
+                "-1": {
+                    "ECorr": 0.3813,
+                    "Energy": -235.09951
+                },
+                "-2": {
+                    "ECorr": 0.8409,
+                    "Energy": -230.96419
+                },
+                "0": {
+                    "ECorr": 0.0,
+                    "Energy": -239.09054
+                }
+            },
+            "n_Cu": 0,
+            "n_Ge": -1,
+            "n_Hg": 1,
+            "n_Te": 0
+        },
+        "V_Cu": {
+            "Extrinsic": "No",
+            "charge": {
+                "-1": {
+                    "ECorr": 0.3781,
+                    "Energy": -236.67298
+                },
+                "0": {
+                    "ECorr": 0.0,
+                    "Energy": -240.55744
+                }
+            },
+            "n_Cu": -1,
+            "n_Ge": 0,
+            "n_Hg": 0,
+            "n_Te": 0
+        },
+        "V_Ge": {
+            "Extrinsic": "No",
+            "charge": {
+                "+1": {
+                    "ECorr": -0.2847,
+                    "Energy": -240.64139
+                },
+                "+2": {
+                    "ECorr": -0.5793,
+                    "Energy": -244.33453
+                },
+                "+3": {
+                    "ECorr": -0.7639,
+                    "Energy": -247.99466
+                },
+                "+4": {
+                    "ECorr": 0.0,
+                    "Energy": -251.59799
+                },
+                "0": {
+                    "ECorr": 0.0,
+                    "Energy": -236.89077
+                }
+            },
+            "n_Cu": 0,
+            "n_Ge": -1,
+            "n_Hg": 0,
+            "n_Te": 0
+        },
+        "V_Hg": {
+            "Extrinsic": "No",
+            "charge": {
+                "-1": {
+                    "ECorr": 0.0,
+                    "Energy": -239.05623
+                },
+                "-2": {
+                    "ECorr": 0.7618,
+                    "Energy": -235.46987
+                },
+                "0": {
+                    "ECorr": 0.0,
+                    "Energy": -243.16702
+                }
+            },
+            "n_Cu": 0,
+            "n_Ge": 0,
+            "n_Hg": -1,
+            "n_Te": 0
+        },
+        "V_Te": {
+            "Extrinsic": "No",
+            "charge": {
+                "+1": {
+                    "ECorr": -0.3804,
+                    "Energy": -243.38214
+                },
+                "+2": {
+                    "ECorr": -0.7057,
+                    "Energy": -247.03915
+                },
+                "0": {
+                    "ECorr": 0.0,
+                    "Energy": -239.58688
+                }
+            },
+            "n_Cu": 0,
+            "n_Ge": 0,
+            "n_Hg": 0,
+            "n_Te": -1
+        },
+        "supercellsize": 8.0
+    },
+    "CuGaTe2": {
+        "Cu_Ga": {
+            "Extrinsic": "No",
+            "charge": {
+                "-1": {
+                    "ECorr": 0.0,
+                    "Energy": -260.77391787
+                },
+                "-2": {
+                    "ECorr": 0.0,
+                    "Energy": -256.33448722
+                },
+                "0": {
+                    "ECorr": 0.0,
+                    "Energy": -265.0113305
+                }
+            },
+            "n_Cu": 1,
+            "n_Ga": -1,
+            "n_Te": 0
+        },
+        "Ga_Cu": {
+            "Extrinsic": "No",
+            "charge": {
+                "+1": {
+                    "ECorr": 0.0,
+                    "Energy": -269.53348257
+                },
+                "+2": {
+                    "ECorr": 0.0,
+                    "Energy": -275.3697891
+                },
+                "0": {
+                    "ECorr": 0.0,
+                    "Energy": -264.10560332
+                }
+            },
+            "n_Cu": -1,
+            "n_Ga": 1,
+            "n_Te": 0
+        },
+        "V_Cu": {
+            "Extrinsic": "No",
+            "charge": {
+                "-1": {
+                    "ECorr": 0.0,
+                    "Energy": -257.49012941
+                },
+                "0": {
+                    "ECorr": 0.0,
+                    "Energy": -261.6724917
+                }
+            },
+            "n_Cu": -1,
+            "n_Ga": 0,
+            "n_Te": 0
+        },
+        "V_Ga": {
+            "Extrinsic": "No",
+            "charge": {
+                "-1": {
+                    "ECorr": 0.0,
+                    "Energy": -255.70413584
+                },
+                "-2": {
+                    "ECorr": 0.0,
+                    "Energy": -251.44214295
+                },
+                "-3": {
+                    "ECorr": 0.0,
+                    "Energy": -247.08357501
+                },
+                "0": {
+                    "ECorr": 0.0,
+                    "Energy": -259.79179399
+                }
+            },
+            "n_Cu": 0,
+            "n_Ga": -1,
+            "n_Te": 0
+        },
+        "V_Te": {
+            "Extrinsic": "No",
+            "charge": {
+                "+1": {
+                    "ECorr": 0.0,
+                    "Energy": -263.73801151
+                },
+                "+2": {
+                    "ECorr": 0.0,
+                    "Energy": -268.73863956
+                },
+                "0": {
+                    "ECorr": 0.0,
+                    "Energy": -259.71400985
+                }
+            },
+            "n_Cu": 0,
+            "n_Ga": 0,
+            "n_Te": -1
+        },
+        "supercellsize": 8.0
+    },
+    "Hg2GeTe4": {
+        "Ag_Hg": {
+            "Extrinsic": "Yes",
+            "charge": {
+                "-1": {
+                    "ECorr": 0.0,
+                    "Energy": -183.22147699
+                },
+                "0": {
+                    "ECorr": 0.0,
+                    "Energy": -186.36378799
+                }
+            },
+            "n_Ge": 0,
+            "n_Hg": -1,
+            "n_Te": 0
+        },
+        "Br_Te": {
+            "Extrinsic": "Yes",
+            "charge": {
+                "+1": {
+                    "ECorr": 0.0,
+                    "Energy": -186.75437531
+                },
+                "0": {
+                    "ECorr": 0.0,
+                    "Energy": -182.45885472
+                }
+            },
+            "n_Ge": 0,
+            "n_Hg": 0,
+            "n_Te": -1
+        },
+        "Ge_Hg": {
+            "Extrinsic": "No",
+            "charge": {
+                "+1": {
+                    "ECorr": 0.1101,
+                    "Energy": -192.1537395
+                },
+                "+2": {
+                    "ECorr": 0.3265,
+                    "Energy": -196.04887258
+                },
+                "0": {
+                    "ECorr": 0.0,
+                    "Energy": -188.45864336
+                }
+            },
+            "n_Ge": 1,
+            "n_Hg": -1,
+            "n_Te": 0
+        },
+        "Hg_Ge": {
+            "Extrinsic": "No",
+            "charge": {
+                "-1": {
+                    "ECorr": 0.0925,
+                    "Energy": -174.72577017
+                },
+                "-2": {
+                    "ECorr": 0.2079,
+                    "Energy": -171.46661726
+                },
+                "0": {
+                    "ECorr": 0.0,
+                    "Energy": -177.94345709
+                }
+            },
+            "n_Ge": -1,
+            "n_Hg": 1,
+            "n_Te": 0
+        },
+        "I_Te": {
+            "Extrinsic": "Yes",
+            "charge": {
+                "+1": {
+                    "ECorr": 0.0,
+                    "Energy": -186.1868047
+                },
+                "0": {
+                    "ECorr": 0.0,
+                    "Energy": -181.80900231
+                }
+            },
+            "n_Ge": 0,
+            "n_Hg": 0,
+            "n_Te": -1
+        },
+        "La_Hg": {
+            "Extrinsic": "Yes",
+            "charge": {
+                "+1": {
+                    "ECorr": 0.0,
+                    "Energy": -195.55833316
+                },
+                "0": {
+                    "ECorr": 0.0,
+                    "Energy": -191.00419302
+                }
+            },
+            "n_Ge": 0,
+            "n_Hg": -1,
+            "n_Te": 0
+        },
+        "V_Ge": {
+            "Extrinsic": "No",
+            "charge": {
+                "-1": {
+                    "ECorr": 0.1785,
+                    "Energy": -172.4112832
+                },
+                "-2": {
+                    "ECorr": 0.3162,
+                    "Energy": -169.02457359
+                },
+                "-3": {
+                    "ECorr": 0.6192,
+                    "Energy": -165.59127506
+                },
+                "-4": {
+                    "ECorr": 0.8256,
+                    "Energy": -162.05140427
+                },
+                "0": {
+                    "ECorr": 0.0,
+                    "Energy": -175.71900612
+                }
+            },
+            "n_Ge": -1,
+            "n_Hg": 0,
+            "n_Te": 0
+        },
+        "V_Hg": {
+            "Extrinsic": "No",
+            "charge": {
+                "-1": {
+                    "ECorr": 0.2665,
+                    "Energy": -178.87575907
+                },
+                "-2": {
+                    "ECorr": 0.6499,
+                    "Energy": -175.83708313
+                },
+                "0": {
+                    "ECorr": 0.0,
+                    "Energy": -181.90363766
+                }
+            },
+            "n_Ge": 0,
+            "n_Hg": -1,
+            "n_Te": 0
+        },
+        "V_Te": {
+            "Extrinsic": "No",
+            "charge": {
+                "+1": {
+                    "ECorr": 0.0934,
+                    "Energy": -182.46453085
+                },
+                "+2": {
+                    "ECorr": 0.3615,
+                    "Energy": -186.4465053
+                },
+                "0": {
+                    "ECorr": 0.0,
+                    "Energy": -179.12749288
+                }
+            },
+            "n_Ge": 0,
+            "n_Hg": 0,
+            "n_Te": -1
+        },
+        "Zn_Ge": {
+            "Extrinsic": "Yes",
+            "charge": {
+                "-1": {
+                    "ECorr": 0.0,
+                    "Energy": -176.51725568
+                },
+                "-2": {
+                    "ECorr": 0.0,
+                    "Energy": -173.22406344
+                },
+                "0": {
+                    "ECorr": 0.0,
+                    "Energy": -179.58418167
+                }
+            },
+            "n_Ge": -1,
+            "n_Hg": 0,
+            "n_Te": 0
+        },
+        "supercellsize": 8.0
+    }
+}

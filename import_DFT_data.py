@@ -16,20 +16,19 @@ __author__ = 'Michael_Jiaxing_Lidia_Benita_Elif'
 
 import os
 import re
-import json
+import codecs, json
 import numpy as np
 from shutil import copyfile
 from periodictable import elements
 from pymatgen.io.vasp.outputs import Vasprun
 
+########################################################################################################################
+########################################################################################################################
+############################ Import Relevant Thermodynamic Compound Information to Database ############################
+########################################################################################################################
+########################################################################################################################
 
-########################################################################################################################
-########################################################################################################################
-############################################# Phase Stability Information ##############################################
-########################################################################################################################
-########################################################################################################################
-
-class Compounds_Import:
+class Phase_Stability_Compounds_Information_Import:
 	
 	def __init__(self):
 		
@@ -49,12 +48,7 @@ class Compounds_Import:
 	####################################################################################################################
 	####################################################################################################################
 	
-	def Add_Element(self, element_name, directory_name):
-		
-		# Check if the directory name is legitimate
-		if not os.path.isdir(directory_name):
-			print("WARNING: Cannot find directory '"+directory_name+"'. Exiting...")
-			return
+	def Add_Element_Info(self, element_name, directory_name):
 		
 		# Check to see that the element is legitimate
 		if element_name not in self.elements:
@@ -121,18 +115,12 @@ class Compounds_Import:
 	####################################################################################################################
 	####################################################################################################################
 	
-	def Add_Compound(self, compound_name, directory_name):
+	def Add_Compound_Info(self, compound_name, directory_name):
 		
 		# Check if the directory name is legitimate
 		if not os.path.isdir(directory_name):
 			print("WARNING: Cannot find directory '"+directory_name+"'. Exiting...")
-			return
-		
-		# Check if the compound is actually an element
-		if compound_name in self.elements:
-			print("WARNING: '"+compound_name+"' is an element, not a compound. Exiting...")
-			return
-			
+			return ""
 		
 		# Check if the compound already exists in the database
 		if compound_name in self.compounds_info["Compounds"].keys():
@@ -220,16 +208,11 @@ class Compounds_Import:
 		self.compounds_info["Compounds"][compound_name] = compound_data
 	
 	
-	####################################################################################################################
-	####################################################################################################################
-	################################################# Update Database ##################################################
-	####################################################################################################################
-	####################################################################################################################
-	
-	def Update_Compounds_Database(self):
+	# Update the database (add new compound data)
+	def Update_Database(self):
 		
 		try:
-			copyfile("Compounds_Tracker.json", ".vtandem/Compounds_Tracker_Backup.json")
+			copyfile("Compounds_Tracker.json", ".Compounds_Tracker_Backup.json")
 		except:
 			pass
 		with open("Compounds_Tracker.json", "w") as jsonfile:
@@ -239,15 +222,70 @@ class Compounds_Import:
 
 
 
+class DOS_Information_Import:
+	
+	def __init__(self):
+		
+		if "DOS_Tracker.json" in os.listdir(os.getcwd()):
+			with open("DOS_Tracker.json") as DOSTracker:
+				self.dos_data = json.load(DOSTracker)
+		else:
+			self.dos_data = {}
+	
+	
+	def Add_Compound_DOS_Info(self, compound_name, filename):
+		
+		# Check if the directory name is legitimate
+		if not os.path.isfile(filename):
+			print("WARNING: Cannot find file: '"+directory_name+"'. Exiting...")
+			return ""
+		
+		# Check if the compound already exists in the database
+		if compound_name in self.dos_data.keys():
+			print(compound_name+" is already in the DOS database (DOS_Tracker.json). The imported data will replace the old data.")
+		
+		"""
+		# Check if the DOSCAR file exists in directory
+		if "DOSCAR" not in os.listdir(directory_name):
+			print("WARNING: Cannot find density of states of '"+compound_name+"' (DOSCAR file). Exiting...")
+			return ""
+		"""
+		
+		# Initialize
+		dos_info = {}
+		
+		# Extract data
+		for line in open(filename).readlines():
+			
+			#Skip lines that describe the partial DOS with respect to orbital projections
+			if len(line.split()) != 3:
+				continue
+			
+			try:
+				dos_info[float(line.split()[0])] = float(line.split()[1])
+			except:
+				dos_info[float(line.split()[0])] = 0.0	# Sometimes the DOS can be an extremely small number that VASP outputs e.g. "0.5E-111" as "0.5-111", which is not readable by python
+			
+		# Store data
+		self.dos_data[compound_name] = dos_info
+	
+	
+	# Update the database (add new compound data)
+	def Update_Database(self):
+		
+		try:
+			copyfile("DOS_Tracker.json", ".DOS_Tracker_Backup.json")
+		except:
+			pass
+		with open("DOS_Tracker.json", "w") as jsonfile:
+			json.dump(self.dos_data, jsonfile, indent=4, sort_keys=True)
 
 
-########################################################################################################################
-########################################################################################################################
-################################################# Defects Information ##################################################
-########################################################################################################################
-########################################################################################################################
 
-class Defects_Import:
+
+
+
+class Defects_Diagram_Information_Import:
 	
 	def __init__(self):
 		
@@ -261,18 +299,7 @@ class Defects_Import:
 			self.defects_data = {}
 	
 	
-	####################################################################################################################
-	####################################################################################################################
-	####################################### Add Defects of Compound to Database ########################################
-	####################################################################################################################
-	####################################################################################################################
-	
-	def Add_Defects(self, compound_name, directory_name, supercell_size):
-		
-		# If compound does not exists in Compounds_Tracker.json, then don't import
-		if compound_name not in json.load(open("Compounds_Tracker.json"))["Compounds"].keys():
-			print("The compound '"+compound_name+"' does not exist in Compounds_Tracker.json. Skipping...")
-			return
+	def Add_Compound_Defects_Info(self, compound_name, directory_name, supercell_size):
 		
 		# Create list of possible defects in compound
 		possible_defect_site_list = [ ''.join( [letter for letter in element_segment if not letter.isdigit()] ) for element_segment in re.findall("[A-Z][^A-Z]*", compound_name) ]
@@ -295,7 +322,7 @@ class Defects_Import:
 				print("The directory name '"+directory+"' is not in the correct format for the defect name. Skipping...")
 				continue
 			if (directory.split("_")[-1] not in possible_defect_site_list) or (directory.split("_")[0] not in self.elements):
-				print("'"+directory+"' is not a legitimate defect name for "+compound_name+". Skipping...")
+				print(directory+" is not a legitimate defect name for "+compound_name+". Skipping...")
 				continue
 			
 			defect_name = directory
@@ -370,15 +397,10 @@ class Defects_Import:
 		self.defects_data[compound_name]["supercellsize"] = supercell_size
 	
 	
-	####################################################################################################################
-	####################################################################################################################
-	############################################# Update Defects Database ##############################################
-	####################################################################################################################
-	####################################################################################################################
-	
-	def Update_Defects_Database(self):
+	# Update the database (add new defects data)
+	def Update_Database(self):
 		try:
-			copyfile("Defects_Tracker.json", ".vtandem/Defects_Tracker_Backup.json")
+			copyfile("Defects_Tracker.json", ".Defects_Tracker_Backup.json")
 		except:
 			pass
 		with open("Defects_Tracker.json", "w") as jsonfile:
@@ -386,82 +408,6 @@ class Defects_Import:
 
 
 
-
-
-
-
-########################################################################################################################
-########################################################################################################################
-################################################### DOS Information ####################################################
-########################################################################################################################
-########################################################################################################################
-
-class DOS_Import:
-	
-	def __init__(self):
-		
-		if "DOS_Tracker.json" in os.listdir(os.getcwd()):
-			with open("DOS_Tracker.json") as DOSTracker:
-				self.dos_data = json.load(DOSTracker)
-		else:
-			self.dos_data = {}
-	
-	
-	####################################################################################################################
-	####################################################################################################################
-	############################################### Add DOS to Database ################################################
-	####################################################################################################################
-	####################################################################################################################
-	
-	def Add_DOS(self, compound_name, filename):
-		
-		# Check if the directory name is legitimate
-		if not os.path.isfile(filename):
-			print("WARNING: Cannot find file: '"+directory_name+"'. Exiting...")
-			return ""
-		
-		# Check if the compound already exists in the database
-		if compound_name in self.dos_data.keys():
-			print("The compound '"+compound_name+"' is already in the DOS database (DOS_Tracker.json). The imported data will replace the old data.")
-		
-		# If compound does not exists in Compounds_Tracker.json, then don't import
-		if compound_name not in json.load(open("Compounds_Tracker.json"))["Compounds"].keys():
-			print("The compound '"+compound_name+"' does not exist in Compounds_Tracker.json. Skipping...")
-			return
-		
-		# Initialize
-		dos_info = {}
-		
-		# Extract data
-		for line in open(filename).readlines():
-			
-			#Skip lines that describe the partial DOS with respect to orbital projections
-			if len(line.split()) != 3:
-				continue
-			
-			try:
-				dos_info[float(line.split()[0])] = float(line.split()[1])
-			except:
-				dos_info[float(line.split()[0])] = 0.0	# Sometimes the DOS can be an extremely small number that VASP outputs e.g. "0.5E-111" as "0.5-111", which is not readable by python
-			
-		# Store data
-		self.dos_data[compound_name] = dos_info
-	
-	
-	####################################################################################################################
-	####################################################################################################################
-	############################################### Update DOS Database ################################################
-	####################################################################################################################
-	####################################################################################################################
-	
-	def Update_DOS_Database(self):
-		
-		try:
-			copyfile("DOS_Tracker.json", ".vtandem/DOS_Tracker_Backup.json")
-		except:
-			pass
-		with open("DOS_Tracker.json", "w") as jsonfile:
-			json.dump(self.dos_data, jsonfile, indent=4, sort_keys=True)
 
 
 
