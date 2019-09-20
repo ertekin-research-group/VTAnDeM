@@ -10,9 +10,9 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 
-from ternary.ternary_scripts.plot_ternary_phase_diagram import ChemicalPotential_Ternary_PhaseDiagramProjected2D
-from ternary.ternary_scripts.plot_ternary_defects_diagram import Ternary_Defects_Diagram
-from ternary.ternary_scripts.plot_ternary_carrier_concentration import Ternary_Carrier_Concentration
+from vtandem.visualization.ternary.ternary_scripts.plot_ternary_phase_diagram import ChemicalPotential_Ternary_PhaseDiagramProjected2D
+from vtandem.visualization.ternary.ternary_scripts.plot_ternary_defects_diagram import Ternary_Defects_Diagram
+from vtandem.visualization.ternary.ternary_scripts.plot_ternary_carrier_concentration import Ternary_Carrier_Concentration
 
 
 

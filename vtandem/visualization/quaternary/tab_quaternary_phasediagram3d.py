@@ -15,10 +15,8 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 
-from obtain_DFT_data import *
-
-from quaternary.quaternary_scripts.plot_quaternary_phase_diagram import ChemicalPotential_Quaternary_PhaseDiagramProjected2D_TripleView
-from quaternary.quaternary_scripts.plot3d_quaternary_phase_diagram import ChemicalPotential_Quaternary_PhaseDiagram3D
+from vtandem.visualization.quaternary.quaternary_scripts.plot_quaternary_phase_diagram import ChemicalPotential_Quaternary_PhaseDiagramProjected2D_TripleView
+from vtandem.visualization.quaternary.quaternary_scripts.plot3d_quaternary_phase_diagram import ChemicalPotential_Quaternary_PhaseDiagram3D
 
 
 class Tab_PhaseDiagram3D(QWidget):
