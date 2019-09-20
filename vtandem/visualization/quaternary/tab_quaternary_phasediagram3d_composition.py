@@ -12,9 +12,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 
-from obtain_DFT_data import *
-
-from quaternary.quaternary_scripts.plot3d_composition_quaternary_phase_diagram import Composition_Quaternary_PhaseDiagram3D
+from vtandem.visualization.quaternary.quaternary_scripts.plot3d_composition_quaternary_phase_diagram import Composition_Quaternary_PhaseDiagram3D
 
 
 class Tab_Compositional_PhaseDiagram3D(QWidget):
