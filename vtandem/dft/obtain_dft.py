@@ -1,6 +1,6 @@
 
-__author__ = 'Michael_Lidia_Jiaxing_Benita_Elif'
 __name__ = 'VTAnDeM_Visualization-Toolkit-for-Analyzing-Defects-in-Materials'
+__author__ = 'Michael_Lidia_Jiaxing_Elif'
 
 import json
 import periodictable

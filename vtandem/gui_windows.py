@@ -26,15 +26,18 @@ from vtandem.dft.obtain_dft import *
 ###############################################################################################################################
 ###############################################################################################################################
 
+# Ternary scripts
+from vtandem.visualization.ternary.tab_ternary_phasediagram_defectsdiagram_carrierconcentration import Tab_Ternary_PhaseDiagram_DefectsDiagram_CarrierConcentration
+from vtandem.visualization.ternary.tab_ternary_phasediagram3d import Tab_Ternary_PhaseDiagram3D
+from vtandem.visualization.ternary.tab_ternary_phasediagram_composition import Tab_Ternary_Compositional_PhaseDiagram
+
 # Quaternary scripts
 from vtandem.visualization.quaternary.tab_quaternary_phasediagram_defectsdiagram_carrierconcentration import Tab_PhaseDiagram_DefectsDiagram_CarrierConcentration
 from vtandem.visualization.quaternary.tab_quaternary_phasediagram3d import Tab_PhaseDiagram3D
 from vtandem.visualization.quaternary.tab_quaternary_phasediagram3d_composition import Tab_Compositional_PhaseDiagram3D
 
-# Ternary scripts
-from vtandem.visualization.ternary.tab_ternary_phasediagram_defectsdiagram_carrierconcentration import Tab_Ternary_PhaseDiagram_DefectsDiagram_CarrierConcentration
-from vtandem.visualization.ternary.tab_ternary_phasediagram3d import Tab_Ternary_PhaseDiagram3D
-from vtandem.visualization.ternary.tab_ternary_phasediagram_composition import Tab_Ternary_Compositional_PhaseDiagram
+# Binary scripts
+from vtandem.visualization.binary.tab_binary_defectsdiagram_carrierconcentration import Tab_Binary_DefectsDiagram_CarrierConcentration
 
 script_path = os.path.dirname(__file__)
 vtandem_source_path = "/".join(script_path.split("/")[:-1])
@@ -572,6 +575,7 @@ class Material_Selection_Window(QMainWindow):
 		self.compounds_tree.setHeaderLabels(["Please select material:"])
 		
 		# Create tree structure for set of available compounds
+		self.binary_compounds_set = QTreeWidgetItem(["Binary"])
 		self.ternary_compounds_set = QTreeWidgetItem(["Ternary"])
 		self.quaternary_compounds_set = QTreeWidgetItem(["Quaternary"])
 		
@@ -589,7 +593,9 @@ class Material_Selection_Window(QMainWindow):
 		
 		# Add compounds to tree
 		for compound in self.compounds_info["Compounds"].keys():
-			if self.compounds_info["Compounds"][compound]["number_species"] == 3:
+			if self.compounds_info["Compounds"][compound]["number_species"] == 2:
+				self.binary_compounds_set.addChild(QTreeWidgetItem([compound]))
+			elif self.compounds_info["Compounds"][compound]["number_species"] == 3:
 				self.ternary_compounds_set.addChild(QTreeWidgetItem([compound]))
 			elif self.compounds_info["Compounds"][compound]["number_species"] == 4:
 				self.quaternary_compounds_set.addChild(QTreeWidgetItem([compound]))
@@ -597,6 +603,7 @@ class Material_Selection_Window(QMainWindow):
 		self.compounds_tree.itemClicked.connect(self.Select_Visualization)
 		
 		# Add above features to Tree Widget
+		self.compounds_tree.addTopLevelItem(self.binary_compounds_set)
 		self.compounds_tree.addTopLevelItem(self.ternary_compounds_set)
 		self.compounds_tree.addTopLevelItem(self.quaternary_compounds_set)
 		self.vtandem_options_widget_layout.addWidget(self.compounds_tree)
@@ -657,8 +664,12 @@ class Material_Selection_Window(QMainWindow):
 				self.carrier_concentration_checkbox.setStyleSheet("color: gray")
 				return
 			
-			self.phase_stability_checkbox.setChecked(True)
-			self.phase_stability_checkbox.setStyleSheet("color: black")
+			if self.compounds_info["Compounds"][compound_name]["number_species"] == 2:
+				self.phase_stability_checkbox.setChecked(False)
+				self.phase_stability_checkbox.setStyleSheet("color: gray")
+			else:
+				self.phase_stability_checkbox.setChecked(True)
+				self.phase_stability_checkbox.setStyleSheet("color: black")
 			
 			if compound_name in self.defects_data.keys():
 				self.defects_diagram_checkbox.setEnabled(True)
@@ -706,7 +717,12 @@ class Material_Selection_Window(QMainWindow):
 			
 			self.hide()
 			
-			if compound_type == "Ternary":
+			if compound_type == "Binary":
+				binary_species_list = [ re.sub(r'[0-9]+', '', specie) for specie in re.findall( "[A-Z][^A-Z]*", compound_name ) ]
+				self.binary_aw = Binary_Main_VTAnDeM_Window(main_compound = compound_name, first_element = binary_species_list[0], second_element = binary_species_list[1], show_defects_diagram = show_defects_diagram, show_carrier_concentration = show_carrier_concentration)
+				self.binary_aw.show()
+			
+			elif compound_type == "Ternary":
 				ternary_species_list = [ re.sub(r'[0-9]+', '', specie) for specie in re.findall( "[A-Z][^A-Z]*", compound_name ) ]
 				self.ternary_aw = Ternary_Main_VTAnDeM_Window(main_compound = compound_name, first_element = ternary_species_list[0], second_element = ternary_species_list[1], third_element = ternary_species_list[2], show_defects_diagram = show_defects_diagram, show_carrier_concentration = show_carrier_concentration)
 				self.ternary_aw.show()
@@ -978,6 +994,130 @@ class Ternary_Main_VTAnDeM_Window(QMainWindow):
 		self.select_material_window.show()
 		
 		self.close()
+
+
+
+
+
+
+
+###############################################################################################################################
+###############################################################################################################################
+############################################# VTAnDeM Window for Binary Materials ############################################
+###############################################################################################################################
+###############################################################################################################################
+
+class Binary_Main_VTAnDeM_Window(QMainWindow):
+	
+	def __init__(self, parent = None, main_compound = None, first_element = None, second_element = None, show_defects_diagram = True, show_carrier_concentration = True):
+		
+		# Inherit all initial variables from the QMainWindow class
+		QMainWindow.__init__(self)
+		self.setWindowIcon(QIcon(vtandem_source_path+"/logo/LogoSmall.png"))
+		
+		
+		# Set up the framework of the application window (including file menu, exit function, etc.)
+		self.Setup_Window_Framework()
+		
+		# Establish list of elements in compound
+		self.elements_list = [first_element, second_element]					# Species list (order MAY change)
+		
+		# Obtain DFT data
+		self.compounds_info = Obtain_Compounds_Data(self.elements_list)	# Total energies/enthalpies for phase diagram
+		self.defects_data = Obtain_Defects_Data()		# Defect energies for defects diagram
+		self.dos_data = Obtain_DOS_Data()
+		
+		
+		self.Tab1_PhasesDefectsCarriers_Object = Tab_Binary_DefectsDiagram_CarrierConcentration(self, main_compound = main_compound, first_element = first_element, second_element = second_element, compounds_info = self.compounds_info, defects_data = self.defects_data, dos_data = self.dos_data, show_defects_diagram = show_defects_diagram, show_carrier_concentration = show_carrier_concentration)
+		
+		
+		
+		#######################################
+		####### Define and place widgets ######
+		#######################################
+		
+		# Set up layout of widgets (think of "widgets" as being like objects in the app, like a button or a plot)
+		self.widgets = QWidget()						# "Main" widget. This is where all other widgets will be placed.
+														# 	The reason why we need a "main" widget is because PyQT only allows the programmer
+														#	to declare only ONE central widget, where everything happens. Since we need to pool
+														#	into this app other widgets (like buttons and the ternary phase diagram plot),
+														#	we place all of our widgets into this "main" widget.
+		self.setCentralWidget(self.widgets)				# Declare self.widgets as the "main" (or central) widget.
+		self.widgets_grid = QHBoxLayout(self.widgets)	# The layout of the main widget should be such that all widgets placed inside the main
+														#	widget (i.e. buttons, plots, etc.) are placed horizontally.
+		
+		
+		self.plot_tabs_widget = QTabWidget()
+		
+		
+		self.plot_tabs_widget.addTab(self.Tab1_PhasesDefectsCarriers_Object.tab1, "Phases and Defects")
+		#self.plot_tabs_widget.addTab(self.Tab2_PhaseDiagram3D_Object.tab2, "Phase Diagram, Chemical Potential Space")
+		#self.plot_tabs_widget.addTab(self.Tab3_PhaseDiagram_Object.tab3, "Phase Diagram, Composition Space")
+		
+		
+		
+		self.widgets_grid.addWidget(self.plot_tabs_widget)
+		
+		
+		self.showFullScreen()
+	
+	
+	
+	
+	
+	
+	###############################################################################################
+	################################# Main Window Framework #######################################
+	###############################################################################################
+	
+	def Setup_Window_Framework(self):
+		
+		# Create a menu bar
+		menubar = self.menuBar()	# This menu bar automatically gets added to the existing main window
+		
+		# Add file options to the menu bar
+		fileMenu = menubar.addMenu('&File')
+		
+		# Set up an option where the user can go back to the material selection window
+		newappAction = QAction('New', self)
+		newappAction.triggered.connect(self.Open_MaterialSelectionWindow)
+		fileMenu.addAction(newappAction)
+		
+		# Add "About" section
+		aboutMenu = menubar.addMenu("&About")
+		
+		# Set up an option to view a brief description of VTAnDeM
+		aboutAction = QAction("About", self)
+		aboutAction.triggered.connect(self.VTAnDeM_Description)
+		aboutMenu.addAction(aboutAction)
+		
+		# Set the title of the window
+		mainwindow_title = "VTAnDeM: Visualization Toolkit for Analyzing Defects in Materials"
+		self.setWindowTitle(mainwindow_title)
+	
+	
+	
+	
+	def VTAnDeM_Description(self):
+		
+		description_window = QMainWindow(self)
+		
+		description_window.show()
+	
+	
+	
+	
+	
+	
+	def Open_MaterialSelectionWindow(self):
+		
+		self.select_material_window = Material_Selection_Window()
+		self.select_material_window.setWindowIcon(QIcon(vtandem_source_path+"/logo/LogoSmall.png"))
+		self.select_material_window.show()
+		
+		self.close()
+
+
 
 
 

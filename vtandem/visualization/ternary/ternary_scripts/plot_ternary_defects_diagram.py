@@ -1,6 +1,6 @@
 
-__author__ = 'Michael_Lidia_Jiaxing_Benita_Elif'
 __name__ = 'VTAnDeM_Visualization-Toolkit-for-Analyzing-Defects-in-Materials'
+__author__ = 'Michael_Lidia_Jiaxing_Elif'
 
 
 import numpy as np
@@ -9,6 +9,10 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from labellines import labelLine, labelLines
+
+from vtandem.visualization.defect_formation_energy import Calculate_IntrinsicDefectFormationEnthalpies
+from vtandem.visualization.defect_formation_energy import Calculate_ExtrinsicDefectFormationEnthalpies
+from vtandem.visualization.defect_formation_energy import Find_MinimumDefectFormationEnthalpies
 
 
 class Ternary_Defects_Diagram(object):
@@ -29,19 +33,10 @@ class Ternary_Defects_Diagram(object):
 		self.third_element  = third_element
 		self.elements_list = [self.first_element, self.second_element, self.third_element]
 		
-		
 		# Keep track of chemical potential values
 		self.mu_elements = {self.first_element: {"mu0": 0.0, "deltamu": 0.0},
 							self.second_element: {"mu0": 0.0, "deltamu": 0.0},
 							self.third_element: {"mu0": 0.0, "deltamu": 0.0} }
-		
-		
-		"""
-		# Establish constants for the species
-		self.species_a = first_element
-		self.species_b = second_element
-		self.species_c = third_element
-		"""
 		
 		# Store all extracted DFT data
 		self.ternary_defects_data = None
@@ -52,14 +47,6 @@ class Ternary_Defects_Diagram(object):
 		self.EVBM = 0.0
 		self.ECBM = 0.0
 		self.fermi_energy_array = None
-		
-		"""
-		# Store all mu values
-		self.mu_values = {}
-		self.mu_values[self.first_element]  = 0.0
-		self.mu_values[self.second_element] = 0.0
-		self.mu_values[self.third_element]  = 0.0
-		"""
 		
 		# Minimum and maximum y-value range
 		self.ymin = -2.0
@@ -111,78 +98,15 @@ class Ternary_Defects_Diagram(object):
 		self.equilibrium_fermi_energy_tick.tick_params(axis='both', labelsize=9)
 	
 	
+	
 	def Calculate_DefectFormations(self):
 		
-		"""
-		# Obtain current user-tunable chemical potentials
-		dmu_a = self.mu_values[self.species_a]
-		dmu_b = self.mu_values[self.species_b]
-		dmu_c = self.mu_values[self.species_c]
-		"""
+		intrinsic_defects_enthalpy_data = Calculate_IntrinsicDefectFormationEnthalpies(self.ternary_defects_data, self.main_compound_total_energy, self.fermi_energy_array, self.mu_elements)
+		self.intrinsic_defects_enthalpy_data = Find_MinimumDefectFormationEnthalpies(intrinsic_defects_enthalpy_data)
 		
-		# Initialize storage for all charges of defect
-		intrinsic_defects_enthalpy_data = {}
-		extrinsic_defects_enthalpy_data = {}
-		
-		# Loop through defects in ternary
-		for defect in self.ternary_defects_data.keys():
-			
-			# Check that item is truly a defect
-			if "_" not in defect:
-				continue
-			
-			# Extrinsic defect
-			if self.ternary_defects_data[defect]["Extrinsic"] == "Yes":
-				extrinsic_defects_enthalpy_data[defect] = []
-				for charge in self.ternary_defects_data[defect]["charge"].keys():
-					"""
-					defect_formation_enthalpy = self.ternary_defects_data[defect]["charge"][charge]["Energy"] \
-												- self.ternary_defects_data["supercellsize"] * self.main_compound_total_energy \
-												- self.ternary_defects_data[defect]["n_"+self.species_a] * ( self.first_element_mu0 + float(dmu_a) ) \
-												- self.ternary_defects_data[defect]["n_"+self.species_b] * ( self.second_element_mu0 + float(dmu_b) ) \
-												- self.ternary_defects_data[defect]["n_"+self.species_c] * ( self.third_element_mu0 + float(dmu_c) ) \
-												- (self.extrinsic_defect_mu0 + self.extrinsic_defect_deltamu) \
-												+ float(charge) * self.fermi_energy_array \
-												+ self.ternary_defects_data[defect]["charge"][charge]["ECorr"] # Extra chemical potential contribution from dopant
-					"""
-					defect_formation_enthalpy = self.ternary_defects_data[defect]["charge"][charge]["Energy"] \
-												- self.ternary_defects_data["supercellsize"] * self.main_compound_total_energy \
-												- (self.extrinsic_defect_mu0 + self.extrinsic_defect_deltamu) \
-												+ float(charge) * self.fermi_energy_array \
-												+ self.ternary_defects_data[defect]["charge"][charge]["ECorr"] # Extra chemical potential contribution from dopant
-					for element in self.elements_list:
-						defect_formation_enthalpy -= self.ternary_defects_data[defect]["n_"+element] * ( self.mu_elements[element]["mu0"] + self.mu_elements[element]["deltamu"] )
-					extrinsic_defects_enthalpy_data[defect].append(defect_formation_enthalpy)
-			# Intrinsic defect
-			elif self.ternary_defects_data[defect]["Extrinsic"] == "No":
-				intrinsic_defects_enthalpy_data[defect] = []
-				for charge in self.ternary_defects_data[defect]["charge"].keys():
-					"""
-					defect_formation_enthalpy = self.ternary_defects_data[defect]["charge"][charge]["Energy"] \
-												- self.ternary_defects_data["supercellsize"] * self.main_compound_total_energy \
-												- self.ternary_defects_data[defect]["n_"+self.species_a] * ( self.first_element_mu0 + float(dmu_a) ) \
-												- self.ternary_defects_data[defect]["n_"+self.species_b] * ( self.second_element_mu0 + float(dmu_b) ) \
-												- self.ternary_defects_data[defect]["n_"+self.species_c] * ( self.third_element_mu0 + float(dmu_c) ) \
-												+ float(charge) * self.fermi_energy_array \
-												+ self.ternary_defects_data[defect]["charge"][charge]["ECorr"]
-					"""
-					defect_formation_enthalpy = self.ternary_defects_data[defect]["charge"][charge]["Energy"] \
-												- self.ternary_defects_data["supercellsize"] * self.main_compound_total_energy \
-												+ float(charge) * self.fermi_energy_array \
-												+ self.ternary_defects_data[defect]["charge"][charge]["ECorr"]
-					for element in self.elements_list:
-						defect_formation_enthalpy -= self.ternary_defects_data[defect]["n_"+element] * ( self.mu_elements[element]["mu0"] + self.mu_elements[element]["deltamu"] )
-					intrinsic_defects_enthalpy_data[defect].append(defect_formation_enthalpy)
-		
-		
-		# Find minimum formation energy of all charges of each defect
-		for intrinsic_defect in intrinsic_defects_enthalpy_data.keys():	# Intrinsic defects
-			defect_formation_energy_minimum = np.fromiter(map(min, zip(*itertools.chain(intrinsic_defects_enthalpy_data[intrinsic_defect]))), dtype=np.float)
-			self.intrinsic_defects_enthalpy_data[intrinsic_defect] = defect_formation_energy_minimum
-		for extrinsic_defect in extrinsic_defects_enthalpy_data.keys():	# Extrinsic defects
-			defect_formation_energy_minimum = np.fromiter(map(min, zip(*itertools.chain(extrinsic_defects_enthalpy_data[extrinsic_defect]))), dtype=np.float)
-			self.extrinsic_defects_enthalpy_data[extrinsic_defect] = defect_formation_energy_minimum
-	
+		if self.extrinsic_defect != "None":
+			extrinsic_defects_enthalpy_data = Calculate_ExtrinsicDefectFormationEnthalpies(self.ternary_defects_data, self.main_compound_total_energy, self.fermi_energy_array, self.mu_elements, self.extrinsic_defect, self.extrinsic_defect_mu0, self.extrinsic_defect_deltamu)
+			self.extrinsic_defects_enthalpy_data = Find_MinimumDefectFormationEnthalpies(extrinsic_defects_enthalpy_data)
 	
 	
 	
@@ -236,12 +160,10 @@ class Ternary_Defects_Diagram(object):
 		self.extrinsic_defect_plots[self.extrinsic_defect].set_ydata(self.extrinsic_defects_enthalpy_data[self.extrinsic_defect])
 		
 		# Remove labels before redrawing them at new positions
-		#self.ternary_defects_diagram_plot_drawing.texts.clear()
 		labelLine(self.extrinsic_defect_plots[self.extrinsic_defect], x=(self.ECBM-self.EVBM)/2., align=False)
 		
 		# Draw defects diagram canvas
 		self.ternary_defects_diagram_plot_canvas.draw()
-	
 	
 	
 	
@@ -255,14 +177,6 @@ class Ternary_Defects_Diagram(object):
 			self.equilibrium_fermi_energy_plot = self.ternary_defects_diagram_plot_drawing.axvline(equilibrium_fermi_energy, zorder=1E9, ls='--', color='k')
 		
 		# Place EF^eq text
-		"""
-		if (equilibrium_fermi_energy > 0.0) and (equilibrium_fermi_energy < self.ECBM-self.EVBM):
-			self.equilibrium_fermi_energy_tick.set_xticks([equilibrium_fermi_energy])
-			self.equilibrium_fermi_energy_tick.set_xticklabels([r"$E_{f}^{eq}$"])
-		else:
-			self.equilibrium_fermi_energy_tick.set_xticks([])
-			self.equilibrium_fermi_energy_tick.set_xticklabels([])
-		"""
 		try:
 			self.equilibrium_fermi_energy_tick.set_xticks([equilibrium_fermi_energy])
 			self.equilibrium_fermi_energy_tick.set_xticklabels([r"$E_{f}^{eq}$"])

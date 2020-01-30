@@ -20,9 +20,10 @@ from vtandem.visualization.carrier_concentration import Calculate_CarrierConcent
 
 
 
-class Quaternary_Carrier_Concentration(object):
+class Binary_Carrier_Concentration(object):
 	
-	def __init__(self, parent = None, main_compound = None, first_element = None, second_element = None, third_element = None, fourth_element = None):
+	def __init__(self, parent = None, main_compound = None, first_element = None, second_element = None):
+		
 		
 		# Font description for phase stability diagram plot
 		self.font = {'family': 'sans-serif',
@@ -30,39 +31,30 @@ class Quaternary_Carrier_Concentration(object):
 				'weight': 'normal',
 				'size': 14 }
 		
-		# Establish the first, second, third, and fourth species of the quaternary compound.
+		# Establish the first and second species of the binary compound.
 		# Note that this list is subject to change, depending on what the user chooses.
 		self.main_compound  = main_compound
 		self.first_element	= first_element
 		self.second_element	= second_element
-		self.third_element	= third_element
-		self.fourth_element	= fourth_element
-		self.elements_list   = [self.first_element, self.second_element, self.third_element, self.fourth_element]
+		self.elements_list  = [self.first_element, self.second_element]
+		
 		
 		# Keep track of chemical potential values
 		self.mu_elements = {self.first_element: {"mu0": 0.0, "deltamu": 0.0},
-							self.second_element: {"mu0": 0.0, "deltamu": 0.0},
-							self.third_element: {"mu0": 0.0, "deltamu": 0.0},
-							self.fourth_element: {"mu0": 0.0, "deltamu": 0.0} }
+							self.second_element: {"mu0": 0.0, "deltamu": 0.0} }
 		
-		# Number of each specie in the main quaternary compound
-		self.main_compound_number_first_specie  = 0	# Number of each specie in the main quaternary compound
+		# Number of each specie in the main binary compound
+		self.main_compound_number_first_specie  = 0
 		self.main_compound_number_second_specie = 0
-		self.main_compound_number_third_specie  = 0
-		self.main_compound_number_fourth_specie = 0
 		self.number_species = {	self.first_element: self.main_compound_number_first_specie,
-								self.second_element: self.main_compound_number_second_specie,
-								self.third_element: self.main_compound_number_third_specie,
-								self.fourth_element: self.main_compound_number_fourth_specie }
+								self.second_element: self.main_compound_number_second_specie }
 		
 		# Store all extracted DFT data
-		self.quaternary_defects_data = None
-		self.quaternary_dos_data = None
+		self.binary_defects_data = None
+		self.binary_dos_data = None
 		self.main_compound_total_energy = 0.0
 		self.first_element_mu0 = 0.0
 		self.second_element_mu0 = 0.0
-		self.third_element_mu0 = 0.0
-		self.fourth_element_mu0 = 0.0
 		self.vol = 0.0
 		self.EVBM = 0.0
 		self.ECBM = 0.0
@@ -75,7 +67,7 @@ class Quaternary_Carrier_Concentration(object):
 		self.energies_ValenceBand		= None
 		self.gE_ValenceBand 			= None
 		self.energies_ConductionBand	= None
-		self.gE_ConductionBand 			= None
+		self.gE_ConductionBand	 		= None
 		
 		self.hole_concentrations_dict		= {}
 		self.electron_concentrations_dict	= {}
@@ -85,7 +77,6 @@ class Quaternary_Carrier_Concentration(object):
 		for temperature in self.temperature_array:
 			self.intrinsic_equilibrium_fermi_energy[temperature] = 0.0
 			self.total_equilibrium_fermi_energy[temperature] = 0.0
-		
 		
 		self.check_outside_bandgap = False
 		
@@ -103,6 +94,7 @@ class Quaternary_Carrier_Concentration(object):
 		self.carrier_concentration_plot_drawing = self.carrier_concentration_plot_figure.add_subplot(111)
 		self.carrier_concentration_plot_canvas = FigureCanvas(self.carrier_concentration_plot_figure)
 		
+		
 		self.carrier_concentration_intrinsic_defect_hole_plot = None
 		self.carrier_concentration_intrinsic_defect_electron_plot = None
 		self.carrier_concentration_total_hole_plot = None
@@ -111,6 +103,7 @@ class Quaternary_Carrier_Concentration(object):
 		# Set y-axis minimum and maximum
 		self.ymin = 1E16
 		self.ymax = 1E23
+	
 	
 	
 	def Activate_CarrierConcentration_Plot_Axes(self):
@@ -128,6 +121,9 @@ class Quaternary_Carrier_Concentration(object):
 		self.carrier_concentration_plot_drawing.set_aspect("auto")
 	
 	
+	
+	
+	
 	def Organize_DOS_Data(self):
 		
 		# Initialize data
@@ -135,13 +131,14 @@ class Quaternary_Carrier_Concentration(object):
 		gE = []
 		
 		# Orgnize data
-		for energy_dos in sorted(np.asarray([float(i) for i in self.quaternary_dos_data.keys()])):
+		for energy_dos in sorted(np.asarray([float(i) for i in self.binary_dos_data.keys()])):
 			energy.append(energy_dos)
-			gE.append(float(self.quaternary_dos_data[str(energy_dos)])) #*1E24)
+			gE.append(float(self.binary_dos_data[str(energy_dos)])) #*1E24)
 		
 		# Store into global variables
 		self.energy = np.asarray(energy)
 		self.gE = np.asarray(gE)
+	
 	
 	
 	def Extract_Relevant_Energies_DOSs(self):
@@ -189,15 +186,18 @@ class Quaternary_Carrier_Concentration(object):
 				self.electron_concentrations_dict[temperature][self.fermi_energy_array.tolist().index(ef)] = electron_concentration
 	
 	
+	
+	
 	def Initialize_HoleConcentration_Plot(self):
 		
+		#intrinsic_defect_hole_concentration, intrinsic_defect_electron_concentration, total_defect_hole_concentration, total_defect_electron_concentration = self.Calculate_CarrierConcentration()
 		intrinsic_defect_hole_concentration, intrinsic_defect_electron_concentration, total_hole_concentration, total_electron_concentration, intrinsic_equilibrium_fermi_energy_temperature, total_equilibrium_fermi_energy_temperature = Calculate_CarrierConcentration(	EVBM = self.EVBM, \
 																																																																			ECBM = self.ECBM, \
 																																																																			energies_ValenceBand = self.energies_ValenceBand, \
 																																																																			gE_ValenceBand = self.gE_ValenceBand, \
 																																																																			energies_ConductionBand = self.energies_ConductionBand, \
 																																																																			gE_ConductionBand = self.gE_ConductionBand, \
-																																																																			defects_data = self.quaternary_defects_data, \
+																																																																			defects_data = self.binary_defects_data, \
 																																																																			main_compound_total_energy = self.main_compound_total_energy, \
 																																																																			mu_elements = self.mu_elements, \
 																																																																			temperature_array = self.temperature_array, \
@@ -233,13 +233,14 @@ class Quaternary_Carrier_Concentration(object):
 	
 	def Update_HoleConcentration_Plot(self):
 		
+		#intrinsic_defect_hole_concentration, intrinsic_defect_electron_concentration, total_defect_hole_concentration, total_defect_electron_concentration = self.Calculate_CarrierConcentration()
 		intrinsic_defect_hole_concentration, intrinsic_defect_electron_concentration, total_hole_concentration, total_electron_concentration, intrinsic_equilibrium_fermi_energy_temperature, total_equilibrium_fermi_energy_temperature = Calculate_CarrierConcentration(	EVBM = self.EVBM, \
 																																																																			ECBM = self.ECBM, \
 																																																																			energies_ValenceBand = self.energies_ValenceBand, \
 																																																																			gE_ValenceBand = self.gE_ValenceBand, \
 																																																																			energies_ConductionBand = self.energies_ConductionBand, \
 																																																																			gE_ConductionBand = self.gE_ConductionBand, \
-																																																																			defects_data = self.quaternary_defects_data, \
+																																																																			defects_data = self.binary_defects_data, \
 																																																																			main_compound_total_energy = self.main_compound_total_energy, \
 																																																																			mu_elements = self.mu_elements, \
 																																																																			temperature_array = self.temperature_array, \
@@ -268,13 +269,14 @@ class Quaternary_Carrier_Concentration(object):
 	
 	def Initialize_ElectronConcentration_Plot(self):
 		
+		#intrinsic_defect_hole_concentration, intrinsic_defect_electron_concentration, total_defect_hole_concentration, total_defect_electron_concentration = self.Calculate_CarrierConcentration()
 		intrinsic_defect_hole_concentration, intrinsic_defect_electron_concentration, total_hole_concentration, total_electron_concentration, intrinsic_equilibrium_fermi_energy_temperature, total_equilibrium_fermi_energy_temperature = Calculate_CarrierConcentration(	EVBM = self.EVBM, \
 																																																																			ECBM = self.ECBM, \
 																																																																			energies_ValenceBand = self.energies_ValenceBand, \
 																																																																			gE_ValenceBand = self.gE_ValenceBand, \
 																																																																			energies_ConductionBand = self.energies_ConductionBand, \
 																																																																			gE_ConductionBand = self.gE_ConductionBand, \
-																																																																			defects_data = self.quaternary_defects_data, \
+																																																																			defects_data = self.binary_defects_data, \
 																																																																			main_compound_total_energy = self.main_compound_total_energy, \
 																																																																			mu_elements = self.mu_elements, \
 																																																																			temperature_array = self.temperature_array, \
@@ -310,13 +312,14 @@ class Quaternary_Carrier_Concentration(object):
 	
 	def Update_ElectronConcentration_Plot(self):
 		
+		#intrinsic_defect_hole_concentration, intrinsic_defect_electron_concentration, total_defect_hole_concentration, total_defect_electron_concentration = self.Calculate_CarrierConcentration()
 		intrinsic_defect_hole_concentration, intrinsic_defect_electron_concentration, total_hole_concentration, total_electron_concentration, intrinsic_equilibrium_fermi_energy_temperature, total_equilibrium_fermi_energy_temperature = Calculate_CarrierConcentration(	EVBM = self.EVBM, \
 																																																																			ECBM = self.ECBM, \
 																																																																			energies_ValenceBand = self.energies_ValenceBand, \
 																																																																			gE_ValenceBand = self.gE_ValenceBand, \
 																																																																			energies_ConductionBand = self.energies_ConductionBand, \
 																																																																			gE_ConductionBand = self.gE_ConductionBand, \
-																																																																			defects_data = self.quaternary_defects_data, \
+																																																																			defects_data = self.binary_defects_data, \
 																																																																			main_compound_total_energy = self.main_compound_total_energy, \
 																																																																			mu_elements = self.mu_elements, \
 																																																																			temperature_array = self.temperature_array, \
@@ -328,7 +331,7 @@ class Quaternary_Carrier_Concentration(object):
 																																																																			extrinsic_defect_deltamu = self.extrinsic_defect_deltamu, \
 																																																																			hole_concentrations_dict = self.hole_concentrations_dict, \
 																																																																			electron_concentrations_dict = self.electron_concentrations_dict, \
-																																																																			check_outside_bandgap = self.check_outside_bandgap,
+																																																																			check_outside_bandgap = self.check_outside_bandgap, \
 																																																																			synthesis_temperature = self.synthesis_temperature )
 		
 		# Update equilibrium Fermi energy
@@ -340,6 +343,7 @@ class Quaternary_Carrier_Concentration(object):
 			self.carrier_concentration_total_electron_plot.set_ydata(total_electron_concentration)
 		
 		self.carrier_concentration_plot_canvas.draw()
+
 
 
 

@@ -44,21 +44,36 @@ def vtandem(import_element, import_compound, import_defects, import_dos, new, op
 	
 	\b
 	[1] Importing Elements/Compounds
-	When importing compounds using the --import_element or --import_compound
-	option, the argument <TEXT PATH> should be in the form:
-	    'Name /path/to/data/folder'
-	'Name' is case-sensitive (e.g. Cu2HgGeTe4).
+	When importing elements, use the --import_element option. The argument
+	<TEXT PATH> should be in the form:
+	    'Element_Name /path/to/data/folder'
+	'Element_Name' is the case-sensitive name of the element (e.g. Cu).
 	/path/to/data/folder should have the file structure:
 	
 	\b
 	  /path/to/data/folder
-	    |-- OUTCAR
-	    |-- POSCAR
+	    |-- OUTCAR (or OSZICAR)
+	    |-- CONTCAR (or POSCAR)
 	    |-- vasprun.xml
 	
 	\b
 	\b
-	[2] Importing Defects Information
+	[2] Importing Compounds
+	When importing compounds, use the --import_compound option. The argument
+	<TEXT PATH> should be in the form:
+		'Compound_Name /path/to/data/folder'
+	'Compound_Name' is the case-sensitive name of the compound (e.g. Cu2HgGeTe4).
+	/path/to/data/folder should have the file structure:
+	
+	\b
+	  \path/to/data/folder
+	    |-- OUTCAR (or OSZICAR)
+		|-- CONTCAR (or POSCAR)
+		|-- vasprun.xml
+	
+	\b
+	\b
+	[3] Importing Defects Information
 	When importing defects using the --import_defects option, the argument
 	<TEXT PATH> should be given in the form:
 	    'Compound_Name /path/to/data/folder'
@@ -83,7 +98,7 @@ def vtandem(import_element, import_compound, import_defects, import_dos, new, op
 	
 	\b
 	\b
-	[3] Importing Density of States
+	[4] Importing Density of States
 	When importing the DOS using the --import_dos option, the argument  <TEXT
 	PATH> should be in the form:
 	    'Compound_Name /path/to/DOSCAR'
