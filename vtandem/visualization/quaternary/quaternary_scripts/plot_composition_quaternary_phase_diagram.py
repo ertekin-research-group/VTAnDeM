@@ -148,8 +148,9 @@ class Composition_Quaternary_PhaseDiagram(Composition_PhaseDiagram):
 		self.centroids_plot = self.composition_phasediagram_plot_drawing.scatter(	self.fourphaseregion_centroids[:,0],
 																					self.fourphaseregion_centroids[:,1],
 																					self.fourphaseregion_centroids[:,2]	)
-	
-	
+		
+		# Revert back to original data structure (list)
+		self.fourphaseregion_centroids = list(self.fourphaseregion_centroids)
 	
 	
 	def Update_Annotation(self, index):

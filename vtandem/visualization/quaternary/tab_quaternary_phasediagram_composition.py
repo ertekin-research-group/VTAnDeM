@@ -81,6 +81,9 @@ class Tab_Quaternary_Compositional_PhaseDiagram3D(object):
 		
 		# Add compositional phase diagram window widget to tab3
 		self.Compositional_PhaseDiagram_Window = Compositional_PhaseDiagram_Window(self.main_compound, self.Compositional_PhaseDiagram3D)
+		self.Compositional_PhaseDiagram_Window.compositional_phasediagram_window_layout.addWidget(self.Compositional_PhaseDiagram_Window.compound_title)
+		self.Compositional_PhaseDiagram_Window.compositional_phasediagram_window_layout.addWidget(self.Compositional_PhaseDiagram_Window.composition_phase_diagram_plot)
+		self.Compositional_PhaseDiagram_Window.compositional_phasediagram_window_layout.addWidget(self.Compositional_PhaseDiagram_Window.phasediagram_savefigure_button)
 		self.tab3_layout.addWidget(self.Compositional_PhaseDiagram_Window.compositional_phasediagram_window)
 		
 		
