@@ -1,5 +1,5 @@
 
-__author__ = 'Michael_Lidia_Jiaxing_Benita_Elif'
+__author__ = 'Michael_Lidia_Jiaxing_Elif'
 __name__ = 'VTAnDeM_Visualization-Toolkit-for-Analyzing-Defects-in-Materials'
 
 
@@ -44,6 +44,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 
+from vtandem.visualization.compound_name import Compound_Name_Formal
 
 
 class ChemicalPotential_Ternary_PhaseDiagram3D(object):
@@ -77,40 +78,13 @@ class ChemicalPotential_Ternary_PhaseDiagram3D(object):
 		self.competing_compounds_colorwheel = {}
 		
 		# 3D ternary phase diagram plot objects
-		self.ternary_phasediagram_3d_plot_figure = plt.figure()
-		self.ternary_phasediagram_3d_plot_canvas = FigureCanvas(self.ternary_phasediagram_3d_plot_figure)
-		self.ternary_phasediagram_3d_plot_axes = Axes3D(self.ternary_phasediagram_3d_plot_figure)		# NOTE: Axes3D MUST be called AFTER calling FigureCanvas
+		self.chemicalpotential_phasediagram_plot_figure = plt.figure()
+		self.chemicalpotential_phasediagram_plot_canvas = FigureCanvas(self.chemicalpotential_phasediagram_plot_figure)
+		self.chemicalpotential_phasediagram_plot_axes = Axes3D(self.chemicalpotential_phasediagram_plot_figure)		# NOTE: Axes3D MUST be called AFTER calling FigureCanvas
 		
 		self.path = None
 		
-		self.ternary_phasediagram_3d_plot_axes.view_init(elev=15, azim=145)
-	
-	
-	
-	###############################################################################################
-	########################## Rewrite Compound Name Latex-Style ##################################
-	###############################################################################################
-	
-	def Compound_Name_Formal(self, compound_name):
-		
-		if compound_name in self.all_elements:
-			return compound_name
-		
-		# Go into the compounds_info dictionary and obtains the chemistry and stoichiometry of the compound of choice
-		compound_species_info = self.compounds_info[compound_name]
-		
-		compound_name_formal = ""
-		for species in compound_species_info["elements_list"]:				# Loop through the list of possible species that can be contained in the compound
-			if compound_species_info[species] == 0:
-				continue								# Don't add the species to the name if the compound doesn't contain the species
-			elif compound_species_info[species] == 1:
-				compound_name_formal += species			# Add the species to the name of the compound
-			elif compound_species_info[species] > 1:
-				compound_name_formal += species+"$_{"+str(int(compound_species_info[species]))+"}$"	# Add the species to the name of the compound
-				#compound_name_formal += species+"<sub>"+str(int(compound_species_info[species]))+"</sub>"	# Add the species to the name of the compound
-																											#	with a subscript for the stoichiometry
-		
-		return compound_name_formal
+		self.chemicalpotential_phasediagram_plot_axes.view_init(elev=15, azim=145)
 	
 	
 	
@@ -171,7 +145,7 @@ class ChemicalPotential_Ternary_PhaseDiagram3D(object):
 			
 			A_matrix.append(np.array([coefficient_x, coefficient_y]))
 			b_vector.append(b)
-			compounds_list.append(self.Compound_Name_Formal(competing_compound))
+			compounds_list.append(Compound_Name_Formal(competing_compound, self.compounds_info, "unicode"))
 		
 		return A_matrix, b_vector, compounds_list
 	
@@ -202,13 +176,9 @@ class ChemicalPotential_Ternary_PhaseDiagram3D(object):
 		color_counter = 0
 		for i, ininc_i in enumerate(ininc):
 			
-			print(ininc_i)
-			
 			if len(ininc_i) < 2:
 				continue
 			ininc_i = self.Sort_Plane_Vertices(ininc_i, adj)
-			
-			print(ininc_i)
 			
 			x = []
 			y = []
@@ -216,19 +186,9 @@ class ChemicalPotential_Ternary_PhaseDiagram3D(object):
 			for v in ininc_i:
 				x.append(verts[v][0])
 				y.append(verts[v][1])
-				#z.append(verts[v][2])
 				z_point = ( self.compounds_info[self.main_compound]["enthalpy"] - self.compounds_info[self.main_compound][self.element_x]*verts[v][0] - self.compounds_info[self.main_compound][self.element_y]*verts[v][1] ) / float(self.compounds_info[self.main_compound][self.dependent_element])
 				z.append(z_point)
-			"""
-			x.append(verts[ininc_i[0]][0])
-			y.append(verts[ininc_i[0]][1])
-			#z.append(verts[ininc_i[0]][2])
-			z_point = ( self.compounds_info[self.main_compound]["enthalpy"] - self.compounds_info[self.main_compound][self.element_x]*verts[v][0] - self.compounds_info[self.main_compound][self.element_y]*verts[v][1] ) / float(self.compounds_info[self.main_compound][self.dependent_element])
-			z.append(z_point)
-			"""
 			coord = [list(zip(x, y, z))]
-			
-			print(coord)
 			
 			label = sec_phases[i]
 			polygon = Poly3DCollection(coord, alpha=0.9, label=label, closed=True)
@@ -239,9 +199,9 @@ class ChemicalPotential_Ternary_PhaseDiagram3D(object):
 			polygon._facecolors2d=polygon._facecolors3d
 			polygon._edgecolors2d=polygon._edgecolors3d
 			
-			self.ternary_phasediagram_3d_plot_axes.add_collection3d(polygon)
+			self.chemicalpotential_phasediagram_plot_axes.add_collection3d(polygon)
 			path = Line3DCollection(coord, lw=2, color=self.competing_compounds_colorwheel[label])
-			self.ternary_phasediagram_3d_plot_axes.add_collection3d(path)
+			self.chemicalpotential_phasediagram_plot_axes.add_collection3d(path)
 		
 		# Include competing compounds not included in phase stability bound into colorwheel
 		for competing_compound in sec_phases:
@@ -261,19 +221,19 @@ class ChemicalPotential_Ternary_PhaseDiagram3D(object):
 		main_compound_number_third_specie = self.compounds_info[self.main_compound][self.dependent_element]
 		phasediagram_endpoints = min(main_compound_enthalpy/main_compound_number_first_specie, main_compound_enthalpy/main_compound_number_second_specie, main_compound_enthalpy/main_compound_number_third_specie)
 		
-		self.ternary_phasediagram_3d_plot_axes.set_xlim([phasediagram_endpoints - buffer, 0 + buffer])
-		self.ternary_phasediagram_3d_plot_axes.set_ylim([phasediagram_endpoints - buffer, 0 + buffer])
-		self.ternary_phasediagram_3d_plot_axes.set_zlim([phasediagram_endpoints - buffer, 0 + buffer])
+		self.chemicalpotential_phasediagram_plot_axes.set_xlim([phasediagram_endpoints - buffer, 0 + buffer])
+		self.chemicalpotential_phasediagram_plot_axes.set_ylim([phasediagram_endpoints - buffer, 0 + buffer])
+		self.chemicalpotential_phasediagram_plot_axes.set_zlim([phasediagram_endpoints - buffer, 0 + buffer])
 		
-		self.ternary_phasediagram_3d_plot_axes.set_xlabel(r"$\Delta\mu_{"+self.element_x+"}$ (eV)", fontdict=self.font)  
-		self.ternary_phasediagram_3d_plot_axes.set_ylabel(r"$\Delta\mu_{"+self.element_y+"}$ (eV)", fontdict=self.font)  
-		self.ternary_phasediagram_3d_plot_axes.set_zlabel(r"$\Delta\mu_{"+self.element_z+"}$ (eV)", fontdict=self.font)
+		self.chemicalpotential_phasediagram_plot_axes.set_xlabel(r"$\Delta\mu_{"+self.element_x+"}$ (eV)", fontdict=self.font)  
+		self.chemicalpotential_phasediagram_plot_axes.set_ylabel(r"$\Delta\mu_{"+self.element_y+"}$ (eV)", fontdict=self.font)  
+		self.chemicalpotential_phasediagram_plot_axes.set_zlabel(r"$\Delta\mu_{"+self.element_z+"}$ (eV)", fontdict=self.font)
 		
 		
-		self.ternary_phasediagram_3d_plot_axes.set_aspect("auto")
+		self.chemicalpotential_phasediagram_plot_axes.set_aspect("auto")
 		
-		self.ternary_phasediagram_3d_plot_axes.legend(loc='center left')
-		self.ternary_phasediagram_3d_plot_axes.legend(loc='upper center', ncol=5)
+		self.chemicalpotential_phasediagram_plot_axes.legend(loc='center left')
+		self.chemicalpotential_phasediagram_plot_axes.legend(loc='upper center', ncol=5)
 	
 	
 	
@@ -291,7 +251,7 @@ class ChemicalPotential_Ternary_PhaseDiagram3D(object):
 		
 		self.Activate_PhaseDiagram3D_Plot_Axes()
 		
-		self.ternary_phasediagram_3d_plot_canvas.draw()
+		self.chemicalpotential_phasediagram_plot_canvas.draw()
 	
 	
 	
@@ -304,16 +264,16 @@ class ChemicalPotential_Ternary_PhaseDiagram3D(object):
 	
 	def Animate_SpacePotato(self, i):
 		
-		self.ternary_phasediagram_3d_plot_axes.clear()
+		self.chemicalpotential_phasediagram_plot_axes.clear()
 		
 		self.Draw_PhaseDiagram3D()
 		
-		self.ternary_phasediagram_3d_plot_axes.view_init(elev=15, azim=i)
+		self.chemicalpotential_phasediagram_plot_axes.view_init(elev=15, azim=i)
 		
 		print(i)
 		self.spacepotato_animation_status.setValue(100./60.*i)
 		
-		return self.ternary_phasediagram_3d_plot_figure,
+		return self.chemicalpotential_phasediagram_plot_figure,
 	
 	
 	
@@ -331,7 +291,7 @@ class ChemicalPotential_Ternary_PhaseDiagram3D(object):
 		
 		self.spacepotato_animation_generator_window.show()
 		
-		anim = animation.FuncAnimation(self.ternary_phasediagram_3d_plot_figure, self.Animate_SpacePotato, frames=360, blit=True)
+		anim = animation.FuncAnimation(self.chemicalpotential_phasediagram_plot_figure, self.Animate_SpacePotato, frames=360, blit=True)
 		anim.save('rotating_Cu2HgGeTe4.gif', writer='imagemagick', fps=30)
 		
 		self.spacepotato_animation_generator_window.close()

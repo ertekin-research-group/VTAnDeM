@@ -54,7 +54,6 @@ def vtandem(import_element, import_compound, import_defects, import_dos, new, op
 	  /path/to/data/folder
 	    |-- OUTCAR (or OSZICAR)
 	    |-- CONTCAR (or POSCAR)
-	    |-- vasprun.xml
 	
 	\b
 	\b
@@ -68,8 +67,8 @@ def vtandem(import_element, import_compound, import_defects, import_dos, new, op
 	\b
 	  \path/to/data/folder
 	    |-- OUTCAR (or OSZICAR)
-		|-- CONTCAR (or POSCAR)
-		|-- vasprun.xml
+	    |-- CONTCAR (or POSCAR)
+	    |-- vasprun.xml
 	
 	\b
 	\b
@@ -135,9 +134,21 @@ __        __ ____________   ___             _______           ___      ___
 			return
 		from vtandem.dft.import_dft import Compounds_Import
 		element_import_object = Compounds_Import()
-		element_import_object.Add_Element(import_element[0], import_element[1])
+		import_element_success = element_import_object.Add_Element(import_element[0], import_element[1])
+		"""
 		element_import_object.Update_Compounds_Database()
-		print("Imported element '"+import_element[0]+"' from the folder '"+import_element[1]+"' successfully!")
+		# Check whether the new element has been imported
+		#with open("Compounds_Tracker.json", "r") as jsonfile:
+		print("Compounds_Tracker.json")
+		with open('Compounds_Tracker.json') as jsonfile:
+			data = json.load(jsonfile)
+			print(data)
+			if import_element[0] in data.keys():
+				print("Imported element '"+import_element[0]+"' from the folder '"+import_element[1]+"' successfully!")
+		"""
+		if import_element_success:
+			element_import_object.Update_Compounds_Database()
+			print("Imported element '"+import_element[0]+"' from the folder '"+import_element[1]+"' successfully!")
 	
 	# Import compound data to Compounds_Tracker.json
 	if (import_compound[0] != default_values["import_phase_stability"][0]) and (import_compound[1] != default_values["import_phase_stability"][1]):
@@ -146,9 +157,18 @@ __        __ ____________   ___             _______           ___      ___
 			return
 		from vtandem.dft.import_dft import Compounds_Import
 		compound_import_object = Compounds_Import()
-		compound_import_object.Add_Compound(import_compound[0], import_compound[1])
+		import_compound_success = compound_import_object.Add_Compound(import_compound[0], import_compound[1])
+		"""
 		compound_import_object.Update_Compounds_Database()
-		print("Imported compound '"+import_compound[0]+"' from the folder '"+import_compound[1]+"' successfully!")
+		# Check whether the new compound has been imported
+		with open("Compounds_Tracker.json") as jsonfile:
+			data = json.load(jsonfile)
+			if import_compound[0] in data.keys():
+				print("Imported compound '"+import_compound[0]+"' from the folder '"+import_compound[1]+"' successfully!")
+		"""
+		if import_compound_success:
+			compound_import_object.Update_Compounds_Database()
+			print("Imported compound '"+import_compound[0]+"' from the folder '"+import_compound[1]+"' successfully!")
 	
 	# Import defects data to Defects_Tracker.json
 	sizex = import_defects[2]

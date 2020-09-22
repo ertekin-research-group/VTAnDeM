@@ -52,17 +52,17 @@ class Compounds_Import:
 		# Check if the directory name is legitimate
 		if not os.path.isdir(directory_name):
 			print("WARNING: Cannot find directory '"+directory_name+"'. Exiting...")
-			return
+			return False
 		
 		# Check to see that the element is legitimate
 		if element_name not in self.elements:
 			print(element_name+" is not recognized as a legitimate element. Exiting...")
-			return
+			return False
 		
 		# Check if the element already exists in the database
 		if element_name in self.compounds_info["Elements"].keys():
 			print(element_name+" is already in the database. The imported data will replace the old data.")
-			return
+			pass
 		
 		# Initialize
 		element_data = {}
@@ -73,7 +73,7 @@ class Compounds_Import:
 		# Find stoichiometry of element in POSCAR/CONTCAR
 		if ("POSCAR" not in os.listdir(directory_name)) and ("CONTCAR" not in os.listdir(directory_name)):
 			print("WARNING: Cannot find structure file (neither POSCAR nor CONTCAR) of "+element_name+". Exiting...")
-			return ""
+			return False
 		try:
 			structure_file = open(directory_name+"/POSCAR").readlines()
 		except:
@@ -87,7 +87,7 @@ class Compounds_Import:
 		# Find total energy of element in OUTCAR/OSZICAR
 		if ("OUTCAR" not in os.listdir(directory_name)) and ("OSZICAR" not in os.listdir(directory_name)):
 			print("WARNING: Cannot find total energy (neither OUTCAR nor OSZICAR) of "+element_name+". Exiting...")
-			return ""
+			return False
 		try:
 			outcar_file = open(directory_name+"/OUTCAR").readlines()
 			for line in outcar_file:
@@ -112,6 +112,8 @@ class Compounds_Import:
 		
 		# Store data
 		self.compounds_info["Elements"][element_name] = element_data
+		
+		return True
 	
 	
 	####################################################################################################################
@@ -123,16 +125,17 @@ class Compounds_Import:
 		# Check if the directory name is legitimate
 		if not os.path.isdir(directory_name):
 			print("WARNING: Cannot find directory '"+directory_name+"'. Exiting...")
-			return
+			return False
 		
 		# Check if the compound is actually an element
 		if compound_name in self.elements:
 			print("WARNING: '"+compound_name+"' is an element, not a compound. Exiting...")
-			return
+			return False
 		
 		# Check if the compound already exists in the database
 		if compound_name in self.compounds_info["Compounds"].keys():
-			print(compound_name+" is already in the phase stability database (Compounds_Tracker.json). The imported data will replace the old data.")
+			print(compound_name+" is already in the database. The imported data will replace the old data.")
+			pass
 		
 		# Initialize
 		compound_data = {}
@@ -142,7 +145,7 @@ class Compounds_Import:
 		for element in elements_list:
 			if element not in self.elements:
 				print("'"+element+"' is not a valid element. Exiting...")
-				return ""
+				return False
 			else:
 				try:
 					number_species_in_compound = float(compound_name.split(element)[-1][:2])
@@ -161,7 +164,7 @@ class Compounds_Import:
 		# Find stoichiometry of compound listed in POSCAR/CONTCAR
 		if ("POSCAR" not in os.listdir(directory_name)) and ("CONTCAR" not in os.listdir(directory_name)):
 			print("WARNING: Cannot find structure file (neither POSCAR nor CONTCAR). Exiting...")
-			return ""
+			return False
 		try:
 			structure_file = open(directory_name+"/CONTCAR").readlines()
 		except:
@@ -184,7 +187,7 @@ class Compounds_Import:
 		# Find total energy of compound in OUTCAR/OSZICAR
 		if ("OUTCAR" not in os.listdir(directory_name)) and ("OSZICAR" not in os.listdir(directory_name)):
 			print("WARNING: Cannot find total energy (neither OUTCAR nor OSZICAR). Exiting...")
-			return ""
+			return False
 		try:
 			outcar_file = open(directory_name+"/OUTCAR").readlines()
 			for line in outcar_file:
@@ -213,7 +216,7 @@ class Compounds_Import:
 		# Find band gap and valence band maximum of compound in vasprun.xml
 		if "vasprun.xml" not in os.listdir(directory_name):
 			print("WARNING: Cannot find band gap nor valence band maximum (vasprun.xml file). Exiting...")
-			return ""
+			return False
 		vasprun = Vasprun(directory_name+"/vasprun.xml")
 		(bandgap, cbm, vbm, is_direct) = vasprun.eigenvalue_band_properties
 		compound_data["band_gap"] = bandgap
@@ -221,6 +224,8 @@ class Compounds_Import:
 		
 		# Store data
 		self.compounds_info["Compounds"][compound_name] = compound_data
+		
+		return True
 	
 	
 	####################################################################################################################
@@ -233,8 +238,14 @@ class Compounds_Import:
 			copyfile("Compounds_Tracker.json", ".vtandem/Compounds_Tracker_Backup.json")
 		except:
 			pass
+		
+		"""
 		with open("Compounds_Tracker.json", "w") as jsonfile:
 			json.dump(self.compounds_info, jsonfile, indent=4, sort_keys=True)
+		"""
+		jsonfile = open("Compounds_Tracker.json", "w")
+		json.dump(self.compounds_info, jsonfile, indent=4, sort_keys=True)
+		jsonfile.close()
 
 
 

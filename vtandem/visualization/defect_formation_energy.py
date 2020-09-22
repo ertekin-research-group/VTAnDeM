@@ -42,28 +42,33 @@ def Calculate_ExtrinsicDefectFormationEnthalpies(	defects_data, \
 													main_compound_total_energy, \
 													fermi_energy_array, \
 													mu_elements, \
-													extrinsic_defect, \
-													extrinsic_defect_mu0, \
-													extrinsic_defect_deltamu	):
+													extrinsic_defects, \
+													dopant_mu0, \
+													dopant_deltamu	):
 	
 	# Check that the extrinsic defect name truly represents a defect
-	if ("_" not in extrinsic_defect) and (extrinsic_defect.split("_")[-1] not in mu_elements.keys()):
-		return
+	for extrinsic_defect in extrinsic_defects:
+		if ("_" not in extrinsic_defect) and (extrinsic_defect.split("_")[-1] not in mu_elements.keys()):
+			return
 	
 	# Initialize storage for all charges of the extrinsic defect
 	extrinsic_defects_enthalpy_data = {}
-	extrinsic_defects_enthalpy_data[extrinsic_defect] = {}
 	
-	# Loop through charge states of extrinsic defect
-	for charge in defects_data[extrinsic_defect]["charge"].keys():
-		defect_formation_enthalpy = defects_data[extrinsic_defect]["charge"][charge]["Energy"] \
-									- defects_data["supercellsize"] * main_compound_total_energy \
-									- (extrinsic_defect_mu0 + extrinsic_defect_deltamu) \
-									+ float(charge) * fermi_energy_array \
-									+ defects_data[extrinsic_defect]["charge"][charge]["ECorr"]
-		for element in mu_elements.keys():
-			defect_formation_enthalpy -= defects_data[extrinsic_defect]["n_"+element] * ( mu_elements[element]["mu0"] + mu_elements[element]["deltamu"] )
-		extrinsic_defects_enthalpy_data[extrinsic_defect][charge] = defect_formation_enthalpy
+	for extrinsic_defect in extrinsic_defects:
+		
+		extrinsic_defects_enthalpy_data[extrinsic_defect] = {}
+		
+		# Loop through charge states of extrinsic defect
+		for charge in defects_data[extrinsic_defect]["charge"].keys():
+			defect_formation_enthalpy = defects_data[extrinsic_defect]["charge"][charge]["Energy"] \
+										- defects_data["supercellsize"] * main_compound_total_energy \
+										- (extrinsic_defect_mu0 + extrinsic_defect_deltamu) \
+										+ float(charge) * fermi_energy_array \
+										+ defects_data[extrinsic_defect]["charge"][charge]["ECorr"]
+			for element in mu_elements.keys():
+				# We subtract, since "defects_data[extrinsic_defect]["n_"+element]" is negative
+				defect_formation_enthalpy -= defects_data[extrinsic_defect]["n_"+element] * ( mu_elements[element]["mu0"] + mu_elements[element]["deltamu"] )
+			extrinsic_defects_enthalpy_data[extrinsic_defect][charge] = defect_formation_enthalpy
 	
 	return extrinsic_defects_enthalpy_data
 

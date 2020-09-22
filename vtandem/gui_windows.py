@@ -30,11 +30,12 @@ from vtandem.dft.obtain_dft import *
 from vtandem.visualization.ternary.tab_ternary_phasediagram_defectsdiagram_carrierconcentration import Tab_Ternary_PhaseDiagram_DefectsDiagram_CarrierConcentration
 from vtandem.visualization.ternary.tab_ternary_phasediagram3d import Tab_Ternary_PhaseDiagram3D
 from vtandem.visualization.ternary.tab_ternary_phasediagram_composition import Tab_Ternary_Compositional_PhaseDiagram
+from vtandem.visualization.ternary.tab_ternary_dopants import Tab_Ternary_Dopants
 
 # Quaternary scripts
 from vtandem.visualization.quaternary.tab_quaternary_phasediagram_defectsdiagram_carrierconcentration import Tab_PhaseDiagram_DefectsDiagram_CarrierConcentration
 from vtandem.visualization.quaternary.tab_quaternary_phasediagram3d import Tab_PhaseDiagram3D
-from vtandem.visualization.quaternary.tab_quaternary_phasediagram3d_composition import Tab_Compositional_PhaseDiagram3D
+from vtandem.visualization.quaternary.tab_quaternary_phasediagram_composition import Tab_Quaternary_Compositional_PhaseDiagram3D
 
 # Binary scripts
 from vtandem.visualization.binary.tab_binary_defectsdiagram_carrierconcentration import Tab_Binary_DefectsDiagram_CarrierConcentration
@@ -783,7 +784,7 @@ class Quaternary_Main_VTAnDeM_Window(QMainWindow):
 		
 		self.Tab1_PhasesDefectsCarriers_Object = Tab_PhaseDiagram_DefectsDiagram_CarrierConcentration(self, main_compound = main_compound, first_element = first_element, second_element = second_element, third_element = third_element, fourth_element = fourth_element, compounds_info = self.compounds_info, defects_data = self.defects_data, dos_data = self.dos_data, show_defects_diagram = show_defects_diagram, show_carrier_concentration = show_carrier_concentration)
 		self.Tab2_PhaseDiagram3D_Object = Tab_PhaseDiagram3D(self, main_compound = main_compound, first_element = first_element, second_element = second_element, third_element = third_element, fourth_element = fourth_element, compounds_info = self.compounds_info)
-		self.Tab3_PhaseDiagram3D_Object = Tab_Compositional_PhaseDiagram3D(self, main_compound = main_compound, first_element = first_element, second_element = second_element, third_element = third_element, fourth_element = fourth_element, compounds_info = self.compounds_info)
+		self.Tab3_PhaseDiagram3D_Object = Tab_Quaternary_Compositional_PhaseDiagram3D(main_compound = main_compound, first_element = first_element, second_element = second_element, third_element = third_element, fourth_element = fourth_element, compounds_info = self.compounds_info, defects_data = self.defects_data, show_defects_diagram = show_defects_diagram)
 		
 		
 		
@@ -903,10 +904,12 @@ class Ternary_Main_VTAnDeM_Window(QMainWindow):
 		self.dos_data = Obtain_DOS_Data()
 		
 		
-		
-		self.Tab1_PhasesDefectsCarriers_Object = Tab_Ternary_PhaseDiagram_DefectsDiagram_CarrierConcentration(self, main_compound = main_compound, first_element = first_element, second_element = second_element, third_element = third_element, compounds_info = self.compounds_info, defects_data = self.defects_data, dos_data = self.dos_data, show_defects_diagram = show_defects_diagram, show_carrier_concentration = show_carrier_concentration)
+		self.Tab1_PhasesDefectsCarriers_Object = Tab_Ternary_PhaseDiagram_DefectsDiagram_CarrierConcentration(main_compound = main_compound, first_element = first_element, second_element = second_element, third_element = third_element, compounds_info = self.compounds_info, defects_data = self.defects_data, dos_data = self.dos_data, show_defects_diagram = show_defects_diagram, show_carrier_concentration = show_carrier_concentration)
 		self.Tab2_PhaseDiagram3D_Object = Tab_Ternary_PhaseDiagram3D(self, main_compound = main_compound, first_element = first_element, second_element = second_element, third_element = third_element, compounds_info = self.compounds_info)
-		self.Tab3_PhaseDiagram_Object = Tab_Ternary_Compositional_PhaseDiagram(self, main_compound = main_compound, first_element = first_element, second_element = second_element, third_element = third_element, compounds_info = self.compounds_info)
+		self.Tab3_PhaseDiagram_Object = Tab_Ternary_Compositional_PhaseDiagram(main_compound = main_compound, first_element = first_element, second_element = second_element, third_element = third_element, compounds_info = self.compounds_info, defects_data = self.defects_data, show_defects_diagram = show_defects_diagram)
+		
+		if show_defects_diagram:
+			self.Tab4_Ternary_Dopants = Tab_Ternary_Dopants(main_compound = main_compound, first_element = first_element, second_element = second_element, third_element = third_element, compounds_info = self.compounds_info, defects_data = self.defects_data)
 		
 		
 		
@@ -932,6 +935,8 @@ class Ternary_Main_VTAnDeM_Window(QMainWindow):
 		self.plot_tabs_widget.addTab(self.Tab2_PhaseDiagram3D_Object.tab2, "Phase Diagram, Chemical Potential Space")
 		self.plot_tabs_widget.addTab(self.Tab3_PhaseDiagram_Object.tab3, "Phase Diagram, Composition Space")
 		
+		if show_defects_diagram:
+			self.plot_tabs_widget.addTab(self.Tab4_Ternary_Dopants.tab4, "Dopants")
 		
 		
 		self.widgets_grid.addWidget(self.plot_tabs_widget)

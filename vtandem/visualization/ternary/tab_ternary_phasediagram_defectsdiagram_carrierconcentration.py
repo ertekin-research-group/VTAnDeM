@@ -14,10 +14,9 @@ from vtandem.visualization.ternary.ternary_scripts.plot_ternary_defects_diagram 
 from vtandem.visualization.ternary.ternary_scripts.plot_ternary_carrier_concentration import Ternary_Carrier_Concentration
 
 
-
 class Tab_Ternary_PhaseDiagram_DefectsDiagram_CarrierConcentration(QWidget):
 	
-	def __init__(self, parent=None, main_compound=None, first_element=None, second_element=None, third_element=None, compounds_info=None, defects_data=None, dos_data=None, show_defects_diagram = True, show_carrier_concentration = True):
+	def __init__(self, main_compound=None, first_element=None, second_element=None, third_element=None, compounds_info=None, defects_data=None, dos_data=None, show_defects_diagram = True, show_carrier_concentration = True):
 		
 		QWidget.__init__(self)
 		
@@ -60,9 +59,10 @@ class Tab_Ternary_PhaseDiagram_DefectsDiagram_CarrierConcentration(QWidget):
 		self.deltamu_values[third_element] = self.main_compound_enthalpy / self.main_compound_number_third_specie
 		
 		# Extrinsic dopant
-		self.extrinsic_defect = "None"
-		self.extrinsic_defect_mu0 = 0.0
-		self.extrinsic_defect_deltamu = 0.0
+		self.dopant = "None"
+		self.dopant_mu0 = 0.0
+		self.dopant_deltamu = 0.0
+		self.extrinsic_defects = []
 		
 		
 		###############################################################################################
@@ -142,8 +142,8 @@ class Tab_Ternary_PhaseDiagram_DefectsDiagram_CarrierConcentration(QWidget):
 			self.tab1_defectsdiagram_widget_layout = QVBoxLayout(self.tab1_defectsdiagram_widget)	# Again, the above mentioned widgets will be stacked vertically.
 			
 			# Set up defects diagram object
-			self.DefectsDiagram = Ternary_Defects_Diagram(self, main_compound = main_compound, first_element = first_element, second_element = second_element, third_element = third_element)
-			self.DefectsDiagram.ternary_defects_data = self.defects_data[self.main_compound]
+			self.DefectsDiagram = Ternary_Defects_Diagram(main_compound = main_compound, first_element = first_element, second_element = second_element, third_element = third_element)
+			self.DefectsDiagram.defects_data = self.defects_data[self.main_compound]
 			self.DefectsDiagram.main_compound_number_first_specie = self.main_compound_number_first_specie
 			self.DefectsDiagram.main_compound_number_second_specie = self.main_compound_number_second_specie
 			self.DefectsDiagram.main_compound_number_third_specie = self.main_compound_number_third_specie
@@ -160,7 +160,7 @@ class Tab_Ternary_PhaseDiagram_DefectsDiagram_CarrierConcentration(QWidget):
 			self.DefectsDiagram.Activate_DefectsDiagram_Plot_Axes()
 			
 			# Defects diagram plot
-			self.defects_diagram_plot = self.DefectsDiagram.ternary_defects_diagram_plot_canvas
+			self.defects_diagram_plot = self.DefectsDiagram.defects_diagram_plot_canvas
 			self.tab1_defectsdiagram_widget_layout.addWidget(self.defects_diagram_plot)
 			
 			# Y-axis limits for defects diagram
@@ -184,33 +184,44 @@ class Tab_Ternary_PhaseDiagram_DefectsDiagram_CarrierConcentration(QWidget):
 			
 			
 			# Extrinsic defect properties
-			self.extrinsic_defect_properties = QWidget()
-			self.extrinsic_defect_properties_layout = QHBoxLayout(self.extrinsic_defect_properties)
+			self.dopant_properties_widget = QWidget()
+			self.dopant_properties_widget_layout = QHBoxLayout(self.dopant_properties_widget)
 			
 			# Extrinsic defect chemical potential
-			self.extrinsic_defect_chemical_potential_label = QLabel(u"\u0394"+"\u03BC"+"<sub>x</sub>")
-			self.extrinsic_defect_chemical_potential_label.setAlignment(Qt.AlignCenter)
-			self.extrinsic_defect_properties_layout.addWidget(self.extrinsic_defect_chemical_potential_label)
-			self.extrinsic_defect_chemical_potential_deltamu = QLineEdit("-0.0000")
-			self.extrinsic_defect_chemical_potential_deltamu.setMaxLength(7)
-			self.extrinsic_defect_chemical_potential_deltamu.editingFinished.connect(self.Update_ExtrinsicDefect_DeltaMu)
-			self.extrinsic_defect_properties_layout.addWidget(self.extrinsic_defect_chemical_potential_deltamu)
+			self.dopant_chemical_potential_label = QLabel(u"\u0394"+"\u03BC"+"<sub>x</sub>")
+			self.dopant_chemical_potential_label.setAlignment(Qt.AlignCenter)
+			self.dopant_properties_widget_layout.addWidget(self.dopant_chemical_potential_label)
+			self.dopant_chemical_potential_deltamu = QLineEdit("-0.0000")
+			self.dopant_chemical_potential_deltamu.setMaxLength(7)
+			self.dopant_chemical_potential_deltamu.editingFinished.connect(self.Update_ExtrinsicDefect_DeltaMu)
+			self.dopant_chemical_potential_deltamu.setEnabled(False)
+			self.dopant_properties_widget_layout.addWidget(self.dopant_chemical_potential_deltamu)
 			
 			# Extrinsic defect selection box
-			self.extrinsic_defect_selection_box = QComboBox()
-			self.extrinsic_defect_selection_box.addItem("None")
+			self.dopant_selection_box = QComboBox()
+			self.dopant_selection_box.setEnabled(False)
+			self.dopant_selection_box.addItem("None")
 			for defect in self.defects_data[self.main_compound].keys():
 				if "_" not in defect:
 					continue
 				if self.defects_data[self.main_compound][defect]["Extrinsic"] == "Yes":
-					#self.extrinsic_dopant_selection_box.addItem(u" "+defect.split("_")[0]+"<sub>"+defect.split("_")[-1]+"</sub>")
-					#self.extrinsic_dopant_selection_box.addItem(u"\u0394\u03BC"+"<sub>a</sub>"+"<sub>a</sub>")
-					#self.extrinsic_dopant_selection_box.addItem(r""+defect.split("_")[0]+"$_{"+defect.split("_")[-1]+"}$")
-					#self.extrinsic_dopant_selection_box.addItem(defect.split("_")[0]+'\u2083'+defect.split("_")[-1])
-					self.extrinsic_defect_selection_box.addItem(defect)
-			self.extrinsic_defect_selection_box.setCurrentIndex(0)
-			self.extrinsic_defect_selection_box.activated.connect(self.Update_ExtrinsicDefect)
-			self.extrinsic_defect_properties_layout.addWidget(self.extrinsic_defect_selection_box)
+					### Herein lies the graveyard of various tricks I tried to implement subscripts in QComboBox, and I stand
+					###		before you to tell you that: it cannot be done. It's hopeless, trying to write subscripts in QComboBox,
+					###		for some reason. For this unknown reason, you (the programmer or future Michael Toriyama) should not
+					###		waste any more time with the unforgiving fact that neither unicode nor latex will show up properly
+					###		as a text on QComboBox. Do not waste any more of your time trying... Please and thank you.
+					#self.extrinsic_defect_selection_box.addItem(u" "+defect.split("_")[0]+"<sub>"+defect.split("_")[-1]+"</sub>")
+					#self.extrinsic_defect_selection_box.addItem(u""+defect.split("_")[0]+"<sub>"+defect.split("_")[-1]+"</sub>")
+					#self.extrinsic_defect_selection_box.addItem(u""+defect.split("_")[0]+"<sub>"+defect.split("_")[-1]+"</sub>")
+					#self.extrinsic_defect_selection_box.addItem(defect.split("_")[0]+"$_{"+defect.split("_")[-1]+"}$")
+					#self.extrinsic_defect_selection_box.addItem(defect.split("_")[0]+'\u2083'+defect.split("_")[-1])
+					### LOL I don't even need the ones above, I'll just add the names of dopants available in the database.
+					dopant = defect.split("_")[0]
+					if dopant not in [self.dopant_selection_box.itemText(i) for i in range(self.dopant_selection_box.count())]:
+						self.dopant_selection_box.addItem(dopant)
+			self.dopant_selection_box.setCurrentIndex(0)
+			self.dopant_selection_box.activated.connect(self.Update_ExtrinsicDefect)
+			self.dopant_properties_widget_layout.addWidget(self.dopant_selection_box)
 			
 			
 			if self.show_carrier_concentration:
@@ -223,19 +234,13 @@ class Tab_Ternary_PhaseDiagram_DefectsDiagram_CarrierConcentration(QWidget):
 				self.defects_synthesis_temperature_layout.addWidget(self.defects_synthesis_temperature_label)
 				self.defects_synthesis_temperature_box = QLineEdit("")
 				self.defects_synthesis_temperature_box.editingFinished.connect(self.Update_SynthesisTemperature)
+				self.defects_synthesis_temperature_box.setEnabled(False)
 				self.defects_synthesis_temperature_layout.addWidget(self.defects_synthesis_temperature_box)
-				self.extrinsic_defect_properties_layout.addWidget(self.defects_synthesis_temperature)
+				self.dopant_properties_widget_layout.addWidget(self.defects_synthesis_temperature)
 			
 			
-			self.tab1_defectsdiagram_widget_layout.addWidget(self.extrinsic_defect_properties)
+			self.tab1_defectsdiagram_widget_layout.addWidget(self.dopant_properties_widget)
 			
-			
-			
-			
-			# (WIDGET) Button to generate defects diagram
-			self.generate_defects_diagram_plot_button_widget = QPushButton("Generate Defects Diagram")
-			self.generate_defects_diagram_plot_button_widget.clicked[bool].connect(self.Generate_DefectsDiagram_Plot_Function)
-			self.tab1_defectsdiagram_widget_layout.addWidget(self.generate_defects_diagram_plot_button_widget)
 			
 			# (WIDGET) Save defects diagram as figure
 			self.defects_diagram_savefigure_button = QPushButton("Save Defects Diagram Figure")
@@ -264,8 +269,8 @@ class Tab_Ternary_PhaseDiagram_DefectsDiagram_CarrierConcentration(QWidget):
 			
 			# Set up carrier concentration plot object
 			self.CarrierConcentration = Ternary_Carrier_Concentration(self, main_compound = main_compound, first_element = first_element, second_element = second_element, third_element = third_element)
-			self.CarrierConcentration.ternary_defects_data = self.defects_data[self.main_compound]
-			self.CarrierConcentration.ternary_dos_data = self.dos_data[self.main_compound]
+			self.CarrierConcentration.defects_data = self.defects_data[self.main_compound]
+			self.CarrierConcentration.dos_data = self.dos_data[self.main_compound]
 			self.CarrierConcentration.main_compound_number_first_specie = self.main_compound_number_first_specie
 			self.CarrierConcentration.main_compound_number_second_specie = self.main_compound_number_second_specie
 			self.CarrierConcentration.main_compound_number_third_specie = self.main_compound_number_third_specie
@@ -322,15 +327,8 @@ class Tab_Ternary_PhaseDiagram_DefectsDiagram_CarrierConcentration(QWidget):
 			self.tab1_carrierconcentration_widget_layout.addWidget(self.carrierconcentration_viewport)
 			
 			
-			
 			self.Activate_Equilibrium_Fermi_Energy_Settings()
 			
-			
-			
-			# (WIDGET) Button to generate carrier concentration plot
-			self.generate_carrier_concentration_plot_button_widget = QPushButton("Generate Carrier Concentration")
-			self.generate_carrier_concentration_plot_button_widget.clicked[bool].connect(self.Generate_CarrierConcentration_Plot_Function)
-			self.tab1_carrierconcentration_widget_layout.addWidget(self.generate_carrier_concentration_plot_button_widget)
 			
 			# (WIDGET) Save carrier concentration plot as figure
 			self.carrier_concentration_savefigure_button = QPushButton("Save Carrier Concentration Plot")
@@ -527,7 +525,7 @@ class Tab_Ternary_PhaseDiagram_DefectsDiagram_CarrierConcentration(QWidget):
 		self.equilibrium_fermi_energy_widget_layout.addWidget(equilibrium_fermi_energy_label)
 		
 		# Display for equilibrium Fermi energy
-		self.equilibrium_fermi_energy_display = QLineEdit()
+		self.equilibrium_fermi_energy_display = QLineEdit("0.00000")
 		self.equilibrium_fermi_energy_display.setMaxLength(7)
 		self.equilibrium_fermi_energy_display.setEnabled(False)
 		self.equilibrium_fermi_energy_display.setStyleSheet("""QLineEdit { background-color: white; color: black }""")
@@ -554,7 +552,6 @@ class Tab_Ternary_PhaseDiagram_DefectsDiagram_CarrierConcentration(QWidget):
 		intrinsic_equilibrium_fermi_energy = self.CarrierConcentration.intrinsic_equilibrium_fermi_energy[temperature]
 		total_equilibrium_fermi_energy = self.CarrierConcentration.total_equilibrium_fermi_energy[temperature]
 		
-		#self.equilibrium_fermi_energy_display.setText(str(round(total_equilibrium_fermi_energy, 3)))
 		self.equilibrium_fermi_energy_display.setText(str(total_equilibrium_fermi_energy))
 		
 		if (str(total_equilibrium_fermi_energy) == "< EVBM") or (str(total_equilibrium_fermi_energy) == "> ECBM"):
@@ -633,7 +630,7 @@ class Tab_Ternary_PhaseDiagram_DefectsDiagram_CarrierConcentration(QWidget):
 		self.PhaseDiagram.Update_PhaseDiagram_Plot_Axes()
 		
 		# Reset clicked point
-		self.pressed_point_plot, = self.PhaseDiagram.ternary_phase_diagram_plot_drawing.plot([], [], color=self.pressed_point_desc['color'], marker=self.pressed_point_desc['marker'])
+		self.pressed_point_plot, = self.PhaseDiagram.ternary_phase_diagram_plot_drawing.plot([0.0], [0.0], color=self.pressed_point_desc['color'], marker=self.pressed_point_desc['marker'])
 		
 		# Plot the phase stability diagram of the ternary compound using the new settings
 		self.PhaseDiagram.Plot_Ternary_PhaseDiagram()
@@ -641,6 +638,7 @@ class Tab_Ternary_PhaseDiagram_DefectsDiagram_CarrierConcentration(QWidget):
 		
 		if self.show_defects_diagram:
 			
+			"""
 			# Update global variables in defects diagram object
 			self.DefectsDiagram.first_element = self.first_element
 			self.DefectsDiagram.second_element = self.second_element
@@ -653,12 +651,19 @@ class Tab_Ternary_PhaseDiagram_DefectsDiagram_CarrierConcentration(QWidget):
 			self.DefectsDiagram.mu_elements[self.third_element]["deltamu"] = self.deltamu_values[self.third_element]
 			
 			# Reset defects diagram
-			self.DefectsDiagram.ternary_defects_diagram_plot_drawing.remove()
-			self.DefectsDiagram.ternary_defects_diagram_plot_drawing = self.DefectsDiagram.ternary_defects_diagram_plot_figure.add_subplot(111)
+			self.DefectsDiagram.defects_diagram_plot_drawing.remove()
+			self.DefectsDiagram.defects_diagram_plot_drawing = self.DefectsDiagram.defects_diagram_plot_figure.add_subplot(111)
 			self.DefectsDiagram.Activate_DefectsDiagram_Plot_Axes()
-			self.DefectsDiagram.ternary_defects_diagram_plot_canvas.draw()
+			self.DefectsDiagram.defects_diagram_plot_canvas.draw()
+			"""
+			self.dopant_selection_box.setEnabled(True)
+			self.defects_synthesis_temperature_box.setEnabled(True)
+			
+			self.Generate_DefectsDiagram_Plot_Function()
 		
 		
+		
+		"""
 		if self.show_carrier_concentration:
 			
 			# Update global variables in carrier concentration object
@@ -685,6 +690,7 @@ class Tab_Ternary_PhaseDiagram_DefectsDiagram_CarrierConcentration(QWidget):
 			self.CarrierConcentration.carrier_concentration_plot_drawing = self.CarrierConcentration.carrier_concentration_plot_figure.add_subplot(111)
 			self.CarrierConcentration.Activate_CarrierConcentration_Plot_Axes()
 			self.CarrierConcentration.carrier_concentration_plot_canvas.draw()
+		"""
 	
 	
 	
@@ -693,7 +699,8 @@ class Tab_Ternary_PhaseDiagram_DefectsDiagram_CarrierConcentration(QWidget):
 	################################# Generate Defects Diagram ####################################
 	###############################################################################################
 	
-	def Generate_DefectsDiagram_Plot_Function(self, event):
+	#def Generate_DefectsDiagram_Plot_Function(self, event):
+	def Generate_DefectsDiagram_Plot_Function(self):
 		
 		# This function specifies what happens when the user clicks the "Generate Defects Diagram" button.
 		
@@ -714,8 +721,8 @@ class Tab_Ternary_PhaseDiagram_DefectsDiagram_CarrierConcentration(QWidget):
 		self.DefectsDiagram.mu_elements[self.third_element]["deltamu"] = self.deltamu_values[self.third_element]
 		
 		# Reset defects diagram
-		self.DefectsDiagram.ternary_defects_diagram_plot_drawing.remove()
-		self.DefectsDiagram.ternary_defects_diagram_plot_drawing = self.DefectsDiagram.ternary_defects_diagram_plot_figure.add_subplot(111)
+		self.DefectsDiagram.defects_diagram_plot_drawing.remove()
+		self.DefectsDiagram.defects_diagram_plot_drawing = self.DefectsDiagram.defects_diagram_plot_figure.add_subplot(111)
 		self.DefectsDiagram.Activate_DefectsDiagram_Plot_Axes()
 		
 		# Calculate defect formation energies
@@ -725,12 +732,15 @@ class Tab_Ternary_PhaseDiagram_DefectsDiagram_CarrierConcentration(QWidget):
 		self.DefectsDiagram.intrinsic_defect_plots = {}
 		self.DefectsDiagram.extrinsic_defect_plots = {}
 		self.DefectsDiagram.Initialize_Intrinsic_DefectsDiagram_Plot()
+		if self.dopant != "None":
+			self.DefectsDiagram.Initialize_Extrinsic_DefectsDiagram_Plot()
 		
 		
 		
 		
 		if self.show_carrier_concentration:
 			
+			"""
 			# Update elements and chemical potentials
 			self.CarrierConcentration.first_element = self.first_element
 			self.CarrierConcentration.second_element = self.second_element
@@ -754,6 +764,9 @@ class Tab_Ternary_PhaseDiagram_DefectsDiagram_CarrierConcentration(QWidget):
 			
 			# Plot the equilibrium Fermi energy
 			self.Update_Equilibrium_Fermi_Energy_Temperature()
+			"""
+			
+			self.Generate_CarrierConcentration_Plot_Function()
 	
 	
 	
@@ -794,7 +807,13 @@ class Tab_Ternary_PhaseDiagram_DefectsDiagram_CarrierConcentration(QWidget):
 	def Update_ExtrinsicDefect(self):
 		
 		# Obtain selected dopant
-		self.extrinsic_defect = self.extrinsic_defect_selection_box.currentText()
+		if self.extrinsic_defect_selection_box.currentText() == "None":
+			self.extrinsic_defect = "None"
+			self.extrinsic_defect_chemical_potential_deltamu.setEnabled(False)
+		else:
+			dopant_qcombobox_text = self.extrinsic_defect_selection_box.currentText()
+			self.extrinsic_defect = dopant_qcombobox_text.split("->")[0]+"_"+dopant_qcombobox_text.split("->")[1]
+			self.extrinsic_defect_chemical_potential_deltamu.setEnabled(True)
 		
 		# Set intrinsic chemical potential mu0 of dopant
 		if self.extrinsic_defect == "None":
@@ -805,8 +824,8 @@ class Tab_Ternary_PhaseDiagram_DefectsDiagram_CarrierConcentration(QWidget):
 			self.extrinsic_defect_mu0 = self.compounds_info[self.extrinsic_defect.split("_")[0]]["mu0"]
 		
 		# Reset deltamu of dopant
-		self.extrinsic_defect_chemical_potential_deltamu.setText("-0.0000")
-		self.extrinsic_defect_deltamu = 0.0
+		self.dopant_chemical_potential_deltamu.setText("-0.0000")
+		self.dopant_deltamu = 0.0
 		
 		# Recalculate defect formation energies
 		self.DefectsDiagram.extrinsic_defect = self.extrinsic_defect
@@ -816,8 +835,8 @@ class Tab_Ternary_PhaseDiagram_DefectsDiagram_CarrierConcentration(QWidget):
 		
 		# Draw fresh defects diagram
 		self.DefectsDiagram.extrinsic_defect_plots = {}
-		self.DefectsDiagram.ternary_defects_diagram_plot_drawing.remove()
-		self.DefectsDiagram.ternary_defects_diagram_plot_drawing = self.DefectsDiagram.ternary_defects_diagram_plot_figure.add_subplot(111)
+		self.DefectsDiagram.defects_diagram_plot_drawing.remove()
+		self.DefectsDiagram.defects_diagram_plot_drawing = self.DefectsDiagram.defects_diagram_plot_figure.add_subplot(111)
 		self.DefectsDiagram.Activate_DefectsDiagram_Plot_Axes()
 		self.DefectsDiagram.Initialize_Intrinsic_DefectsDiagram_Plot()
 		if self.extrinsic_defect != "None":
@@ -885,7 +904,8 @@ class Tab_Ternary_PhaseDiagram_DefectsDiagram_CarrierConcentration(QWidget):
 	############################# Control Carrier Concentration Plot ##############################
 	###############################################################################################
 	
-	def Generate_CarrierConcentration_Plot_Function(self, event):
+	#def Generate_CarrierConcentration_Plot_Function(self, event):
+	def Generate_CarrierConcentration_Plot_Function(self):
 		
 		if len(self.elements_list) > len(set(self.elements_list)):	# Every time someone clicks the species' buttons, the self.elements list gets updated.
 																	#	The "set" function checks the self.elements list and omits any that are repeated.
@@ -1015,8 +1035,8 @@ class Tab_Ternary_PhaseDiagram_DefectsDiagram_CarrierConcentration(QWidget):
 				self.DefectsDiagram.ymin = float(self.defectsdiagram_Ymin_box.text())
 			if ytype == "YMax":
 				self.DefectsDiagram.ymax = float(self.defectsdiagram_Ymax_box.text())
-			self.DefectsDiagram.ternary_defects_diagram_plot_drawing.set_ylim(self.DefectsDiagram.ymin, self.DefectsDiagram.ymax)
-			self.DefectsDiagram.ternary_defects_diagram_plot_canvas.draw()
+			self.DefectsDiagram.defects_diagram_plot_drawing.set_ylim(self.DefectsDiagram.ymin, self.DefectsDiagram.ymax)
+			self.DefectsDiagram.defects_diagram_plot_canvas.draw()
 		
 		# Modify carrier concentration y-axis
 		elif plot_type == "CarrierConcentration":
@@ -1048,14 +1068,14 @@ class Tab_Ternary_PhaseDiagram_DefectsDiagram_CarrierConcentration(QWidget):
 				if figure_type == "Phase Diagram":
 					self.PhaseDiagram.ternary_phase_diagram_plot_figure.savefig(filename, bbox_inches='tight')
 				elif figure_type == "Defects Diagram":
-					self.DefectsDiagram.ternary_defects_diagram_plot_figure.savefig(filename, bbox_inches='tight')
+					self.DefectsDiagram.defects_diagram_plot_figure.savefig(filename, bbox_inches='tight')
 				elif figure_type == "Carrier Concentration":
 					self.CarrierConcentration.carrier_concentration_plot_figure.savefig(filename, bbox_inches='tight')
 			else:
 				if figure_type == "Phase Diagram":
 					self.PhaseDiagram.ternary_phase_diagram_plot_figure.savefig(filename+"."+extension, bbox_inches='tight')
 				elif figure_type == "Defects Diagram":
-					self.DefectsDiagram.ternary_defects_diagram_plot_figure.savefig(filename+"."+extension, bbox_inches='tight')
+					self.DefectsDiagram.defects_diagram_plot_figure.savefig(filename+"."+extension, bbox_inches='tight')
 				elif figure_type == "Carrier Concentration":
 					self.CarrierConcentration.carrier_concentration_plot_figure.savefig(filename+"."+extension, bbox_inches='tight')
 

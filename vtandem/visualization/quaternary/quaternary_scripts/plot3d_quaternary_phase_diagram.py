@@ -1,5 +1,5 @@
 
-__author__ = 'Michael_Lidia_Jiaxing_Benita_Elif'
+__author__ = 'Michael_Lidia_Jiaxing_Elif'
 __name__ = 'VTAnDeM_Visualization-Toolkit-for-Analyzing-Defects-in-Materials'
 
 
@@ -44,6 +44,8 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 
+from vtandem.visualization.compound_name import Compound_Name_Formal
+
 
 
 class ChemicalPotential_Quaternary_PhaseDiagram3D(object):
@@ -81,45 +83,14 @@ class ChemicalPotential_Quaternary_PhaseDiagram3D(object):
 		self.competing_compounds_colorwheel = {}
 		
 		# 3D quaternary phase diagram plot objects
-		self.quaternary_phasediagram_3d_plot_figure = plt.figure()
-		self.quaternary_phasediagram_3d_plot_canvas = FigureCanvas(self.quaternary_phasediagram_3d_plot_figure)
-		self.quaternary_phasediagram_3d_plot_axes = Axes3D(self.quaternary_phasediagram_3d_plot_figure)		# NOTE: Axes3D MUST be called AFTER calling FigureCanvas
-		"""
-		self.quaternary_phasediagram_3d_plot_axes = self.quaternary_phasediagram_3d_plot_figure.gca(projection = "3d")
-		self.quaternary_phasediagram_3d_plot_axes = self.quaternary_phasediagram_3d_plot_figure.add_subplot(111, projection = "3d")
-		self.quaternary_phasediagram_3d_plot_axes = Axes3D(self.quaternary_phasediagram_3d_plot_figure)
-		"""
+		self.chemicalpotential_phasediagram_plot_figure = plt.figure()
+		self.chemicalpotential_phasediagram_plot_canvas = FigureCanvas(self.chemicalpotential_phasediagram_plot_figure)
+		self.chemicalpotential_phasediagram_plot_axes = Axes3D(self.chemicalpotential_phasediagram_plot_figure)		# NOTE: Axes3D MUST be called AFTER calling FigureCanvas
+		
 		
 		self.path = None
 		
-		self.quaternary_phasediagram_3d_plot_axes.view_init(elev=15, azim=145)
-	
-	
-	
-	###############################################################################################
-	########################## Rewrite Compound Name Latex-Style ##################################
-	###############################################################################################
-	
-	def Compound_Name_Formal(self, compound_name):
-		
-		if compound_name in self.all_elements:
-			return compound_name
-		
-		# Go into the compounds_info dictionary and obtains the chemistry and stoichiometry of the compound of choice
-		compound_species_info = self.compounds_info[compound_name]
-		
-		compound_name_formal = ""
-		for species in compound_species_info["elements_list"]:				# Loop through the list of possible species that can be contained in the compound
-			if compound_species_info[species] == 0:
-				continue								# Don't add the species to the name if the compound doesn't contain the species
-			elif compound_species_info[species] == 1:
-				compound_name_formal += species			# Add the species to the name of the compound
-			elif compound_species_info[species] > 1:
-				compound_name_formal += species+"$_{"+str(int(compound_species_info[species]))+"}$"	# Add the species to the name of the compound
-				#compound_name_formal += species+"<sub>"+str(int(compound_species_info[species]))+"</sub>"	# Add the species to the name of the compound
-																											#	with a subscript for the stoichiometry
-		
-		return compound_name_formal
+		self.chemicalpotential_phasediagram_plot_axes.view_init(elev=15, azim=145)
 	
 	
 	
@@ -190,7 +161,8 @@ class ChemicalPotential_Quaternary_PhaseDiagram3D(object):
 			
 			A_matrix.append(np.array([coefficient_x, coefficient_y, coefficient_z]))
 			b_vector.append(b)
-			compounds_list.append(self.Compound_Name_Formal(competing_compound))
+			#compounds_list.append(self.Compound_Name_Formal(competing_compound))
+			compounds_list.append(competing_compound)
 		
 		return A_matrix, b_vector, compounds_list
 	
@@ -236,22 +208,22 @@ class ChemicalPotential_Quaternary_PhaseDiagram3D(object):
 			coord = [list(zip(x, y, z))]
 			
 			label = sec_phases[i]
-			polygon = Poly3DCollection(coord, alpha=0.9, label=label, closed=True)
+			polygon = Poly3DCollection(coord, alpha=0.9, label=Compound_Name_Formal(label, self.compounds_info, "latex"), closed=True)
 			polygon.set_facecolor(cmap(color_counter))
-			self.competing_compounds_colorwheel[label] = cmap(color_counter)
+			self.competing_compounds_colorwheel[Compound_Name_Formal(label, self.compounds_info, "latex")] = cmap(color_counter)
 			color_counter += 1
 			
 			polygon._facecolors2d=polygon._facecolors3d
 			polygon._edgecolors2d=polygon._edgecolors3d
 			
-			self.quaternary_phasediagram_3d_plot_axes.add_collection3d(polygon)
+			self.chemicalpotential_phasediagram_plot_axes.add_collection3d(polygon)
 			path = Line3DCollection(coord, lw=2, color='k')
-			self.quaternary_phasediagram_3d_plot_axes.add_collection3d(path)
+			self.chemicalpotential_phasediagram_plot_axes.add_collection3d(path)
 		
 		# Include competing compounds not included in phase stability bound into colorwheel
 		for competing_compound in sec_phases:
 			if competing_compound not in self.competing_compounds_colorwheel.keys():
-				self.competing_compounds_colorwheel[competing_compound] = cmap(color_counter)
+				self.competing_compounds_colorwheel[Compound_Name_Formal(competing_compound, self.compounds_info, "latex")] = cmap(color_counter)
 				color_counter += 1
 	
 	
@@ -267,19 +239,19 @@ class ChemicalPotential_Quaternary_PhaseDiagram3D(object):
 		main_compound_number_fourth_specie = self.compounds_info[self.main_compound][self.dependent_element]
 		phasediagram_endpoints = min(main_compound_enthalpy/main_compound_number_first_specie, main_compound_enthalpy/main_compound_number_second_specie, main_compound_enthalpy/main_compound_number_third_specie, main_compound_enthalpy/main_compound_number_fourth_specie)
 		
-		self.quaternary_phasediagram_3d_plot_axes.set_xlim([phasediagram_endpoints - buffer, 0 + buffer])
-		self.quaternary_phasediagram_3d_plot_axes.set_ylim([phasediagram_endpoints - buffer, 0 + buffer])
-		self.quaternary_phasediagram_3d_plot_axes.set_zlim([phasediagram_endpoints - buffer, 0 + buffer])
+		self.chemicalpotential_phasediagram_plot_axes.set_xlim([phasediagram_endpoints - buffer, 0 + buffer])
+		self.chemicalpotential_phasediagram_plot_axes.set_ylim([phasediagram_endpoints - buffer, 0 + buffer])
+		self.chemicalpotential_phasediagram_plot_axes.set_zlim([phasediagram_endpoints - buffer, 0 + buffer])
 		
-		self.quaternary_phasediagram_3d_plot_axes.set_xlabel(r"$\Delta\mu_{"+self.element_x+"}$ (eV)", fontdict=self.font)  
-		self.quaternary_phasediagram_3d_plot_axes.set_ylabel(r"$\Delta\mu_{"+self.element_y+"}$ (eV)", fontdict=self.font)  
-		self.quaternary_phasediagram_3d_plot_axes.set_zlabel(r"$\Delta\mu_{"+self.element_z+"}$ (eV)", fontdict=self.font)
+		self.chemicalpotential_phasediagram_plot_axes.set_xlabel(r"$\Delta\mu_{"+self.element_x+"}$ (eV)", fontdict=self.font)  
+		self.chemicalpotential_phasediagram_plot_axes.set_ylabel(r"$\Delta\mu_{"+self.element_y+"}$ (eV)", fontdict=self.font)  
+		self.chemicalpotential_phasediagram_plot_axes.set_zlabel(r"$\Delta\mu_{"+self.element_z+"}$ (eV)", fontdict=self.font)
 		
 		
-		self.quaternary_phasediagram_3d_plot_axes.set_aspect("auto")
+		self.chemicalpotential_phasediagram_plot_axes.set_aspect("auto")
 		
-		self.quaternary_phasediagram_3d_plot_axes.legend(loc='center left')
-		self.quaternary_phasediagram_3d_plot_axes.legend(loc='upper center', ncol=5)
+		self.chemicalpotential_phasediagram_plot_axes.legend(loc='center left')
+		self.chemicalpotential_phasediagram_plot_axes.legend(loc='upper center', ncol=5)
 	
 	
 	
@@ -293,7 +265,7 @@ class ChemicalPotential_Quaternary_PhaseDiagram3D(object):
 		
 		self.Activate_PhaseDiagram3D_Plot_Axes()
 		
-		self.quaternary_phasediagram_3d_plot_canvas.draw()
+		self.chemicalpotential_phasediagram_plot_canvas.draw()
 	
 	
 	
@@ -381,7 +353,7 @@ class ChemicalPotential_Quaternary_PhaseDiagram3D(object):
 				pass
 			
 			self.path = Line3DCollection(coord, lw=4, color='k')
-			self.quaternary_phasediagram_3d_plot_axes.add_collection3d(self.path)
+			self.chemicalpotential_phasediagram_plot_axes.add_collection3d(self.path)
 	
 	
 	
@@ -394,7 +366,7 @@ class ChemicalPotential_Quaternary_PhaseDiagram3D(object):
 		
 		self.Draw_Mu4_Outline_Region(phasediagram_projection2d.generators, phasediagram_projection2d.ininc, phasediagram_projection2d.adj)
 		
-		self.quaternary_phasediagram_3d_plot_canvas.draw()
+		self.chemicalpotential_phasediagram_plot_canvas.draw()
 	
 	
 	
@@ -403,17 +375,17 @@ class ChemicalPotential_Quaternary_PhaseDiagram3D(object):
 	
 	def Animate_SpacePotato(self, i):
 		
-		self.quaternary_phasediagram_3d_plot_axes.clear()
+		self.chemicalpotential_phasediagram_plot_axes.clear()
 		
 		self.Draw_PhaseDiagram3D()
 		self.Draw_Mu4_Outline()
 		
-		self.quaternary_phasediagram_3d_plot_axes.view_init(elev=15, azim=i)
+		self.chemicalpotential_phasediagram_plot_axes.view_init(elev=15, azim=i)
 		
 		print(i)
 		self.spacepotato_animation_status.setValue(100./60.*i)
 		
-		return self.quaternary_phasediagram_3d_plot_figure,
+		return self.chemicalpotential_phasediagram_plot_figure,
 	
 	
 	
@@ -431,7 +403,7 @@ class ChemicalPotential_Quaternary_PhaseDiagram3D(object):
 		
 		self.spacepotato_animation_generator_window.show()
 		
-		anim = animation.FuncAnimation(self.quaternary_phasediagram_3d_plot_figure, self.Animate_SpacePotato, frames=360, blit=True)
+		anim = animation.FuncAnimation(self.chemicalpotential_phasediagram_plot_figure, self.Animate_SpacePotato, frames=360, blit=True)
 		anim.save('rotating_Cu2HgGeTe4.gif', writer='imagemagick', fps=30)
 		
 		self.spacepotato_animation_generator_window.close()

@@ -3,6 +3,10 @@ __name__ = 'VTAnDeM_Visualization-Toolkit-for-Analyzing-Defects-in-Materials'
 __author__ = 'Michael_Lidia_Jiaxing_Elif'
 
 
+# Import defect formation energy diagram object
+from vtandem.visualization.defects_diagram import DefectFormationEnergy_Diagram
+
+"""
 import numpy as np
 import itertools
 import matplotlib.pyplot as plt
@@ -13,17 +17,22 @@ from labellines import labelLine, labelLines
 from vtandem.visualization.defect_formation_energy import Calculate_IntrinsicDefectFormationEnthalpies
 from vtandem.visualization.defect_formation_energy import Calculate_ExtrinsicDefectFormationEnthalpies
 from vtandem.visualization.defect_formation_energy import Find_MinimumDefectFormationEnthalpies
+"""
 
-
-class Binary_Defects_Diagram(object):
+class Binary_Defects_Diagram(DefectFormationEnergy_Diagram):
 	
 	def __init__(self, parent = None, main_compound = None, first_element = None, second_element = None):
 		
+		"""
 		# Font description for phase stability diagram plot
 		self.font = {'family': 'sans-serif',
 				'color':  'black',
 				'weight': 'normal',
 				'size': 14 }
+		"""
+		
+		# Inherit all variables (plot object, etc.) from parent object (DefectFormationEnergy_Diagram)
+		super().__init__()
 		
 		# Establish the first and second species of the binary compound.
 		# Note that this list is subject to change, depending on what the user chooses.
@@ -37,14 +46,19 @@ class Binary_Defects_Diagram(object):
 							self.second_element: {"mu0": 0.0, "deltamu": 0.0} }
 		
 		# Store all extracted DFT data
+		"""
 		self.binary_defects_data = None
+		"""
 		self.main_compound_total_energy = 0.0
 		self.first_element_mu0 = 0.0
 		self.second_element_mu0 = 0.0
+		"""
 		self.EVBM = 0.0
 		self.ECBM = 0.0
 		self.fermi_energy_array = None
+		"""
 		
+		"""
 		# Minimum and maximum y-value range
 		self.ymin = -2.0
 		self.ymax = 2.0
@@ -72,9 +86,10 @@ class Binary_Defects_Diagram(object):
 		# Equilibrium Fermi energy vertical line
 		self.equilibrium_fermi_energy_plot = None
 		self.equilibrium_fermi_energy_tick = self.binary_defects_diagram_plot_drawing.twiny()
+		"""
 	
 	
-	
+	"""
 	def Activate_DefectsDiagram_Plot_Axes(self):
 		
 		self.binary_defects_diagram_plot_drawing.set_xlim(0.0, self.ECBM-self.EVBM)
@@ -97,55 +112,10 @@ class Binary_Defects_Diagram(object):
 	
 	def Calculate_DefectFormations(self):
 		
-		"""
-		# Initialize storage for all charges of defect
-		intrinsic_defects_enthalpy_data = {}
-		extrinsic_defects_enthalpy_data = {}
-		
-		# Loop through defects in binary
-		for defect in self.binary_defects_data.keys():
-			
-			# Check that item is truly a defect
-			if "_" not in defect:
-				continue
-			
-			# Extrinsic defect
-			if self.binary_defects_data[defect]["Extrinsic"] == "Yes":
-				extrinsic_defects_enthalpy_data[defect] = []
-				for charge in self.binary_defects_data[defect]["charge"].keys():
-					defect_formation_enthalpy = self.binary_defects_data[defect]["charge"][charge]["Energy"] \
-												- self.binary_defects_data["supercellsize"] * self.main_compound_total_energy \
-												- (self.extrinsic_defect_mu0 + self.extrinsic_defect_deltamu) \
-												+ float(charge) * self.fermi_energy_array \
-												+ self.binary_defects_data[defect]["charge"][charge]["ECorr"] # Extra chemical potential contribution from dopant
-					for element in self.elements_list:
-						defect_formation_enthalpy -= self.binary_defects_data[defect]["n_"+element] * ( self.mu_elements[element]["mu0"] + self.mu_elements[element]["deltamu"] )
-					extrinsic_defects_enthalpy_data[defect].append(defect_formation_enthalpy)
-			# Intrinsic defect
-			elif self.binary_defects_data[defect]["Extrinsic"] == "No":
-				intrinsic_defects_enthalpy_data[defect] = []
-				for charge in self.binary_defects_data[defect]["charge"].keys():
-					defect_formation_enthalpy = self.binary_defects_data[defect]["charge"][charge]["Energy"] \
-												- self.binary_defects_data["supercellsize"] * self.main_compound_total_energy \
-												+ float(charge) * self.fermi_energy_array \
-												+ self.binary_defects_data[defect]["charge"][charge]["ECorr"]
-					for element in self.elements_list:
-						defect_formation_enthalpy -= self.binary_defects_data[defect]["n_"+element] * ( self.mu_elements[element]["mu0"] + self.mu_elements[element]["deltamu"] )
-					intrinsic_defects_enthalpy_data[defect].append(defect_formation_enthalpy)
-		"""
 		#intrinsic_defects_enthalpy_data, extrinsic_defects_enthalpy_data = Calculate_DefectFormationEnthalpies(self.binary_defects_data, self.main_compound_total_energy, self.fermi_energy_array, self.mu_elements, self.extrinsic_defect_mu0, self.extrinsic_defect_deltamu)
 		intrinsic_defects_enthalpy_data = Calculate_IntrinsicDefectFormationEnthalpies(self.binary_defects_data, self.main_compound_total_energy, self.fermi_energy_array, self.mu_elements)
 		self.intrinsic_defects_enthalpy_data = Find_MinimumDefectFormationEnthalpies(intrinsic_defects_enthalpy_data)
 		
-		"""
-		# Find minimum formation energy of all charges of each defect
-		for intrinsic_defect in intrinsic_defects_enthalpy_data.keys():	# Intrinsic defects
-			defect_formation_energy_minimum = np.fromiter(map(min, zip(*itertools.chain(intrinsic_defects_enthalpy_data[intrinsic_defect]))), dtype=np.float)
-			self.intrinsic_defects_enthalpy_data[intrinsic_defect] = defect_formation_energy_minimum
-		for extrinsic_defect in extrinsic_defects_enthalpy_data.keys():	# Extrinsic defects
-			defect_formation_energy_minimum = np.fromiter(map(min, zip(*itertools.chain(extrinsic_defects_enthalpy_data[extrinsic_defect]))), dtype=np.float)
-			self.extrinsic_defects_enthalpy_data[extrinsic_defect] = defect_formation_energy_minimum
-		"""
 		#self.intrinsic_defects_enthalpy_data, self.extrinsic_defects_enthalpy_data = Find_MinimumDefectFormationEnthalpies(intrinsic_defects_enthalpy_data, extrinsic_defects_enthalpy_data)
 		if self.extrinsic_defect != "None":
 			extrinsic_defects_enthalpy_data = Calculate_ExtrinsicDefectFormationEnthalpies(self.binary_defects_data, self.main_compound_total_energy, self.fermi_energy_array, self.mu_elements, self.extrinsic_defect, self.extrinsic_defect_mu0, self.extrinsic_defect_deltamu)
@@ -230,7 +200,7 @@ class Binary_Defects_Diagram(object):
 		
 		# Draw defects diagram canvas
 		self.binary_defects_diagram_plot_canvas.draw()
-
+	"""
 
 
 

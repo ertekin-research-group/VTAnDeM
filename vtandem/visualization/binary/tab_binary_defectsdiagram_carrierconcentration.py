@@ -87,7 +87,7 @@ class Tab_Binary_DefectsDiagram_CarrierConcentration(QWidget):
 			
 			# Set up defects diagram object
 			self.DefectsDiagram = Binary_Defects_Diagram(self, main_compound = main_compound, first_element = first_element, second_element = second_element)
-			self.DefectsDiagram.binary_defects_data = self.defects_data[self.main_compound]
+			self.DefectsDiagram.defects_data = self.defects_data[self.main_compound]
 			self.DefectsDiagram.main_compound_number_first_specie = self.main_compound_number_first_specie
 			self.DefectsDiagram.main_compound_number_second_specie = self.main_compound_number_second_specie
 			self.DefectsDiagram.main_compound_total_energy = self.compounds_info[main_compound]["total_energy"]
@@ -101,7 +101,7 @@ class Tab_Binary_DefectsDiagram_CarrierConcentration(QWidget):
 			self.DefectsDiagram.Activate_DefectsDiagram_Plot_Axes()
 			
 			# Defects diagram plot
-			self.defects_diagram_plot = self.DefectsDiagram.binary_defects_diagram_plot_canvas
+			self.defects_diagram_plot = self.DefectsDiagram.defects_diagram_plot_canvas
 			self.tab1_defectsdiagram_widget_layout.addWidget(self.defects_diagram_plot)
 			
 			# Y-axis limits for defects diagram
@@ -136,10 +136,9 @@ class Tab_Binary_DefectsDiagram_CarrierConcentration(QWidget):
 			
 			
 			
-			# (WIDGET) Chemical potential displays
+			# Chemical potential tuners
 			self.chemical_potential_displays = QWidget()
 			self.chemical_potential_displays_layout = QVBoxLayout(self.chemical_potential_displays)
-			
 			self.chemical_potential_first_element = QWidget()
 			self.chemical_potential_first_element_layout = QHBoxLayout(self.chemical_potential_first_element)
 			self.chemical_potential_first_element_label = QLabel(u"\u0394"+"\u03BC"+"<sub>"+self.first_element+"</sub> =")
@@ -148,7 +147,6 @@ class Tab_Binary_DefectsDiagram_CarrierConcentration(QWidget):
 			self.chemical_potential_first_element_deltamu = QLabel("-0.0000")
 			self.chemical_potential_first_element_layout.addWidget(self.chemical_potential_first_element_deltamu)
 			self.chemical_potential_displays_layout.addWidget(self.chemical_potential_first_element)
-			
 			self.chemical_potential_second_element = QWidget()
 			self.chemical_potential_second_element_layout = QHBoxLayout(self.chemical_potential_second_element)
 			self.chemical_potential_second_element_label = QLabel(u"\u0394"+"\u03BC"+"<sub>"+self.second_element+"</sub> =")
@@ -158,42 +156,32 @@ class Tab_Binary_DefectsDiagram_CarrierConcentration(QWidget):
 			self.chemical_potential_second_element_layout.addWidget(self.chemical_potential_second_element_deltamu)
 			self.chemical_potential_displays_layout.addWidget(self.chemical_potential_second_element)
 			
-			
-			
-			# (WIDGET) Chemical potential tuners
+			# Chemical potential tuners
 			self.chemical_potential_sliders = QWidget()
 			self.chemical_potential_sliders_layout = QVBoxLayout(self.chemical_potential_sliders)
-			
 			self.chemical_potential_first_element_slider = QSlider(Qt.Horizontal)
-			self.chemical_potential_first_element_slider.valueChanged.connect(lambda: self.Chemical_Potential_Slider(self.first_element, self.chemical_potential_first_element_slider))
+			self.chemical_potential_first_element_slider.setMinimum(0)
+			self.chemical_potential_first_element_slider.setMaximum(1000)
+			self.chemical_potential_first_element_slider.setValue(1000)
+			self.chemical_potential_first_element_slider.setSingleStep(1)
+			self.chemical_potential_first_element_slider.setTickInterval(1)
+			self.chemical_potential_first_element_slider.valueChanged.connect(lambda: self.Chemical_Potential_Slider(self.first_element))
 			self.chemical_potential_sliders_layout.addWidget(self.chemical_potential_first_element_slider)
-			
 			self.chemical_potential_second_element_slider = QSlider(Qt.Horizontal)
-			self.chemical_potential_second_element_slider.valueChanged.connect(lambda: self.Chemical_Potential_Slider(self.second_element, self.chemical_potential_second_element_slider))
+			self.chemical_potential_second_element_slider.setMinimum(0)
+			self.chemical_potential_second_element_slider.setMaximum(1000)
+			self.chemical_potential_second_element_slider.setValue(0)
+			self.chemical_potential_second_element_slider.setSingleStep(1)
+			self.chemical_potential_second_element_slider.setTickInterval(1)
+			self.chemical_potential_second_element_slider.valueChanged.connect(lambda: self.Chemical_Potential_Slider(self.second_element))
 			self.chemical_potential_sliders_layout.addWidget(self.chemical_potential_second_element_slider)
 			
-			
-			# (WIDGET) Chemical potentials section
+			# Chemical potentials section
 			self.chemical_potentials_section = QWidget()
 			self.chemical_potentials_section_layout = QHBoxLayout(self.chemical_potentials_section)
 			self.chemical_potentials_section_layout.addWidget(self.chemical_potential_displays)
 			self.chemical_potentials_section_layout.addWidget(self.chemical_potential_sliders)
 			self.tab1_defectsdiagram_widget_layout.addWidget(self.chemical_potentials_section)
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
 			
 			
 			
@@ -357,22 +345,60 @@ class Tab_Binary_DefectsDiagram_CarrierConcentration(QWidget):
 	################################## Chemical Potential Slider ##################################
 	###############################################################################################
 	
-	def Chemical_Potential_Slider(self, element, chemical_potential_slider):
+	def Chemical_Potential_Slider(self, element):
 		
 		# Arguments:
-		#
 		#	element:	Name of element (str)
-		# 	chemical_potential_slider: QSlider widget
-		#
-		
-		chemical_potential_value_index = chemical_potential_slider.value()
-		self.deltamu_values[element] = self.deltamu_arrays[element][chemical_potential_value_index]
 		
 		if element == self.first_element:
-			#self.deltamu_values[self.second_element] = 
-			self.chemical_potential_first_element_deltamu.setText('{:.4f}'.format(round(self.deltamu_values[element], 4)))
+			chemical_potential_first_element_index = self.chemical_potential_first_element_slider.value()
+			chemical_potential_second_element_index = 1000 - chemical_potential_first_element_index
+			self.chemical_potential_second_element_slider.setValue(chemical_potential_second_element_index)
+		
 		elif element == self.second_element:
-			self.chemical_potential_second_element_deltamu.setText('{:.4f}'.format(round(self.deltamu_values[element], 4)))
+			chemical_potential_second_element_index = self.chemical_potential_second_element_slider.value()
+			chemical_potential_first_element_index = 1000 - chemical_potential_second_element_index
+			self.chemical_potential_first_element_slider.setValue(chemical_potential_first_element_index)
+		
+		self.deltamu_values[self.first_element] = self.deltamu_arrays[self.first_element][chemical_potential_first_element_index]
+		self.deltamu_values[self.second_element] = self.deltamu_arrays[self.second_element][chemical_potential_second_element_index]
+		
+		self.chemical_potential_first_element_deltamu.setText('{:.4f}'.format(round(self.deltamu_values[self.first_element], 4)))
+		self.chemical_potential_second_element_deltamu.setText('{:.4f}'.format(round(self.deltamu_values[self.second_element], 4)))
+		
+		# Update deltamu values in DefectsDiagram object
+		self.DefectsDiagram.mu_elements[self.first_element]["deltamu"] = self.deltamu_values[self.first_element]
+		self.DefectsDiagram.mu_elements[self.second_element]["deltamu"] = self.deltamu_values[self.second_element]
+		
+		# Calculate defect formation energies
+		self.DefectsDiagram.Calculate_DefectFormations()
+		
+		# Update defects diagram
+		self.DefectsDiagram.Update_Intrinsic_DefectsDiagram_Plot()
+		
+		# Update extrinsic defect formation energies
+		if self.extrinsic_defect != "None":
+			self.DefectsDiagram.Update_Extrinsic_DefectsDiagram_Plot()
+		
+		
+		
+		if self.show_carrier_concentration:
+			
+			# Update deltamu values in CarrierConcentration object
+			self.CarrierConcentration.mu_elements[self.first_element]["deltamu"] = self.deltamu_values[self.first_element]
+			self.CarrierConcentration.mu_elements[self.second_element]["deltamu"] = self.deltamu_values[self.second_element]
+			
+			# Calculate carrier concentrations
+			if self.carrierconcentration_holes_checkbox.isChecked():
+				self.CarrierConcentration.Update_HoleConcentration_Plot()
+		
+			if self.carrierconcentration_electrons_checkbox.isChecked():
+				self.CarrierConcentration.Update_ElectronConcentration_Plot()
+			
+			# Plot the equilibrium Fermi energy
+			self.Update_Equilibrium_Fermi_Energy_Temperature()
+	
+	
 	
 	
 	
@@ -434,13 +460,10 @@ class Tab_Binary_DefectsDiagram_CarrierConcentration(QWidget):
 	
 	def Update_Equilibrium_Fermi_Energy_Temperature(self):
 		
-		#self.CarrierConcentration.Calculate_CarrierConcentration()
-		
 		temperature = float(self.temperature_selection_box.currentText())
 		intrinsic_equilibrium_fermi_energy = self.CarrierConcentration.intrinsic_equilibrium_fermi_energy[temperature]
 		total_equilibrium_fermi_energy = self.CarrierConcentration.total_equilibrium_fermi_energy[temperature]
 		
-		#self.equilibrium_fermi_energy_display.setText(str(round(total_equilibrium_fermi_energy, 3)))
 		self.equilibrium_fermi_energy_display.setText(str(total_equilibrium_fermi_energy))
 		
 		if (str(total_equilibrium_fermi_energy) == "< EVBM") or (str(total_equilibrium_fermi_energy) == "> ECBM"):
@@ -483,8 +506,8 @@ class Tab_Binary_DefectsDiagram_CarrierConcentration(QWidget):
 		self.DefectsDiagram.mu_elements[self.second_element]["deltamu"] = self.deltamu_values[self.second_element]
 		
 		# Reset defects diagram
-		self.DefectsDiagram.binary_defects_diagram_plot_drawing.remove()
-		self.DefectsDiagram.binary_defects_diagram_plot_drawing = self.DefectsDiagram.binary_defects_diagram_plot_figure.add_subplot(111)
+		self.DefectsDiagram.defects_diagram_plot_drawing.remove()
+		self.DefectsDiagram.defects_diagram_plot_drawing = self.DefectsDiagram.defects_diagram_plot_figure.add_subplot(111)
 		self.DefectsDiagram.Activate_DefectsDiagram_Plot_Axes()
 		
 		# Calculate defect formation energies
@@ -581,8 +604,8 @@ class Tab_Binary_DefectsDiagram_CarrierConcentration(QWidget):
 		
 		# Draw fresh defects diagram
 		self.DefectsDiagram.extrinsic_defect_plots = {}
-		self.DefectsDiagram.binary_defects_diagram_plot_drawing.remove()
-		self.DefectsDiagram.binary_defects_diagram_plot_drawing = self.DefectsDiagram.binary_defects_diagram_plot_figure.add_subplot(111)
+		self.DefectsDiagram.defects_diagram_plot_drawing.remove()
+		self.DefectsDiagram.defects_diagram_plot_drawing = self.DefectsDiagram.defects_diagram_plot_figure.add_subplot(111)
 		self.DefectsDiagram.Activate_DefectsDiagram_Plot_Axes()
 		self.DefectsDiagram.Initialize_Intrinsic_DefectsDiagram_Plot()
 		if self.extrinsic_defect != "None":
@@ -695,8 +718,8 @@ class Tab_Binary_DefectsDiagram_CarrierConcentration(QWidget):
 				self.DefectsDiagram.ymin = float(self.defectsdiagram_Ymin_box.text())
 			if ytype == "YMax":
 				self.DefectsDiagram.ymax = float(self.defectsdiagram_Ymax_box.text())
-			self.DefectsDiagram.binary_defects_diagram_plot_drawing.set_ylim(self.DefectsDiagram.ymin, self.DefectsDiagram.ymax)
-			self.DefectsDiagram.binary_defects_diagram_plot_canvas.draw()
+			self.DefectsDiagram.defects_diagram_plot_drawing.set_ylim(self.DefectsDiagram.ymin, self.DefectsDiagram.ymax)
+			self.DefectsDiagram.defects_diagram_plot_canvas.draw()
 		
 		# Modify carrier concentration y-axis
 		elif plot_type == "CarrierConcentration":
@@ -728,14 +751,14 @@ class Tab_Binary_DefectsDiagram_CarrierConcentration(QWidget):
 				if figure_type == "Phase Diagram":
 					self.PhaseDiagram.binary_phase_diagram_plot_figure.savefig(filename, bbox_inches='tight')
 				elif figure_type == "Defects Diagram":
-					self.DefectsDiagram.binary_defects_diagram_plot_figure.savefig(filename, bbox_inches='tight')
+					self.DefectsDiagram.defects_diagram_plot_figure.savefig(filename, bbox_inches='tight')
 				elif figure_type == "Carrier Concentration":
 					self.CarrierConcentration.carrier_concentration_plot_figure.savefig(filename, bbox_inches='tight')
 			else:
 				if figure_type == "Phase Diagram":
 					self.PhaseDiagram.binary_phase_diagram_plot_figure.savefig(filename+"."+extension, bbox_inches='tight')
 				elif figure_type == "Defects Diagram":
-					self.DefectsDiagram.binary_defects_diagram_plot_figure.savefig(filename+"."+extension, bbox_inches='tight')
+					self.DefectsDiagram.defects_diagram_plot_figure.savefig(filename+"."+extension, bbox_inches='tight')
 				elif figure_type == "Carrier Concentration":
 					self.CarrierConcentration.carrier_concentration_plot_figure.savefig(filename+"."+extension, bbox_inches='tight')
 

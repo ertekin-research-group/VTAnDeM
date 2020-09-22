@@ -1,5 +1,5 @@
 
-__author__ = 'Michael_Lidia_Jiaxing_Benita_Elif'
+__author__ = 'Michael_Lidia_Jiaxing_Elif'
 __name__ = 'VTAnDeM_Visualization-Toolkit-for-Analyzing-Defects-in-Materials'
 
 import numpy as np
@@ -17,7 +17,7 @@ from vtandem.visualization.quaternary.quaternary_scripts.plot_quaternary_carrier
 
 class Tab_PhaseDiagram_DefectsDiagram_CarrierConcentration(QWidget):
 	
-	def __init__(self, parent = None, main_compound = None, first_element = None, second_element = None, third_element = None, fourth_element = None, compounds_info = None, defects_data = None, dos_data = None, show_defects_diagram = True, show_carrier_concentration = True):
+	def __init__(self, parent=None, main_compound=None, first_element=None, second_element=None, third_element=None, fourth_element=None, compounds_info=None, defects_data=None, dos_data=None, show_defects_diagram=True, show_carrier_concentration=True):
 		
 		QWidget.__init__(self)
 		
@@ -78,14 +78,6 @@ class Tab_PhaseDiagram_DefectsDiagram_CarrierConcentration(QWidget):
 		
 		
 		
-		
-		
-		
-		
-		
-		
-		
-		
 		###############################################################################################
 		###############################################################################################
 		#################################### Initialize first tab #####################################
@@ -100,23 +92,11 @@ class Tab_PhaseDiagram_DefectsDiagram_CarrierConcentration(QWidget):
 		
 		
 		
-		
-		
-		
-		
-		
-		
-		
-		
-		
 		###############################################################################################
 		###############################################################################################
 		#################### Initialize plot objects (imported from other scripts) ####################
 		###############################################################################################
 		###############################################################################################
-		
-		
-		
 		
 		
 		# PHASE DIAGRAM
@@ -187,7 +167,7 @@ class Tab_PhaseDiagram_DefectsDiagram_CarrierConcentration(QWidget):
 			
 			# Set up defects diagram object
 			self.DefectsDiagram = Quaternary_Defects_Diagram(self, main_compound = main_compound, first_element = first_element, second_element = second_element, third_element = third_element, fourth_element = fourth_element)
-			self.DefectsDiagram.quaternary_defects_data = self.defects_data[self.main_compound]
+			self.DefectsDiagram.defects_data = self.defects_data[self.main_compound]
 			self.DefectsDiagram.main_compound_number_first_specie = self.main_compound_number_first_specie
 			self.DefectsDiagram.main_compound_number_second_specie = self.main_compound_number_second_specie
 			self.DefectsDiagram.main_compound_number_third_specie = self.main_compound_number_third_specie
@@ -207,7 +187,7 @@ class Tab_PhaseDiagram_DefectsDiagram_CarrierConcentration(QWidget):
 			self.DefectsDiagram.Activate_DefectsDiagram_Plot_Axes()
 			
 			# Defects diagram plot
-			self.defects_diagram_plot = self.DefectsDiagram.quaternary_defects_diagram_plot_canvas
+			self.defects_diagram_plot = self.DefectsDiagram.defects_diagram_plot_canvas
 			self.tab1_defectsdiagram_widget_layout.addWidget(self.defects_diagram_plot)
 			
 			# Set up defects diagram settings
@@ -282,18 +262,12 @@ class Tab_PhaseDiagram_DefectsDiagram_CarrierConcentration(QWidget):
 			
 			
 			
-			
-			
-			
-			
-			
-			
-			
-			
+			"""
 			# (WIDGET) Button to generate defects diagram
 			self.generate_defects_diagram_plot_button_widget = QPushButton("Generate Defect Diagram")
 			self.generate_defects_diagram_plot_button_widget.clicked[bool].connect(self.Generate_DefectsDiagram_Plot_Function)
 			self.tab1_defectsdiagram_widget_layout.addWidget(self.generate_defects_diagram_plot_button_widget)
+			"""
 			
 			# (WIDGET) Save defects diagram as figure
 			self.defects_diagram_savefigure_button = QPushButton("Save Defects Diagram Figure")
@@ -325,8 +299,8 @@ class Tab_PhaseDiagram_DefectsDiagram_CarrierConcentration(QWidget):
 			
 			# Set up carrier concentration plot object
 			self.CarrierConcentration = Quaternary_Carrier_Concentration(self, main_compound = main_compound, first_element = first_element, second_element = second_element, third_element = third_element, fourth_element = fourth_element)
-			self.CarrierConcentration.quaternary_defects_data = self.defects_data[self.main_compound]
-			self.CarrierConcentration.quaternary_dos_data = self.dos_data[self.main_compound]
+			self.CarrierConcentration.defects_data = self.defects_data[self.main_compound]
+			self.CarrierConcentration.dos_data = self.dos_data[self.main_compound]
 			self.CarrierConcentration.main_compound_number_first_specie = self.main_compound_number_first_specie
 			self.CarrierConcentration.main_compound_number_second_specie = self.main_compound_number_second_specie
 			self.CarrierConcentration.main_compound_number_third_specie = self.main_compound_number_third_specie
@@ -388,10 +362,12 @@ class Tab_PhaseDiagram_DefectsDiagram_CarrierConcentration(QWidget):
 			
 			self.Activate_Equilibrium_Fermi_Energy_Settings()
 			
+			"""
 			# (WIDGET) Button to generate carrier concentration plot
 			self.generate_carrier_concentration_plot_button_widget = QPushButton("Generate Carrier Concentration")
 			self.generate_carrier_concentration_plot_button_widget.clicked[bool].connect(self.Generate_CarrierConcentration_Plot_Function)
 			self.tab1_carrierconcentration_widget_layout.addWidget(self.generate_carrier_concentration_plot_button_widget)
+			"""
 			
 			# (WIDGET) Save carrier concentration plot as figure
 			self.carrier_concentration_savefigure_button = QPushButton("Save Carrier Concentration Plot")
@@ -613,7 +589,7 @@ class Tab_PhaseDiagram_DefectsDiagram_CarrierConcentration(QWidget):
 		self.fourth_element_slider_value_label.setText("{0:.4f}".format(mu4_rounded))	# Update the text display
 		
 		
-		self.PhaseDiagram.mu4 = self.deltamu_values[self.fourth_element]
+		self.PhaseDiagram.deltamu[4] = self.deltamu_values[self.fourth_element]
 		
 		
 		
@@ -782,8 +758,6 @@ class Tab_PhaseDiagram_DefectsDiagram_CarrierConcentration(QWidget):
 		self.fourth_element = str(self.mu4_species_selection_box.currentText())
 		self.elements_list = [self.first_element, self.second_element, self.third_element, self.fourth_element]
 		
-		
-		
 		# Update the number of each species in the main compound based on the change in species
 		self.main_compound_number_first_specie = self.compounds_info[self.main_compound][self.first_element]
 		self.main_compound_number_second_specie = self.compounds_info[self.main_compound][self.second_element]
@@ -829,7 +803,7 @@ class Tab_PhaseDiagram_DefectsDiagram_CarrierConcentration(QWidget):
 		self.PhaseDiagram.Update_PhaseDiagram_Plot_Axes()
 		
 		# Reset clicked point
-		self.pressed_point_plot, = self.PhaseDiagram.quaternary_phase_diagram_plot_drawing.plot([], [], color=self.pressed_point_desc['color'], marker=self.pressed_point_desc['marker'])
+		self.pressed_point_plot, = self.PhaseDiagram.quaternary_phase_diagram_plot_drawing.plot([0.0], [0.0], color=self.pressed_point_desc['color'], marker=self.pressed_point_desc['marker'])
 		
 		# Plot the phase stability diagram of the quaternary compound using the new settings
 		self.PhaseDiagram.Plot_PhaseDiagram()
@@ -837,6 +811,7 @@ class Tab_PhaseDiagram_DefectsDiagram_CarrierConcentration(QWidget):
 		
 		if self.show_defects_diagram:
 			
+			"""
 			# Update global variables in defects diagram object
 			self.DefectsDiagram.first_element = self.first_element
 			self.DefectsDiagram.second_element = self.second_element
@@ -853,14 +828,16 @@ class Tab_PhaseDiagram_DefectsDiagram_CarrierConcentration(QWidget):
 			
 			
 			# Reset defects diagram
-			self.DefectsDiagram.quaternary_defects_diagram_plot_drawing.remove()
-			self.DefectsDiagram.quaternary_defects_diagram_plot_drawing = self.DefectsDiagram.quaternary_defects_diagram_plot_figure.add_subplot(111)
+			self.DefectsDiagram.defects_diagram_plot_drawing.remove()
+			self.DefectsDiagram.defects_diagram_plot_drawing = self.DefectsDiagram.defects_diagram_plot_figure.add_subplot(111)
 			self.DefectsDiagram.Activate_DefectsDiagram_Plot_Axes()
-			self.DefectsDiagram.quaternary_defects_diagram_plot_canvas.draw()
+			self.DefectsDiagram.defects_diagram_plot_canvas.draw()
+			"""
+			self.Generate_DefectsDiagram_Plot_Function()
 		
 		
 		
-		
+		"""
 		if self.show_carrier_concentration:
 			
 			# Update global variables in carrier concentration object
@@ -893,6 +870,7 @@ class Tab_PhaseDiagram_DefectsDiagram_CarrierConcentration(QWidget):
 			self.CarrierConcentration.carrier_concentration_plot_drawing = self.CarrierConcentration.carrier_concentration_plot_figure.add_subplot(111)
 			self.CarrierConcentration.Activate_CarrierConcentration_Plot_Axes()
 			self.CarrierConcentration.carrier_concentration_plot_canvas.draw()
+		"""
 	
 	
 	
@@ -901,7 +879,8 @@ class Tab_PhaseDiagram_DefectsDiagram_CarrierConcentration(QWidget):
 	################################# Generate Defects Diagram ####################################
 	###############################################################################################
 	
-	def Generate_DefectsDiagram_Plot_Function(self, event):
+	#def Generate_DefectsDiagram_Plot_Function(self, event):
+	def Generate_DefectsDiagram_Plot_Function(self):
 		
 		if self.PhaseDiagram.main_compound_plot == None:
 			QMessageBox.about(self, "WARNING", "Generate the phase diagram first!")
@@ -928,8 +907,8 @@ class Tab_PhaseDiagram_DefectsDiagram_CarrierConcentration(QWidget):
 		self.DefectsDiagram.mu_elements[self.fourth_element]["deltamu"] = self.deltamu_values[self.fourth_element]
 		
 		# Reset defects diagram
-		self.DefectsDiagram.quaternary_defects_diagram_plot_drawing.remove()
-		self.DefectsDiagram.quaternary_defects_diagram_plot_drawing = self.DefectsDiagram.quaternary_defects_diagram_plot_figure.add_subplot(111)
+		self.DefectsDiagram.defects_diagram_plot_drawing.remove()
+		self.DefectsDiagram.defects_diagram_plot_drawing = self.DefectsDiagram.defects_diagram_plot_figure.add_subplot(111)
 		self.DefectsDiagram.Activate_DefectsDiagram_Plot_Axes()
 		
 		# Calculate defect formation energies
@@ -942,6 +921,7 @@ class Tab_PhaseDiagram_DefectsDiagram_CarrierConcentration(QWidget):
 		
 		if self.show_carrier_concentration:
 			
+			"""
 			# Update elements and chemical potentials
 			self.CarrierConcentration.first_element = self.first_element
 			self.CarrierConcentration.second_element = self.second_element
@@ -969,6 +949,9 @@ class Tab_PhaseDiagram_DefectsDiagram_CarrierConcentration(QWidget):
 			# Plot the equilibrium Fermi energy
 			if self.DefectsDiagram.intrinsic_defect_plots != {}:
 				self.Update_Equilibrium_Fermi_Energy_Temperature()
+			"""
+			
+			self.Generate_CarrierConcentration_Plot_Function()
 	
 	
 	
@@ -1033,8 +1016,8 @@ class Tab_PhaseDiagram_DefectsDiagram_CarrierConcentration(QWidget):
 		
 		# Draw fresh defects diagram
 		self.DefectsDiagram.extrinsic_defect_plots = {}
-		self.DefectsDiagram.quaternary_defects_diagram_plot_drawing.remove()
-		self.DefectsDiagram.quaternary_defects_diagram_plot_drawing = self.DefectsDiagram.quaternary_defects_diagram_plot_figure.add_subplot(111)
+		self.DefectsDiagram.defects_diagram_plot_drawing.remove()
+		self.DefectsDiagram.defects_diagram_plot_drawing = self.DefectsDiagram.defects_diagram_plot_figure.add_subplot(111)
 		self.DefectsDiagram.Activate_DefectsDiagram_Plot_Axes()
 		self.DefectsDiagram.Initialize_Intrinsic_DefectsDiagram_Plot()
 		if self.extrinsic_defect != "None":
@@ -1104,7 +1087,8 @@ class Tab_PhaseDiagram_DefectsDiagram_CarrierConcentration(QWidget):
 	############################## Control Carrier Concentration Plot #############################
 	###############################################################################################
 	
-	def Generate_CarrierConcentration_Plot_Function(self, event):
+	#def Generate_CarrierConcentration_Plot_Function(self, event):
+	def Generate_CarrierConcentration_Plot_Function(self):
 		
 		if self.PhaseDiagram.main_compound_plot == None:
 			QMessageBox.about(self, "WARNING", "Generate the phase diagram first!")
@@ -1246,8 +1230,8 @@ class Tab_PhaseDiagram_DefectsDiagram_CarrierConcentration(QWidget):
 				self.DefectsDiagram.ymin = float(self.defectsdiagram_Ymin_box.text())
 			if ytype == "YMax":
 				self.DefectsDiagram.ymax = float(self.defectsdiagram_Ymax_box.text())
-			self.DefectsDiagram.quaternary_defects_diagram_plot_drawing.set_ylim(self.DefectsDiagram.ymin, self.DefectsDiagram.ymax)
-			self.DefectsDiagram.quaternary_defects_diagram_plot_canvas.draw()
+			self.DefectsDiagram.defects_diagram_plot_drawing.set_ylim(self.DefectsDiagram.ymin, self.DefectsDiagram.ymax)
+			self.DefectsDiagram.defects_diagram_plot_canvas.draw()
 		
 		# Modify carrier concentration y-axis
 		elif plot_type == "CarrierConcentration":
@@ -1279,26 +1263,16 @@ class Tab_PhaseDiagram_DefectsDiagram_CarrierConcentration(QWidget):
 				if figure_type == "Phase Diagram":
 					self.PhaseDiagram.quaternary_phase_diagram_plot_figure.savefig(filename, bbox_inches='tight')
 				elif figure_type == "Defects Diagram":
-					self.DefectsDiagram.quaternary_defects_diagram_plot_figure.savefig(filename, bbox_inches='tight')
+					self.DefectsDiagram.defects_diagram_plot_figure.savefig(filename, bbox_inches='tight')
 				elif figure_type == "Carrier Concentration":
 					self.CarrierConcentration.carrier_concentration_plot_figure.savefig(filename, bbox_inches='tight')
-				elif figure_type == "Phase Diagram 3D":
-					self.PhaseDiagram3D.quaternary_phasediagram_3d_plot_figure.savefig(filename, bbox_inches='tight')
 			else:
 				if figure_type == "Phase Diagram":
 					self.PhaseDiagram.quaternary_phase_diagram_plot_figure.savefig(filename+"."+extension, bbox_inches='tight')
 				elif figure_type == "Defects Diagram":
-					self.DefectsDiagram.quaternary_defects_diagram_plot_figure.savefig(filename+"."+extension, bbox_inches='tight')
+					self.DefectsDiagram.defects_diagram_plot_figure.savefig(filename+"."+extension, bbox_inches='tight')
 				elif figure_type == "Carrier Concentration":
 					self.CarrierConcentration.carrier_concentration_plot_figure.savefig(filename+"."+extension, bbox_inches='tight')
-				elif figure_type == "Phase Diagram 3D":
-					self.PhaseDiagram3D.quaternary_phasediagram_3d_plot_figure.savefig(filename+"."+extension, bbox_inches='tight')
-
-
-
-
-
-
 
 
 

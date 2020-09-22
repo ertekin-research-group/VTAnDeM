@@ -360,7 +360,7 @@ def Check_Outside_BandGap( 	charge_density_array, \
 			for intrinsic_defect in intrinsic_defects_enthalpy_data.keys():
 				N = Find_SiteMultiplicity(intrinsic_defect, len(number_species), number_species, volume)
 				for charge in intrinsic_defects_enthalpy_data[intrinsic_defect].keys():
-					if synthesis_temperautre is None:
+					if synthesis_temperature is None:
 						intrinsic_defect_charge_concentration = float(charge) * N * np.exp( -intrinsic_defects_enthalpy_data[intrinsic_defect][charge] / (k * temperature) )
 					elif synthesis_temperature is not None:
 						intrinsic_defect_charge_concentration = float(charge) * N * np.exp( -intrinsic_defects_enthalpy_data[intrinsic_defect][charge] / (k * synthesis_temperature) )
