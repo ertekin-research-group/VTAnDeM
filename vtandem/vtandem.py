@@ -13,9 +13,9 @@ default_values = {
 }
 
 import_element_help = 	"Import data for an element for generating the phase stability diagram (see above [1])."
-import_compound_help = 	"Import data for a compound for generating the phase stability diagram (see above [1])."
-import_defects_help = 	"Import defects data (see above [2])."
-import_dos_help = 	"Import density of states data (see above [3])."
+import_compound_help = 	"Import data for a compound for generating the phase stability diagram (see above [2])."
+import_defects_help = 	"Import defects data (see above [3])."
+import_dos_help = 	"Import density of states data (see above [4])."
 
 @click.command()
 @click.option("--import_element", default=("None", "./"), type=(str, click.Path(exists=True)), help=import_element_help)
@@ -65,7 +65,7 @@ def vtandem(import_element, import_compound, import_defects, import_dos, new, op
 	/path/to/data/folder should have the file structure:
 	
 	\b
-	  \path/to/data/folder
+	  /path/to/data/folder
 	    |-- OUTCAR (or OSZICAR)
 	    |-- CONTCAR (or POSCAR)
 	    |-- vasprun.xml
@@ -74,9 +74,10 @@ def vtandem(import_element, import_compound, import_defects, import_dos, new, op
 	\b
 	[3] Importing Defects Information
 	When importing defects using the --import_defects option, the argument
-	<TEXT PATH> should be given in the form:
-	    'Compound_Name /path/to/data/folder'
+	<TEXT PATH INTEGER INTEGER INTEGER> should be given in the form:
+	    'Compound_Name /path/to/data/folder # # #'
 	'Compound_Name' is case-sensitive (e.g. Cu2HgGeTe4).
+	'#' refers to the supercell size in the x, y, and z directions.
 	/path/to/defects/data/folder should have the file structure:
 	
 	\b

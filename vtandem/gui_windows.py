@@ -27,18 +27,18 @@ from vtandem.dft.obtain_dft import *
 ###############################################################################################################################
 
 # Ternary scripts
-from vtandem.visualization.ternary.tab_ternary_phasediagram_defectsdiagram_carrierconcentration import Tab_Ternary_PhaseDiagram_DefectsDiagram_CarrierConcentration
-from vtandem.visualization.ternary.tab_ternary_phasediagram3d import Tab_Ternary_PhaseDiagram3D
-from vtandem.visualization.ternary.tab_ternary_phasediagram_composition import Tab_Ternary_Compositional_PhaseDiagram
-from vtandem.visualization.ternary.tab_ternary_dopants import Tab_Ternary_Dopants
+from vtandem.visualization.ternary.ternary_tabs.tab_ternary_phasediagram_defectsdiagram_carrierconcentration import Tab_Ternary_PhaseDiagram_DefectsDiagram_CarrierConcentration
+from vtandem.visualization.ternary.ternary_tabs.tab_ternary_phasediagram3d import Tab_Ternary_PhaseDiagram3D
+from vtandem.visualization.ternary.ternary_tabs.tab_ternary_phasediagram_composition import Tab_Ternary_Compositional_PhaseDiagram
+from vtandem.visualization.ternary.ternary_tabs.tab_ternary_dopants import Tab_Ternary_Dopants
 
 # Quaternary scripts
-from vtandem.visualization.quaternary.tab_quaternary_phasediagram_defectsdiagram_carrierconcentration import Tab_PhaseDiagram_DefectsDiagram_CarrierConcentration
-from vtandem.visualization.quaternary.tab_quaternary_phasediagram3d import Tab_PhaseDiagram3D
-from vtandem.visualization.quaternary.tab_quaternary_phasediagram_composition import Tab_Quaternary_Compositional_PhaseDiagram3D
+from vtandem.visualization.quaternary.quaternary_tabs.tab_quaternary_phasediagram_defectsdiagram_carrierconcentration import Tab_PhaseDiagram_DefectsDiagram_CarrierConcentration
+from vtandem.visualization.quaternary.quaternary_tabs.tab_quaternary_phasediagram3d import Tab_PhaseDiagram3D
+from vtandem.visualization.quaternary.quaternary_tabs.tab_quaternary_phasediagram_composition import Tab_Quaternary_Compositional_PhaseDiagram3D
 
 # Binary scripts
-from vtandem.visualization.binary.tab_binary_defectsdiagram_carrierconcentration import Tab_Binary_DefectsDiagram_CarrierConcentration
+from vtandem.visualization.binary.binary_tabs.tab_binary_defectsdiagram_carrierconcentration import Tab_Binary_DefectsDiagram_CarrierConcentration
 
 script_path = os.path.dirname(__file__)
 vtandem_source_path = "/".join(script_path.split("/")[:-1])

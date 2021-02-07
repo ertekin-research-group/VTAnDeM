@@ -140,7 +140,7 @@ class Compounds_Import:
 		# Initialize
 		compound_data = {}
 		
-		# Determine elements in compound from compound_name
+		# Determine number of each element in compound from compound_name
 		elements_list = [ ''.join( [letter for letter in element_segment if not letter.isdigit()] ) for element_segment in re.findall("[A-Z][^A-Z]*", compound_name) ]
 		for element in elements_list:
 			if element not in self.elements:
@@ -148,12 +148,16 @@ class Compounds_Import:
 				return False
 			else:
 				try:
-					number_species_in_compound = float(compound_name.split(element)[-1][:2])
+					number_species_in_compound = float(compound_name.split(element)[-1][:3])
 				except:
 					try:
-						number_species_in_compound = float(compound_name.split(element)[-1][:1])
+						number_species_in_compound = float(compound_name.split(element)[-1][:2])
 					except:
-						number_species_in_compound = 1.0
+						try:
+							number_species_in_compound = float(compound_name.split(element)[-1][:1])
+						except:
+							number_species_in_compound = 1.0
+							pass
 						pass
 					pass
 				compound_data[element] = number_species_in_compound
@@ -239,10 +243,6 @@ class Compounds_Import:
 		except:
 			pass
 		
-		"""
-		with open("Compounds_Tracker.json", "w") as jsonfile:
-			json.dump(self.compounds_info, jsonfile, indent=4, sort_keys=True)
-		"""
 		jsonfile = open("Compounds_Tracker.json", "w")
 		json.dump(self.compounds_info, jsonfile, indent=4, sort_keys=True)
 		jsonfile.close()
