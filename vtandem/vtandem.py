@@ -4,29 +4,32 @@ import json
 import click
 
 default_values = {
-	"import_phase_stability": 	("None", "./"), \
-	"import_defects": 			("None", "./", 0, 0, 0), \
-	"import_dos": 				("None", "./"), \
-	"new": 						False, \
-	"open":						False, \
-	"visualize": 				False
+	"import_phase_stability": 				("None", "./"), \
+	"import_defects": 						("None", "./"), \
+	"import_defect_energy_corrections":		("None", "./"), \
+	"import_dos": 							("None", "./"), \
+	"new": 									False, \
+	"open":									False, \
+	"visualize": 							False
 }
 
-import_element_help = 	"Import data for an element for generating the phase stability diagram (see above [1])."
-import_compound_help = 	"Import data for a compound for generating the phase stability diagram (see above [2])."
-import_defects_help = 	"Import defects data (see above [3])."
-import_dos_help = 	"Import density of states data (see above [4])."
+import_element_help = 						"Import data for an element for generating the phase stability diagram (see above [1])."
+import_compound_help = 						"Import data for a compound for generating the phase stability diagram (see above [2])."
+import_defects_help = 						"Import defects data (see above [3])."
+import_defect_energy_corrections_help =		"Import defect energy corrections (see above [4])."
+import_dos_help = 							"Import density of states data (see above [5])."
 
 @click.command()
-@click.option("--import_element", default=("None", "./"), type=(str, click.Path(exists=True)), help=import_element_help)
-@click.option("--import_compound", default=("None", "./"), type=(str, click.Path(exists=True)), help=import_compound_help)
-@click.option("--import_defects", default=("None", "./", 0, 0, 0), type=(str, click.Path(exists=True), int, int, int), help=import_defects_help)
-@click.option("--import_dos", default=("None", "./"), type=(str, click.Path(exists=True)), help=import_dos_help)
+@click.option("--import_element", "-e", default=default_values["import_phase_stability"], type=(str, click.Path(exists=True)), help=import_element_help)
+@click.option("--import_compound", default=default_values["import_phase_stability"], type=(str, click.Path(exists=True)), help=import_compound_help)
+@click.option("--import_defects", default=default_values["import_defects"], type=(str, click.Path(exists=True)), help=import_defects_help)
+@click.option("--import_defect_energy_corrections", default=default_values["import_defect_energy_corrections"], type=(str, click.Path(exists=True)), help=import_defect_energy_corrections_help)
+@click.option("--import_dos", default=default_values["import_dos"], type=(str, click.Path(exists=True)), help=import_dos_help)
 @click.option("--new", "-n", is_flag=True, help="Initializes a new VTAnDeM project.")
 @click.option("--open", "-o", is_flag=True, help="Open VTAnDeM import data dialog.")
 @click.option("--visualize", "-v", is_flag=True, help="Open material selection dialog.")
 
-def vtandem(import_element, import_compound, import_defects, import_dos, new, open, visualize):
+def vtandem(import_element, import_compound, import_defects, import_defect_energy_corrections, import_dos, new, open, visualize):
 	""" 
 	\b
 	======================================================================
@@ -74,14 +77,16 @@ def vtandem(import_element, import_compound, import_defects, import_dos, new, op
 	\b
 	[3] Importing Defects Information
 	When importing defects using the --import_defects option, the argument
-	<TEXT PATH INTEGER INTEGER INTEGER> should be given in the form:
-	    'Compound_Name /path/to/data/folder # # #'
+	<TEXT PATH> should be given in the form:
+	    'Compound_Name /path/to/data/folder'
 	'Compound_Name' is case-sensitive (e.g. Cu2HgGeTe4).
-	'#' refers to the supercell size in the x, y, and z directions.
 	/path/to/defects/data/folder should have the file structure:
 	
 	\b
 	  /path/to/defects/data/folder
+	    |-- Bulk
+	          |-- OUTCAR
+	          |-- POSCAR
 	    |-- Defect1
 	          |-- q0
 	              |-- OUTCAR
@@ -98,7 +103,20 @@ def vtandem(import_element, import_compound, import_defects, import_dos, new, op
 	
 	\b
 	\b
-	[4] Importing Density of States
+	[4] Importing Defect Energy Corrections
+	When import defect energy corrections, use the --import_defect_energy_corrections
+	option. The argument <TEXT PATH> should be given in the form:
+	    'Compound_Name /path/to/energy/corrections/csv'
+	'Compound_Name' is case-sensitive (e.g. Cu2HgGeTe4).
+	/path/to/energy/corrections/csv is a comma-separated values file, where
+	    each line has the form:
+	
+	\b
+	  Compound_Name, Defect, Charge, ECorr
+	
+	\b
+	\b
+	[5] Importing Density of States
 	When importing the DOS using the --import_dos option, the argument  <TEXT
 	PATH> should be in the form:
 	    'Compound_Name /path/to/DOSCAR'
@@ -172,19 +190,27 @@ __        __ ____________   ___             _______           ___      ___
 			print("Imported compound '"+import_compound[0]+"' from the folder '"+import_compound[1]+"' successfully!")
 	
 	# Import defects data to Defects_Tracker.json
-	sizex = import_defects[2]
-	sizey = import_defects[3]
-	sizez = import_defects[4]
-	supercell_size = sizex * sizey * sizez
-	if (import_defects[0] != default_values["import_defects"][0]) and (import_defects[1] != default_values["import_defects"][1]) and (supercell_size != 0):
+	if (import_defects[0] != default_values["import_defects"][0]) and (import_defects[1] != default_values["import_defects"][1]):
 		if not Check_VTAnDeM_Project():
 			print("Cannot find VTAnDeM project. Exiting...")
 			return
 		from vtandem.dft.import_dft import Defects_Import
 		defects_import_object = Defects_Import()
-		defects_import_object.Add_Defects(import_defects[0], import_defects[1], supercell_size)
+		defects_import_object.Add_Defects(import_defects[0], import_defects[1])
 		defects_import_object.Update_Defects_Database()
 		print("Imported defects of compound '"+import_defects[0]+"' from the folder '"+import_defects[1]+"' successfully!")
+	
+	# Import defect energy corrections (ECorr) to Defects_Tracker.json
+	if (import_defect_energy_corrections[0] != default_values["import_defect_energy_corrections"][0]) and (import_defect_energy_corrections[1] != default_values["import_defect_energy_corrections"][1]):
+		if not Check_VTAnDeM_Project():
+			print("Cannot find VTAnDeM project. Exiting...")
+			return
+		from vtandem.dft.import_dft import Defects_Import
+		DECs_import_object = Defects_Import()
+		DECs_import_object.Add_Energy_Corrections(import_defect_energy_corrections[0], import_defect_energy_corrections[1])
+		DECs_import_object.Update_Defects_Database()
+		print("Imported defect energy corrections of compound '"+import_defect_energy_corrections[0]+"' from the file '"+import_defect_energy_corrections[1]+"' successfully!")
+	
 	
 	# Import density of stats data to DOS_Tracker.json
 	if (import_dos[0] != default_values["import_dos"][0]) and (import_dos[1] != default_values["import_dos"][1]):

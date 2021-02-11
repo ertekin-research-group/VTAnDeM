@@ -14,6 +14,7 @@ from vtandem.visualization.quaternary.quaternary_plots.plot_composition_quaterna
 from vtandem.visualization.quaternary.quaternary_plots.plot_quaternary_defects_diagram import Plot_Quaternary_DefectsDiagram
 
 from vtandem.visualization.windows.window_phasediagram_composition import Window_Compositional_PhaseDiagram
+from vtandem.visualization.windows.window_defectsdiagram import Window_DefectsDiagram
 
 
 class Tab_Quaternary_Compositional_PhaseDiagram3D(object):
@@ -43,7 +44,6 @@ class Tab_Quaternary_Compositional_PhaseDiagram3D(object):
 		###############################################################################################
 		
 		self.Compositional_PhaseDiagram3D = Plot_Composition_Quaternary_PhaseDiagram(main_compound = self.main_compound, first_element = self.first_element, second_element = self.second_element, third_element = self.third_element, fourth_element = self.fourth_element, compounds_info = self.compounds_info)
-		self.Compositional_PhaseDiagram3D.composition_phasediagram_plot_figure.canvas.mpl_connect('button_press_event', self.Generate_DefectsDiagram_Plot_Function)
 		
 		# Defects diagram
 		if show_defects_diagram:
@@ -66,6 +66,9 @@ class Tab_Quaternary_Compositional_PhaseDiagram3D(object):
 			self.DefectsDiagram.ECBM = self.DefectsDiagram.EVBM + self.compounds_info[main_compound]["band_gap"]
 			self.DefectsDiagram.fermi_energy_array = np.linspace(self.DefectsDiagram.EVBM, self.DefectsDiagram.ECBM, 100)
 			self.DefectsDiagram.Activate_DefectsDiagram_Plot_Axes()
+			# Update defects diagram in response to clicking on phase diagram
+			self.Compositional_PhaseDiagram3D.composition_phasediagram_plot_figure.canvas.mpl_connect('button_press_event', self.Generate_DefectsDiagram_Plot_Function)
+		
 		
 		
 		
@@ -81,7 +84,8 @@ class Tab_Quaternary_Compositional_PhaseDiagram3D(object):
 		
 		# Add compositional phase diagram window widget to tab3
 		self.Compositional_PhaseDiagram_Window = Window_Compositional_PhaseDiagram(self.main_compound, self.Compositional_PhaseDiagram3D)
-		self.Compositional_PhaseDiagram_Window.compositional_phasediagram_window_layout.addWidget(self.Compositional_PhaseDiagram_Window.compound_title)
+		#self.Compositional_PhaseDiagram_Window.compositional_phasediagram_window_layout.addWidget(self.Compositional_PhaseDiagram_Window.compound_title)
+		self.Compositional_PhaseDiagram_Window.compositional_phasediagram_window_layout.addWidget(self.Compositional_PhaseDiagram_Window.composition_phase_diagram_title)
 		self.Compositional_PhaseDiagram_Window.compositional_phasediagram_window_layout.addWidget(self.Compositional_PhaseDiagram_Window.composition_phase_diagram_plot)
 		self.Compositional_PhaseDiagram_Window.compositional_phasediagram_window_layout.addWidget(self.Compositional_PhaseDiagram_Window.phasediagram_savefigure_button)
 		self.tab3_layout.addWidget(self.Compositional_PhaseDiagram_Window.compositional_phasediagram_window)
@@ -89,40 +93,8 @@ class Tab_Quaternary_Compositional_PhaseDiagram3D(object):
 		
 		# Add defect formation energy diagram window widget to tab3
 		if show_defects_diagram:
-			
-			###### Main defects diagram window widget
-			self.defectsdiagram_window = QWidget()											# One of the main sub-widgets is where the user defines the settings of the plots.
-			self.defectsdiagram_window_layout = QVBoxLayout(self.defectsdiagram_window)		# The settings should be placed on top of one another, i.e. vertically.
-			
-			# Defects diagram plot
-			self.defects_diagram_plot = self.DefectsDiagram.defects_diagram_plot_canvas
-			self.defectsdiagram_window_layout.addWidget(self.defects_diagram_plot)
-			
-			# Y-axis limits for defects diagram
-			self.defectsdiagram_viewport = QWidget()
-			self.defectsdiagram_viewport_layout = QHBoxLayout(self.defectsdiagram_viewport)
-			
-			# Y-axis limits for defects diagram
-			self.defectsdiagram_Ymin_label = QLabel(u"y"+"<sub>min</sub>")
-			self.defectsdiagram_Ymin_label.setAlignment(Qt.AlignRight)
-			self.defectsdiagram_viewport_layout.addWidget(self.defectsdiagram_Ymin_label)
-			self.defectsdiagram_Ymin_box = QLineEdit("-2.0")
-			self.defectsdiagram_Ymin_box.editingFinished.connect(lambda: self.DefectsDiagram.Update_WindowSize("YMin", self.defectsdiagram_Ymin_box))
-			self.defectsdiagram_viewport_layout.addWidget(self.defectsdiagram_Ymin_box)
-			self.defectsdiagram_Ymax_label = QLabel(u"y"+"<sub>max</sub>")
-			self.defectsdiagram_Ymax_label.setAlignment(Qt.AlignRight)
-			self.defectsdiagram_viewport_layout.addWidget(self.defectsdiagram_Ymax_label)
-			self.defectsdiagram_Ymax_box = QLineEdit("2.0")
-			self.defectsdiagram_Ymax_box.editingFinished.connect(lambda: self.DefectsDiagram.Update_WindowSize("YMax", self.defectsdiagram_Ymax_box))
-			self.defectsdiagram_viewport_layout.addWidget(self.defectsdiagram_Ymax_box)
-			self.defectsdiagram_window_layout.addWidget(self.defectsdiagram_viewport)
-			
-			# (WIDGET) Save defects diagram as figure
-			self.defects_diagram_savefigure_button = QPushButton("Save Defects Diagram Figure")
-			self.defects_diagram_savefigure_button.clicked[bool].connect(lambda: self.SaveFigure_Function())
-			self.defectsdiagram_window_layout.addWidget(self.defects_diagram_savefigure_button)
-			
-			self.tab3_layout.addWidget(self.defectsdiagram_window)
+			self.DefectsDiagram_Window = Window_DefectsDiagram(self.main_compound, self.DefectsDiagram, show_carrier_concentration=False, show_dopant=False)
+			self.tab3_layout.addWidget(self.DefectsDiagram_Window.defectsdiagram_window)
 	
 	
 	
@@ -137,7 +109,6 @@ class Tab_Quaternary_Compositional_PhaseDiagram3D(object):
 		contains, index = self.Compositional_PhaseDiagram3D.centroids_plot.contains(event)
 		if not contains:
 			return
-		
 		
 		# Update elements and chemical potentials
 		self.DefectsDiagram.mu_elements[self.first_element]["deltamu"] = self.Compositional_PhaseDiagram3D.deltamu_values[self.first_element]
@@ -157,27 +128,6 @@ class Tab_Quaternary_Compositional_PhaseDiagram3D(object):
 		self.DefectsDiagram.intrinsic_defect_plots = {}
 		self.DefectsDiagram.extrinsic_defect_plots = {}
 		self.DefectsDiagram.Initialize_Intrinsic_DefectsDiagram_Plot()
-	
-	
-	
-	
-	
-	
-	###############################################################################################
-	###################################### Save Figure ############################################
-	###############################################################################################
-	
-	def SaveFigure_Function(self):
-		
-		options = QFileDialog.Options()
-		options |= QFileDialog.DontUseNativeDialog
-		filename, extension_type = QFileDialog.getSaveFileName(filter = "Portable Network Graphics (*.png);;" \
-																+"Portable Document Format (*.pdf);;" \
-																+"Scalable Vector Graphics (*.svg);;" \
-																+"Encapsulated PostScript (*.eps)", options=options)
-		self.DefectsDiagram.SaveFigure(filename, extension_type)
-
-
 
 
 

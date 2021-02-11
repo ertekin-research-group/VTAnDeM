@@ -26,7 +26,7 @@ class Tab_PhaseDiagram3D(object):
 		self.second_element = second_element
 		self.third_element = third_element
 		self.fourth_element = fourth_element
-		self.elements_list = [self.first_element, self.second_element, self.third_element, self.fourth_element]					# Species list (order MAY change)
+		self.elements_list = [self.first_element, self.second_element, self.third_element, self.fourth_element]		# Species list (order MAY change)
 		
 		self.compounds_info = compounds_info
 		
@@ -58,6 +58,7 @@ class Tab_PhaseDiagram3D(object):
 		self.chemicalpotential_phasediagram3d_window = QWidget()															# One of the main sub-widgets is where the user defines the settings of the plots.
 		self.chemicalpotential_phasediagram3d_window_layout = QVBoxLayout(self.chemicalpotential_phasediagram3d_window)		# The settings should be placed on top of one another, i.e. vertically.
 		
+		"""
 		# (WIDGET) Title of compound
 		compound_title_formal = Compound_Name_Formal(main_compound, self.compounds_info, "unicode")		# Generate Latex-readable version of compound name
 		self.compound_title = QLabel(compound_title_formal)									# QLabel is a widget that displays text
@@ -65,18 +66,18 @@ class Tab_PhaseDiagram3D(object):
 		self.compound_title_font = QFont("sans-serif", 24, QFont.Bold) 						# Declare font
 		self.compound_title.setFont(self.compound_title_font)								# Set the font for the QLabel text
 		self.chemicalpotential_phasediagram3d_window_layout.addWidget(self.compound_title)	# Add the widget to the "main" widget grid layout
+		"""
+		# (WIDGET) Title
+		self.chemicalpotentialPD_name = QLabel("3D Phase Diagram")							# QLabel is a widget that displays text
+		self.chemicalpotentialPD_name.setAlignment(Qt.AlignCenter)								# Align the text to center
+		self.chemicalpotentialPD_name_font = QFont("sans-serif", 24, QFont.Bold) 					# Declare font
+		self.chemicalpotentialPD_name.setFont(self.chemicalpotentialPD_name_font)		# Set the font for the QLabel text
+		self.chemicalpotential_phasediagram3d_window_layout.addWidget(self.chemicalpotentialPD_name)	# Add the widget to the "main" widget grid layout
+		
 		
 		# (WIDGET) Chemical potential phase diagram plot object
 		self.chemicalpotential_phase_diagram_plot = self.PhaseDiagram3D.chemicalpotential_phasediagram_plot_canvas
 		self.chemicalpotential_phasediagram3d_window_layout.addWidget(self.chemicalpotential_phase_diagram_plot)
-		
-		
-		
-		
-		
-		
-		
-		
 		
 		
 		
@@ -124,19 +125,9 @@ class Tab_PhaseDiagram3D(object):
 		
 		
 		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
 		# (WIDGET) Save 3D phase diagram as figure
 		self.phasediagram3d_savefigure_button = QPushButton("Save 3D Phase Diagram Figure")
-		self.phasediagram3d_savefigure_button.clicked[bool].connect(lambda: self.SaveFigure("Phase Diagram 3D"))
+		self.phasediagram3d_savefigure_button.clicked[bool].connect(lambda: self.PhaseDiagram3D.SaveFigure())
 		self.chemicalpotential_phasediagram3d_window_layout.addWidget(self.phasediagram3d_savefigure_button)
 		
 		# (WIDGET) Generate a 3D rotating phase diagram animation
@@ -148,34 +139,39 @@ class Tab_PhaseDiagram3D(object):
 		self.tab2_layout.addWidget(self.chemicalpotential_phasediagram3d_window)
 		
 		
+		
+		
+		
+		
+		
+		
 		###############################################################################################
 		###################### Three Projected Chemical Potential Phase Diagrams ######################
 		###############################################################################################
 		
+		self.chemicalpotentialPD_projected_window = QWidget()
+		self.chemicalpotentialPD_projected_window_layout = QVBoxLayout(self.chemicalpotentialPD_projected_window)
+		
+		# (WIDGET) Title
+		self.chemicalpotentialPD_projected_name = QLabel("Projected Phase Diagram")							# QLabel is a widget that displays text
+		self.chemicalpotentialPD_projected_name.setAlignment(Qt.AlignCenter)								# Align the text to center
+		self.chemicalpotentialPD_projected_name_font = QFont("sans-serif", 24, QFont.Bold) 					# Declare font
+		self.chemicalpotentialPD_projected_name.setFont(self.chemicalpotentialPD_projected_name_font)		# Set the font for the QLabel text
+		self.chemicalpotentialPD_projected_window_layout.addWidget(self.chemicalpotentialPD_projected_name)	# Add the widget to the "main" widget grid layout
+		
 		# (WIDGET) Three projected chemical potential phase diagrams
 		self.phase_diagram_plot_2d_tripleview = self.PhaseDiagram2D_TripleView.tripleview_phase_diagram_plot_canvas
+		self.chemicalpotentialPD_projected_window_layout.addWidget(self.phase_diagram_plot_2d_tripleview)
 		
-		# Add the three projected chemical potential phase diagrams to tab2
-		self.tab2_layout.addWidget(self.phase_diagram_plot_2d_tripleview)
+		# Add window to tab2
+		self.tab2_layout.addWidget(self.chemicalpotentialPD_projected_window)
+		
 		
 		
 		self.Generate_PhaseDiagram3D_Function()
 	
 	
 	
-	
-	"""
-	def Update_Species(self, species_number):
-		if species_number == 1:
-			self.first_element = str(self.first_element_selection_box.currentText())
-		elif species_number == 2:
-			self.second_element = str(self.second_element_selection_box.currentText())
-		elif species_number == 3:
-			self.third_element = str(self.third_element_selection_box.currentText())
-		elif species_number == 4:
-			self.fourth_element = str(self.fourth_element_selection_box.currentText())
-		self.elements_list = [self.first_element, self.second_element, self.third_element, self.fourth_element]
-	"""
 	def Update_Fourth_Species(self):
 		
 		# Change order of elements

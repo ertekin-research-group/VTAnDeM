@@ -37,7 +37,7 @@ class Plot_Composition_Ternary_PhaseDiagram(Plot_Composition_PhaseDiagram):
 		self.Create_Compositional_PhaseDiagram()
 		self.Plot_Compositional_PhaseDiagram()
 		
-		### Find all three-phase regions after compositional phase diagram is drawn.
+		### Find all three-phase regions after compositional phase diagram is drawn
 		self.threephaseregions = []
 		# Store names of the three-phase regions (in the same order as self.threephaseregions).
 		self.threephaseregion_names = []
@@ -57,7 +57,6 @@ class Plot_Composition_Ternary_PhaseDiagram(Plot_Composition_PhaseDiagram):
 		self.threephaseregion_shade = None
 		self.composition_phasediagram_plot_figure.canvas.mpl_connect('button_press_event', self.Shade_ThreePhaseRegion)
 		self.composition_phasediagram_plot_figure.canvas.mpl_connect('button_press_event', self.Calculate_ChemicalPotentials_ThreePhaseRegion)
-		
 		
 		
 		self.composition_phasediagram_plot_figure.canvas.mpl_connect('motion_notify_event', self.Hover)
@@ -97,6 +96,14 @@ class Plot_Composition_Ternary_PhaseDiagram(Plot_Composition_PhaseDiagram):
 					if any( all( list(x) in threephaseregion for x in [point, endpoint1, endpoint2] ) for threephaseregion in self.threephaseregions):
 						continue
 					
+					
+					# Get names of compounds constituting the four-phase region
+					three_phase_region_compound_names = []
+					for pt in [point, endpoint1, endpoint2]:
+						three_phase_region_compound_names.append( self.labels[tuple(pt)].name )
+					if self.main_compound not in three_phase_region_compound_names:
+						continue
+					
 					# Record three phase region
 					three_phase_region = [list(point), list(endpoint1), list(endpoint2)]
 					self.threephaseregions.append(three_phase_region)
@@ -110,6 +117,7 @@ class Plot_Composition_Ternary_PhaseDiagram(Plot_Composition_PhaseDiagram):
 					# Find and record the centroid of the three-phase region
 					centroid = ( point + endpoint1 + endpoint2 ) / 3.
 					self.threephaseregion_centroids.append(centroid)
+					
 	
 	
 	
@@ -125,10 +133,16 @@ class Plot_Composition_Ternary_PhaseDiagram(Plot_Composition_PhaseDiagram):
 		if self.threephaseregion_centroids == []:
 			return
 		
+		# Set color of scatter plot points
+		scatterplot_color = 'k'
+		scatterplot_marker = '*'
+		
 		# Plot all centroids as scatter plot
 		self.threephaseregion_centroids = np.asarray(self.threephaseregion_centroids)
 		self.centroids_plot = self.composition_phasediagram_plot_drawing.scatter(	self.threephaseregion_centroids[:,0],
-																					self.threephaseregion_centroids[:,1]	)
+																					self.threephaseregion_centroids[:,1],
+																					color = scatterplot_color,
+																					marker = scatterplot_marker	)
 	
 	
 	def Update_Annotation(self, index):
@@ -238,6 +252,13 @@ class Plot_Composition_Ternary_PhaseDiagram(Plot_Composition_PhaseDiagram):
 
 
 
+
+class ThreePhaseRegion(object):
+	def __init__(self):
+		self.name = None
+		self.vertices = None
+		self.centroid = None
+		self.centroid_plot = None
 
 
 

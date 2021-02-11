@@ -14,11 +14,12 @@ from PyQt5.QtGui import *
 
 class Window_DefectsDiagram(QWidget):
 	
-	def __init__(self, main_compound: str, DefectsDiagram_Plot, show_carrier_concentration):
+	def __init__(self, main_compound: str, DefectsDiagram_Plot, show_carrier_concentration, show_dopant):
 		
 		super().__init__()
 		
 		self.show_carrier_concentration = show_carrier_concentration
+		self.show_dopant = show_dopant
 		
 		# Initialize main compound
 		self.main_compound = main_compound
@@ -30,6 +31,13 @@ class Window_DefectsDiagram(QWidget):
 		###### Main defects diagram window widget
 		self.defectsdiagram_window = QWidget()										# One of the main sub-widgets is where the user defines the settings of the plots.
 		self.defectsdiagram_window_layout = QVBoxLayout(self.defectsdiagram_window)	# The settings should be placed on top of one another, i.e. vertically.
+		
+		# Title
+		self.defectsdiagram_title = QLabel("Defect \n Energies")				# QLabel is a widget that displays text
+		self.defectsdiagram_title.setAlignment(Qt.AlignCenter)					# Align the text to center
+		self.defectsdiagram_title_font = QFont("sans-serif", 24, QFont.Bold) 	# Declare font
+		self.defectsdiagram_title.setFont(self.defectsdiagram_title_font)		# Set the font for the QLabel text
+		self.defectsdiagram_window_layout.addWidget(self.defectsdiagram_title)
 		
 		# Defects diagram plot
 		self.defects_diagram_plot = self.DefectsDiagram_Plot.defects_diagram_plot_canvas
@@ -44,76 +52,77 @@ class Window_DefectsDiagram(QWidget):
 		self.defectsdiagram_Ymin_label.setAlignment(Qt.AlignRight)
 		self.defectsdiagram_viewport_layout.addWidget(self.defectsdiagram_Ymin_label)
 		self.defectsdiagram_Ymin_box = QLineEdit("-2.0")
-		self.defectsdiagram_Ymin_box.editingFinished.connect(lambda: self.Update_WindowSize("DefectsDiagram", "YMin"))
+		self.defectsdiagram_Ymin_box.editingFinished.connect(lambda: self.DefectsDiagram_Plot.Update_WindowSize("YMin", self.defectsdiagram_Ymin_box))
 		self.defectsdiagram_viewport_layout.addWidget(self.defectsdiagram_Ymin_box)
 		self.defectsdiagram_Ymax_label = QLabel(u"y"+"<sub>max</sub>")
 		self.defectsdiagram_Ymax_label.setAlignment(Qt.AlignRight)
 		self.defectsdiagram_viewport_layout.addWidget(self.defectsdiagram_Ymax_label)
 		self.defectsdiagram_Ymax_box = QLineEdit("2.0")
-		self.defectsdiagram_Ymax_box.editingFinished.connect(lambda: self.Update_WindowSize("DefectsDiagram", "YMax"))
+		self.defectsdiagram_Ymax_box.editingFinished.connect(lambda: self.DefectsDiagram_Plot.Update_WindowSize("YMax", self.defectsdiagram_Ymax_box))
 		self.defectsdiagram_viewport_layout.addWidget(self.defectsdiagram_Ymax_box)
 		self.defectsdiagram_window_layout.addWidget(self.defectsdiagram_viewport)
 		
 		
 		
-		# Extrinsic defect properties
-		self.dopant_properties_widget = QWidget()
-		self.dopant_properties_widget_layout = QHBoxLayout(self.dopant_properties_widget)
-		
-		# Extrinsic defect chemical potential
-		self.dopant_chemical_potential_label = QLabel(u"\u0394"+"\u03BC"+"<sub>x</sub>")
-		self.dopant_chemical_potential_label.setAlignment(Qt.AlignCenter)
-		self.dopant_properties_widget_layout.addWidget(self.dopant_chemical_potential_label)
-		self.dopant_chemical_potential_deltamu = QLineEdit("-0.0000")
-		self.dopant_chemical_potential_deltamu.setMaxLength(7)
-		self.dopant_chemical_potential_deltamu.editingFinished.connect(self.Update_ExtrinsicDefect_DeltaMu)
-		self.dopant_chemical_potential_deltamu.setEnabled(False)
-		self.dopant_properties_widget_layout.addWidget(self.dopant_chemical_potential_deltamu)
-		
-		# Extrinsic defect selection box
-		self.dopant_selection_box = QComboBox()
-		self.dopant_selection_box.setEnabled(False)
-		self.dopant_selection_box.addItem("None")
-		for defect in self.DefectsDiagram_Plot.defects_data.keys():
-			if "_" not in defect:
-				continue
-			if self.DefectsDiagram_Plot.defects_data[defect]["Extrinsic"] == "Yes":
-				### Herein lies the graveyard of various tricks I tried to implement subscripts in QComboBox, and I stand
-				###		before you to tell you that: it cannot be done. It's hopeless, trying to write subscripts in QComboBox,
-				###		for some reason. For this unknown reason, you (the programmer or future Michael Toriyama) should not
-				###		waste any more time with the unforgiving fact that neither unicode nor latex will show up properly
-				###		as a text on QComboBox. Do not waste any more of your time trying... Please and thank you.
-				#self.extrinsic_defect_selection_box.addItem(u" "+defect.split("_")[0]+"<sub>"+defect.split("_")[-1]+"</sub>")
-				#self.extrinsic_defect_selection_box.addItem(u""+defect.split("_")[0]+"<sub>"+defect.split("_")[-1]+"</sub>")
-				#self.extrinsic_defect_selection_box.addItem(u""+defect.split("_")[0]+"<sub>"+defect.split("_")[-1]+"</sub>")
-				#self.extrinsic_defect_selection_box.addItem(defect.split("_")[0]+"$_{"+defect.split("_")[-1]+"}$")
-				#self.extrinsic_defect_selection_box.addItem(defect.split("_")[0]+'\u2083'+defect.split("_")[-1])
-				### LOL I don't even need the ones above, I'll just add the names of dopants available in the database.
-				dopant = defect.split("_")[0]
-				if dopant not in [self.dopant_selection_box.itemText(i) for i in range(self.dopant_selection_box.count())]:
-					self.dopant_selection_box.addItem(dopant)
-		self.dopant_selection_box.setCurrentIndex(0)
-		self.dopant_selection_box.activated.connect(self.Update_ExtrinsicDefect)
-		self.dopant_properties_widget_layout.addWidget(self.dopant_selection_box)
-		
-		
-		if self.show_carrier_concentration:
+		if self.show_dopant:
 			
-			# Synthesis temperature
-			self.defects_synthesis_temperature = QWidget()
-			self.defects_synthesis_temperature_layout = QHBoxLayout(self.defects_synthesis_temperature)
-			self.defects_synthesis_temperature_label = QLabel(u"T<sub>syn</sub> (K) = ")
-			self.defects_synthesis_temperature_label.setAlignment(Qt.AlignRight)
-			self.defects_synthesis_temperature_layout.addWidget(self.defects_synthesis_temperature_label)
-			self.defects_synthesis_temperature_box = QLineEdit("")
-			self.defects_synthesis_temperature_box.editingFinished.connect(self.Update_SynthesisTemperature)
-			self.defects_synthesis_temperature_box.setEnabled(False)
-			self.defects_synthesis_temperature_layout.addWidget(self.defects_synthesis_temperature_box)
-			self.dopant_properties_widget_layout.addWidget(self.defects_synthesis_temperature)
-		
-		
-		self.defectsdiagram_window_layout.addWidget(self.dopant_properties_widget)
+			# Extrinsic defect properties
+			self.dopant_properties_widget = QWidget()
+			self.dopant_properties_widget_layout = QHBoxLayout(self.dopant_properties_widget)
 			
+			# Extrinsic defect chemical potential
+			self.dopant_chemical_potential_label = QLabel(u"\u0394"+"\u03BC"+"<sub>x</sub>")
+			self.dopant_chemical_potential_label.setAlignment(Qt.AlignCenter)
+			self.dopant_properties_widget_layout.addWidget(self.dopant_chemical_potential_label)
+			self.dopant_chemical_potential_deltamu = QLineEdit("-0.0000")
+			self.dopant_chemical_potential_deltamu.setMaxLength(7)
+			self.dopant_chemical_potential_deltamu.editingFinished.connect(self.Update_ExtrinsicDefect_DeltaMu)
+			self.dopant_chemical_potential_deltamu.setEnabled(False)
+			self.dopant_properties_widget_layout.addWidget(self.dopant_chemical_potential_deltamu)
+			
+			# Extrinsic defect selection box
+			self.dopant_selection_box = QComboBox()
+			self.dopant_selection_box.setEnabled(False)
+			self.dopant_selection_box.addItem("None")
+			for defect in self.DefectsDiagram_Plot.defects_data.keys():
+				if "_" not in defect:
+					continue
+				if self.DefectsDiagram_Plot.defects_data[defect]["Extrinsic"] == "Yes":
+					### Herein lies the graveyard of various tricks I tried to implement subscripts in QComboBox, and I stand
+					###		before you to tell you that: it cannot be done. It's hopeless, trying to write subscripts in QComboBox,
+					###		for some reason. For this unknown reason, you (the programmer or future Michael Toriyama) should not
+					###		waste any more time with the unforgiving fact that neither unicode nor latex will show up properly
+					###		as a text on QComboBox. Do not waste any more of your time trying... Please and thank you.
+					#self.extrinsic_defect_selection_box.addItem(u" "+defect.split("_")[0]+"<sub>"+defect.split("_")[-1]+"</sub>")
+					#self.extrinsic_defect_selection_box.addItem(u""+defect.split("_")[0]+"<sub>"+defect.split("_")[-1]+"</sub>")
+					#self.extrinsic_defect_selection_box.addItem(u""+defect.split("_")[0]+"<sub>"+defect.split("_")[-1]+"</sub>")
+					#self.extrinsic_defect_selection_box.addItem(defect.split("_")[0]+"$_{"+defect.split("_")[-1]+"}$")
+					#self.extrinsic_defect_selection_box.addItem(defect.split("_")[0]+'\u2083'+defect.split("_")[-1])
+					### LOL I don't even need the ones above, I'll just add the names of dopants available in the database.
+					dopant = defect.split("_")[0]
+					if dopant not in [self.dopant_selection_box.itemText(i) for i in range(self.dopant_selection_box.count())]:
+						self.dopant_selection_box.addItem(dopant)
+			self.dopant_selection_box.setCurrentIndex(0)
+			self.dopant_selection_box.activated.connect(self.Update_ExtrinsicDefect)
+			self.dopant_properties_widget_layout.addWidget(self.dopant_selection_box)
+			
+			
+			if self.show_carrier_concentration:
+				
+				# Synthesis temperature
+				self.defects_synthesis_temperature = QWidget()
+				self.defects_synthesis_temperature_layout = QHBoxLayout(self.defects_synthesis_temperature)
+				self.defects_synthesis_temperature_label = QLabel(u"T<sub>syn</sub> (K) = ")
+				self.defects_synthesis_temperature_label.setAlignment(Qt.AlignRight)
+				self.defects_synthesis_temperature_layout.addWidget(self.defects_synthesis_temperature_label)
+				self.defects_synthesis_temperature_box = QLineEdit("")
+				self.defects_synthesis_temperature_box.editingFinished.connect(self.Update_SynthesisTemperature)
+				self.defects_synthesis_temperature_box.setEnabled(False)
+				self.defects_synthesis_temperature_layout.addWidget(self.defects_synthesis_temperature_box)
+				self.dopant_properties_widget_layout.addWidget(self.defects_synthesis_temperature)
+			
+			
+			self.defectsdiagram_window_layout.addWidget(self.dopant_properties_widget)
 		
 		
 		
@@ -121,7 +130,8 @@ class Window_DefectsDiagram(QWidget):
 		
 		# (WIDGET) Save defects diagram as figure
 		self.defects_diagram_savefigure_button = QPushButton("Save Defects Diagram Figure")
-		self.defects_diagram_savefigure_button.clicked[bool].connect(lambda: self.SaveFigure("Defects Diagram"))
+		#self.defects_diagram_savefigure_button.clicked[bool].connect(lambda: self.SaveFigure("Defects Diagram"))
+		self.defects_diagram_savefigure_button.clicked[bool].connect(lambda: self.DefectsDiagram_Plot.SaveFigure("Defects Diagram"))
 		self.defectsdiagram_window_layout.addWidget(self.defects_diagram_savefigure_button)
 	
 	
@@ -261,7 +271,7 @@ class Window_DefectsDiagram(QWidget):
 	
 	
 	
-	
+	"""
 	###############################################################################################
 	###################################### Save Figure ############################################
 	###############################################################################################
@@ -278,10 +288,10 @@ class Window_DefectsDiagram(QWidget):
 			extension = extension_type.split(".")[-1].split(")")[0]
 			if filename.split(".")[-1] == extension:
 				if figure_type == "Defects Diagram":
-					self.Compositional_PhaseDiagram.composition_phasediagram_plot_figure.savefig(filename, bbox_inches='tight')
+					self.DefectsDiagram_Plot.defects_diagram_plot_figure.savefig(filename, bbox_inches='tight')
 			else:
 				if figure_type == "Defects Diagram":
-					self.Compositional_PhaseDiagram.composition_phasediagram_plot_figure.savefig(filename+"."+extension, bbox_inches='tight')
-
+					self.DefectsDiagram_Plot.defects_diagram_plot_figure.savefig(filename+"."+extension, bbox_inches='tight')
+	"""
 
 

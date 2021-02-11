@@ -12,6 +12,11 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from pymatgen.analysis.phase_diagram import PhaseDiagram, PDPlotter, PDEntry
 from pymatgen.core.composition import Composition
 
+import PyQt5
+from PyQt5.QtWidgets import *
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+
 
 class Plot_Composition_PhaseDiagram:
 	
@@ -28,7 +33,6 @@ class Plot_Composition_PhaseDiagram:
 			self.all_elements.append(str(element))
 		
 		# Font description for phase stability diagram plot
-		#self.font = {'family': 'sans-serif', 'color':  'black', 'weight': 'bold', 'size': 14 }
 		self.font = {'family': 'sans-serif', 'color':  'black', 'weight': 'bold', 'size': 10 }
 		
 		# Store all extracted DFT data
@@ -89,32 +93,6 @@ class Plot_Composition_PhaseDiagram:
 		self.pmg_phasediagram_plot_object = PDPlotter(self.pmg_phasediagram)
 		(lines, labels, unstable) = self.pmg_phasediagram_plot_object.pd_plot_data
 		
-		
-		y = self.pmg_phasediagram.as_dict()
-		x = self.pmg_phasediagram.get_all_chempots(Composition(self.main_compound))
-		for key in x.keys():
-			print(key, x[key], list(x[key].values()) )
-			#print(type(key), key)
-		
-		elements = []
-		key = list(x.keys())[0]
-		for element in x[key].keys():
-			elements.append(element)
-		cu = elements[0]
-		bi = elements[1]
-		se = elements[2]
-		o = elements[3]
-		print(bi, cu, se, o)
-		phaseregions = []
-		chempots = []
-		for key in x.keys():
-			phaseregions.append(key)
-			chempots.append( np.array([ x[key][bi], x[key][cu], x[key][se], x[key][o] ]) )
-		chempots = np.asarray(chempots).T
-		for x in chempots:
-			print(x)
-		print(phaseregions)
-		
 		# Record all lines and points of the compositional phase diagram
 		self.lines = lines
 		self.labels = labels
@@ -132,7 +110,6 @@ class Plot_Composition_PhaseDiagram:
 		newlabels = []
 		if self.type == "ternary":
 			for x, y in self.lines:
-				#self.composition_phasediagram_plot_drawing.plot(x, y, "bo-", linewidth=3, markeredgecolor="b", markerfacecolor="r", markersize=10)
 				self.composition_phasediagram_plot_drawing.plot(x, y, "bo-", linewidth=linewidth, markeredgecolor="b", markerfacecolor="r", markersize=markersize)
 			for coords in sorted(self.labels.keys()):
 				entry = self.labels[coords]
@@ -146,7 +123,6 @@ class Plot_Composition_PhaseDiagram:
 						count += 1
 		elif self.type == "quaternary":
 			for x, y, z in self.lines:
-				#self.composition_phasediagram_plot_drawing.plot(x, y, z, "bo-", linewidth=3, markeredgecolor="b", markerfacecolor="r", markersize=10)
 				self.composition_phasediagram_plot_drawing.plot(x, y, z, "bo-", linewidth=linewidth, markeredgecolor="b", markerfacecolor="r", markersize=markersize)
 			for coords in sorted(self.labels.keys()):
 				entry = self.labels[coords]
@@ -171,14 +147,20 @@ class Plot_Composition_PhaseDiagram:
 	###################################### Save Figure ############################################
 	###############################################################################################
 	
-	def SaveFigure(self, filename, extension_type):
+	def SaveFigure(self):
 		
-		if filename:
-			extension = extension_type.split(".")[-1].split(")")[0]
-			if filename.split(".")[-1] == extension:
-				self.composition_phasediagram_plot_figure.savefig(filename, bbox_inches='tight')
-			else:
-				self.composition_phasediagram_plot_figure.savefig(filename+"."+extension, bbox_inches='tight')
+		options = QFileDialog.Options()
+		options |= QFileDialog.DontUseNativeDialog
+		filename, extension_type = QFileDialog.getSaveFileName(filter = "Portable Network Graphics (*.png);;" \
+																+"Portable Document Format (*.pdf);;" \
+																+"Scalable Vector Graphics (*.svg);;" \
+																+"Encapsulated PostScript (*.eps)", options=options)
+		
+		extension = extension_type.split(".")[-1].split(")")[0]
+		if filename.split(".")[-1] == extension:
+			self.composition_phasediagram_plot_figure.savefig(filename, bbox_inches='tight')
+		else:
+			self.composition_phasediagram_plot_figure.savefig(filename+"."+extension, bbox_inches='tight')
 
 
 

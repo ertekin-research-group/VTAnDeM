@@ -263,7 +263,14 @@ class Defects_Import:
 	
 	def __init__(self):
 		
+		# All elements
 		self.elements = [el.symbol for el in elements]
+		
+		# Dictionary to hold all site multiplicities
+		self.site_multiplicities = {}
+		
+		# List of possible defect sites (updated when Add_Defects function is invoked)
+		self.possible_defect_site_list = ["i", "V"]
 		
 		# Recreate defect information as dictionary (if JSON exists), otherwise create new datasheet
 		if "Defects_Tracker.json" in os.listdir(os.getcwd()):
@@ -277,93 +284,131 @@ class Defects_Import:
 	####################################### Add Defects of Compound to Database ########################################
 	####################################################################################################################
 	
-	def Add_Defects(self, compound_name, directory_name, supercell_size):
+	def Add_Defects(self, compound_name, directory_name):
 		
-		if not self.Run_Checks(compound_name, directory_name):
-			return
+		# Run checks
+		self.Run_Checks(compound_name, directory_name)
 		
 		# Create list of possible defects in compound
-		possible_defect_site_list = [ ''.join( [letter for letter in element_segment if not letter.isdigit()] ) for element_segment in re.findall("[A-Z][^A-Z]*", compound_name) ]
-		possible_defect_site_list.append("V")
-		possible_defect_site_list.append("i")
+		self.possible_defect_site_list = [ ''.join( [letter for letter in element_segment if not letter.isdigit()] ) for element_segment in re.findall("[A-Z][^A-Z]*", compound_name) ]
+		
+		# Get bulk data first (needs to run before importing defects in order to update site multiplicities)
+		self.Add_Bulk_Info(compound_name=compound_name, bulk_folder=directory_name+"/"+directory)
 		
 		# Loop through each item in the given directory
 		for directory in os.listdir(directory_name):
 			
 			# Check that the directory is a legitimate defect name
-			if (directory.split("_")[-1] not in possible_defect_site_list) or (directory.split("_")[0] not in self.elements):
-				print("'"+directory+"' in '"+directory_name+"' is not a legitimate defect name for '"+compound_name+"'. Skipping...")
+			if ("_" in directory) and (directory.split("_")[-1] in self.possible_defect_site_list) and (directory.split("_")[0] in self.elements):
+				self.Add_Single_Defect(compound_name=compound_name, defect_name=directory, directory_name=directory_name+"/"+directory)
+			elif (directory == "Bulk"):
 				continue
-			
-			self.Add_Single_Defect(compound_name=compound_name, defect_name=directory, directory_name=directory_name+"/"+directory, supercell_size=supercell_size)
+			else:
+				print("'"+directory+"' in '"+directory_name+"' is neither a legitimate defect name for '"+compound_name+"' nor the 'Bulk' folder. Skipping...")
+				continue
 	
 	
 	####################################################################################################################
 	############################################# Add an Individual Defect #############################################
 	####################################################################################################################
 	
-	def Add_Single_Defect(self, compound_name, defect_name, directory_name, supercell_size):
-		
-		if not self.Run_Checks(compound_name, directory_name):
-			return
-		
-		# Create list of possible defects in compound
-		possible_defect_site_list = [ ''.join( [letter for letter in element_segment if not letter.isdigit()] ) for element_segment in re.findall("[A-Z][^A-Z]*", compound_name) ]
-		possible_defect_site_list.append("V")
-		possible_defect_site_list.append("i")
-		
-		# Check that the directory is a legitimate defect name
-		if (defect_name.split("_")[-1] not in possible_defect_site_list) or (defect_name.split("_")[0] not in self.elements):
-			print("'"+defect_name+"' is not a legitimate defect name for '"+compound_name+"'. Skipping...")
-			return
+	def Add_Single_Defect(self, compound_name, defect_name, directory_name):
 		
 		for directory in os.listdir(directory_name):
+			
+			# Check that the folder name is in the correct format
 			try:
 				float(directory.split("q")[-1])
 			except:
 				print("The name '"+directory+"' in '"+directory_name+"' is not in the correct format for charge. The correct format for the charge state of a defect is 'q#', where '#' is an integer representing the charge state. Skipping...")
 				continue
-			self.Add_Defect_Charge(compound_name=compound_name, defect_name=defect_name, charge_state=directory.split("q")[-1], directory_name=directory_name+"/"+directory, supercell_size=supercell_size)
-	
+			
+			# Check that the data exists
+			if ("OUTCAR" not in os.listdir(directory)) and ("OSZICAR" not in os.listdir(directory)):
+				print("WARNING: Cannot find total energy (neither OUTCAR nor OSZICAR files) for defect '"+defect_name+"' with charge state '"+charge_state+"' in '"+directory+"'. Skipping...")
+				continue
+			
+			self.Add_Defect_Charge(compound_name=compound_name, defect_name=defect_name, charge_state=directory.split("q")[-1], directory_name=directory_name+"/"+directory)
 	
 	
 	####################################################################################################################
 	###################################### Add Charge State for Individual Defect ######################################
 	####################################################################################################################
 	
-	def Add_Defect_Charge(self, compound_name, defect_name, charge_state, directory_name, supercell_size):
+	def Add_Defect_Charge(self, compound_name, defect_name, charge_state, directory_name):
 		
-		if not self.Run_Checks(compound_name, directory_name):
-			return
-		
-		# Create list of possible defects in compound
-		possible_defect_site_list = [ ''.join( [letter for letter in element_segment if not letter.isdigit()] ) for element_segment in re.findall("[A-Z][^A-Z]*", compound_name) ]
-		possible_defect_site_list.append("V")
-		possible_defect_site_list.append("i")
-		
-		# Check that the given defect is a legitimate defect name
-		if (defect_name.split("_")[-1] not in possible_defect_site_list) or (defect_name.split("_")[0] not in self.elements):
-			print("'"+defect_name+"' is not a legitimate defect name for "+compound_name+". Skipping...")
-			return
-		
-		# Check that the data exists
-		if ("OUTCAR" not in os.listdir(directory_name)) and ("OSZICAR" not in os.listdir(directory_name)):
-			print("WARNING: Cannot find total energy (neither OUTCAR nor OSZICAR files) for defect '"+defect_name+"' with charge state '"+charge_state+"' in '"+directory_name+"'. Skipping")
-			return
+		# Get total energy of defect
+		total_energy = self.Get_Total_Energy(directory_name)
 		
 		# Set up data for compound/defects in Defects_Tracker.json
 		if compound_name not in self.defects_data.keys():
 			self.defects_data[compound_name] = {}
-			self.defects_data[compound_name]["supercellsize"] = supercell_size
 		if defect_name not in self.defects_data[compound_name].keys():
 			self.defects_data[compound_name][defect_name] = {}
-			self.Get_Basic_Defect_Info(compound_name, defect_name, possible_defect_site_list)
+			self.Get_Basic_Defect_Info(compound_name, defect_name)
 		if "charge" not in self.defects_data[compound_name][defect_name].keys():
 			self.defects_data[compound_name][defect_name]["charge"] = {}
 		if charge_state not in self.defects_data[compound_name][defect_name]["charge"].keys():
 			self.defects_data[compound_name][defect_name]["charge"][charge_state] = {}
 		
-		# Find total energy of defect with specified charge state in OUTCAR or OSZICAR
+		# Update total energy of defect
+		self.defects_data[compound_name][defect_name]["charge"][charge_state]["Energy"] = total_energy
+		self.defects_data[compound_name][defect_name]["charge"][charge_state]["ECorr"] = 0.0
+	
+	
+	####################################################################################################################
+	########################################### Find Stoichiometry of Defect ###########################################
+	####################################################################################################################
+	
+	def Get_Basic_Defect_Info(self, compound_name, defect_name):
+		
+		# Check if defect is extrinsic
+		if (defect_name.split("_")[-1] in self.possible_defect_site_list) and (defect_name.split("_")[0] not in self.possible_defect_site_list):
+			self.defects_data[compound_name][defect_name]["Extrinsic"] = "Yes"
+		else:
+			self.defects_data[compound_name][defect_name]["Extrinsic"] = "No"
+		
+		# Obtain "stoichiometry" of defect
+		for specie in self.possible_defect_site_list:
+			if specie == "V":
+				if defect_name.split("_")[0] == specie:
+					self.defects_data[compound_name][defect_name]["n_"+defect_name.split("_")[-1]] = -1
+			elif specie not in defect_name.split("_"):
+				self.defects_data[compound_name][defect_name]["n_"+specie] = 0
+			else:
+				if defect_name.split("_")[0] == specie:
+					self.defects_data[compound_name][defect_name]["n_"+specie] = 1
+				elif defect_name.split("_")[-1] == specie:
+					self.defects_data[compound_name][defect_name]["n_"+specie] = -1
+		
+		# Record site multiplicity (from bulk POSCAR file)
+		self.defects_data[compound_name][defect_name]["site_multiplicity"] = self.site_multiplicity[ defect_name.split("_")[-1] ]
+	
+	
+	####################################################################################################################
+	########################################### Add Supercell Energy of Bulk ###########################################
+	####################################################################################################################
+	
+	def Add_Bulk_Info(self, compound_name, bulk_folder):
+		
+		# Check if compound is in Defects_Tracker.json
+		if compound_name not in self.defects_data.keys():
+			self.defects_data[compound_name] = {}
+		
+		# Update total energy of bulk
+		total_energy = self.Get_Total_Energy(bulk_folder)
+		self.defects_data[compound_name]["Bulk_Energy"] = total_energy
+		
+		# Update site multiplicities
+		self.Update_Site_Multiplicities(compound_name, bulk_folder)
+	
+	
+	####################################################################################################################
+	################################################# Get Total Energy #################################################
+	####################################################################################################################
+	
+	def Get_Total_Energy(self, directory_name):
+		
 		try:
 			outcar_file = open(directory_name+"/OUTCAR").readlines()
 			for line in outcar_file:
@@ -378,34 +423,33 @@ class Defects_Import:
 					total_energy = float(line.split()[2])
 			pass
 		
-		self.defects_data[compound_name][defect_name]["charge"][charge_state]["Energy"] = total_energy
-		self.defects_data[compound_name][defect_name]["charge"][charge_state]["ECorr"] = 0.0
+		return total_energy
 	
 	
 	####################################################################################################################
-	########################################### Find Stoichiometry of Defect ###########################################
+	######################################### Update Defect Site Multiplicities ########################################
 	####################################################################################################################
 	
-	def Get_Basic_Defect_Info(self, compound_name, defect_name, possible_defect_site_list):
+	def Update_Site_Multiplicities(self, compound_name, bulk_folder):
 		
-		# Check if defect is extrinsic
-		if (defect_name.split("_")[-1] in possible_defect_site_list) and (defect_name.split("_")[0] not in possible_defect_site_list):
-			self.defects_data[compound_name][defect_name]["Extrinsic"] = "Yes"
-		else:
-			self.defects_data[compound_name][defect_name]["Extrinsic"] = "No"
+		# Open file
+		try:
+			structure_file = open(bulk_folder+"/POSCAR").readlines()
+		except:
+			structure_file = open(bulk_folder+"/CONTCAR").readlines()
 		
-		# Obtain "stoichiometry" of defect
-		for specie in possible_defect_site_list:
-			if specie == "V":
-				if defect_name.split("_")[0] == specie:
-					self.defects_data[compound_name][defect_name]["n_"+defect_name.split("_")[-1]] = -1
-			elif specie not in defect_name.split("_"):
-				self.defects_data[compound_name][defect_name]["n_"+specie] = 0
-			else:
-				if defect_name.split("_")[0] == specie:
-					self.defects_data[compound_name][defect_name]["n_"+specie] = 1
-				elif defect_name.split("_")[-1] == specie:
-					self.defects_data[compound_name][defect_name]["n_"+specie] = -1
+		# Get atom names and number of each atom in structure
+		atom_types = structure_file[5].split()
+		number_atoms = structure_file[6].split()
+		
+		# Check that POSCAR/CONTCAR contains the correct atom types
+		for atom_type in atom_types:
+			if atom_type not in self.possible_defect_site_list:
+				raise Exception("Unexpected atom found in POSCAR/CONTCAR file for '"+compound_name+"'. Exiting...")
+		
+		# Update site multiplicities dictionary
+		for atom_type, natoms in zip(atom_types, number_atoms):
+			self.site_multiplicities[atom_type] = natoms
 	
 	
 	####################################################################################################################
@@ -414,28 +458,69 @@ class Defects_Import:
 	
 	def Run_Checks(self, compound_name, directory_name):
 		
-		# Keep track of legitimacy
-		legit = True
-		
-		# Check if the charge state is indeed a directory
+		# Check if the directory is indeed a directory
 		if not os.path.isdir(directory_name):
-			print("The directory '"+directory_name+"' cannot be found. Skipping...")
-			legit = False
+			raise Exception("The directory '"+directory_name+"' cannot be found. Exiting...")
 		
 		# Check if the Compounds_Tracker.json file exists
-		try:
-			open("Compounds_Tracker.json")
-		except:
-			print("The Compounds_Tracker.json file does not exist. Make sure you import the compounds data first. Exiting...")
-			legit = False
-			pass
+		if not os.path.exists("Compounds_Tracker.json"):
+			raise Exception("The Compounds_Tracker.json file does not exist. Make sure you import the compounds data first. Exiting...")
 		
-		# If compound does not exist in Compounds_Tracker.json, then don't import
+		# Check if compound exists in Compounds_Tracker.json
 		if compound_name not in json.load(open("Compounds_Tracker.json"))["Compounds"].keys():
-			print("The compound '"+compound_name+"' does not exist in Compounds_Tracker.json. Skipping...")
-			legit = False
+			raise Exception("The compound '"+compound_name+"' does not exist in Compounds_Tracker.json. Exiting...")
 		
-		return legit
+		# Check if directory contains the 'Bulk' folder
+		if "Bulk" not in os.listdir(directory_name):
+			raise Exception("A folder named 'Bulk' must exist in '"+directory_name+"'. Exiting...")
+		
+		# Check if POSCAR/CONTCAR and OUTCAR/OSZICAR are in the 'Bulk' folder
+		if ("POSCAR" not in os.listdir(directory_name+"/Bulk")) and ("CONTCAR" not in os.listdir(directory_name+"/Bulk")):
+			raise Exception("POSCAR/CONTCAR missing from 'Bulk' folder. Exiting...")
+		if ("OUTCAR" not in os.listdir(directory_name+"/Bulk")) and ("OSZICAR" not in os.listdir(directory_name+"/Bulk")):
+			raise Exception("OUTCAR/OSZICAR missing from 'Bulk' folder. Exiting...")
+	
+	
+	####################################################################################################################
+	######################################### Record Energy Correction Values ##########################################
+	####################################################################################################################
+	
+	def Add_Energy_Corrections(self, compound_name, csv_filename):
+		
+		# Check if provided file name is an actual file
+		if not os.path.isfile(csv_filename):
+			raise Exception("The provided file '"+csv_filename+"' cannot be found/imported. Exiting...")
+		
+		# Check to see if the compound is actually in the database
+		if compound_name not in self.defects_data.keys():
+			raise Exception("The compound '"+compound_name+"' has not been imported yet. Exiting...")
+		
+		# Loop through lines of CSV file
+		for line in open(csv_filename).readlines():
+			data = line.split(",")
+			
+			# Check to see if the line indeed has 4 entries
+			if len(data) != 4:
+				print("The line '"+line+"' does not have 4 entries and therefore may not be in the correct format [Compound, Defect, Charge, ECorr]. Skipping...")
+				continue
+			
+			# Check to see if the line is for the compound
+			if data[0] != compound_name:
+				print("The compound in line '"+line+"' is not '"+compound_name+"'. Skipping...")
+				continue
+			
+			# Check to see if the defect has been imported
+			if data[1] not in self.defects_data[compound_name].keys():
+				print("The defect in line '"+line+"' cannot be found for compound '"+compound_name+"'. Skipping...")
+				continue
+			
+			# Check to see if the defect charge state has been imported
+			if data[2] not in self.defects_data[compound_name][data[1]]["charge"].keys():
+				print("The charge state in line '"+line+"' cannot be found for compound '"+compound_name+"'. Skipping...")
+				continue
+			
+			# Update energy correction
+			self.defects_data[compound_name][data[1]]["charge"][data[2]]["ECorr"] = float(data[3])
 	
 	
 	####################################################################################################################

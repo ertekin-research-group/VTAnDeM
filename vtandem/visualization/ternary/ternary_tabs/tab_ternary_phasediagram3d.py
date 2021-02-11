@@ -57,6 +57,7 @@ class Tab_Ternary_PhaseDiagram3D(object):
 		self.chemicalpotential_phasediagram3d_window = QWidget()															# One of the main sub-widgets is where the user defines the settings of the plots.
 		self.chemicalpotential_phasediagram3d_window_layout = QVBoxLayout(self.chemicalpotential_phasediagram3d_window)		# The settings should be placed on top of one another, i.e. vertically.
 		
+		"""
 		# (WIDGET) Title of compound
 		compound_title_formal = Compound_Name_Formal(main_compound, self.compounds_info, "unicode")		# Generate Latex-readable version of compound name
 		self.compound_title = QLabel(compound_title_formal)									# QLabel is a widget that displays text
@@ -64,6 +65,13 @@ class Tab_Ternary_PhaseDiagram3D(object):
 		self.compound_title_font = QFont("sans-serif", 24, QFont.Bold) 						# Declare font
 		self.compound_title.setFont(self.compound_title_font)								# Set the font for the QLabel text
 		self.chemicalpotential_phasediagram3d_window_layout.addWidget(self.compound_title)	# Add the widget to the "main" widget grid layout
+		"""
+		# (WIDGET) Title
+		self.chemicalpotentialPD_name = QLabel("3D Phase Diagram")							# QLabel is a widget that displays text
+		self.chemicalpotentialPD_name.setAlignment(Qt.AlignCenter)								# Align the text to center
+		self.chemicalpotentialPD_name_font = QFont("sans-serif", 24, QFont.Bold) 					# Declare font
+		self.chemicalpotentialPD_name.setFont(self.chemicalpotentialPD_name_font)		# Set the font for the QLabel text
+		self.chemicalpotential_phasediagram3d_window_layout.addWidget(self.chemicalpotentialPD_name)	# Add the widget to the "main" widget grid layout
 		
 		# (WIDGET) Chemical potential phase diagram plot object
 		self.chemicalpotential_phase_diagram_plot = self.PhaseDiagram3D.chemicalpotential_phasediagram_plot_canvas
@@ -71,7 +79,7 @@ class Tab_Ternary_PhaseDiagram3D(object):
 		
 		# (WIDGET) Save 3D phase diagram as figure
 		self.phasediagram3d_savefigure_button = QPushButton("Save 3D Phase Diagram Figure")
-		self.phasediagram3d_savefigure_button.clicked[bool].connect(lambda: self.SaveFigure("Phase Diagram 3D"))
+		self.phasediagram3d_savefigure_button.clicked[bool].connect(lambda: self.PhaseDiagram3D.SaveFigure())
 		self.chemicalpotential_phasediagram3d_window_layout.addWidget(self.phasediagram3d_savefigure_button)
 		
 		# (WIDGET) Generate a 3D rotating phase diagram animation
@@ -87,11 +95,33 @@ class Tab_Ternary_PhaseDiagram3D(object):
 		###################### Three Projected Chemical Potential Phase Diagrams ######################
 		###############################################################################################
 		
+		
+		self.chemicalpotentialPD_projected_window = QWidget()
+		self.chemicalpotentialPD_projected_window_layout = QVBoxLayout(self.chemicalpotentialPD_projected_window)
+		
+		# (WIDGET) Title
+		self.chemicalpotentialPD_projected_name = QLabel("Projected Phase Diagram")							# QLabel is a widget that displays text
+		self.chemicalpotentialPD_projected_name.setAlignment(Qt.AlignCenter)								# Align the text to center
+		self.chemicalpotentialPD_projected_name_font = QFont("sans-serif", 24, QFont.Bold) 					# Declare font
+		self.chemicalpotentialPD_projected_name.setFont(self.chemicalpotentialPD_projected_name_font)		# Set the font for the QLabel text
+		self.chemicalpotentialPD_projected_window_layout.addWidget(self.chemicalpotentialPD_projected_name)	# Add the widget to the "main" widget grid layout
+		
+		# (WIDGET) Three projected chemical potential phase diagrams
+		self.phase_diagram_plot_2d_tripleview = self.PhaseDiagram2D_TripleView.tripleview_phase_diagram_plot_canvas
+		self.chemicalpotentialPD_projected_window_layout.addWidget(self.phase_diagram_plot_2d_tripleview)
+		
+		# Add window to tab2
+		self.tab2_layout.addWidget(self.chemicalpotentialPD_projected_window)
+		
+		
+		
+		"""
 		# (WIDGET) Three projected chemical potential phase diagrams
 		self.phase_diagram_plot_2d_tripleview = self.PhaseDiagram2D_TripleView.tripleview_phase_diagram_plot_canvas
 		
 		# Add the three projected chemical potential phase diagrams to tab2
 		self.tab2_layout.addWidget(self.phase_diagram_plot_2d_tripleview)
+		"""
 		
 		
 		# Draw phase diagrams
@@ -131,7 +161,7 @@ class Tab_Ternary_PhaseDiagram3D(object):
 		
 		self.PhaseDiagram3D.chemicalpotential_phasediagram_plot_axes.clear()
 		
-		self.PhaseDiagram3D.Set_Elements(element_x = self.first_element, element_y = self.second_element, element_z = self.third_element)
+		self.PhaseDiagram3D.Set_Elements(element_x = self.first_element, element_y = self.second_element, dependent_element = self.third_element)
 		
 		self.PhaseDiagram3D.Draw_PhaseDiagram3D()
 		
@@ -142,36 +172,6 @@ class Tab_Ternary_PhaseDiagram3D(object):
 		self.PhaseDiagram2D_TripleView.competing_compounds_colorwheel = self.PhaseDiagram3D.competing_compounds_colorwheel
 		
 		self.PhaseDiagram2D_TripleView.Plot_PhaseDiagrams()
-	
-	
-	
-	
-	
-	###############################################################################################
-	###################################### Save Figure ############################################
-	###############################################################################################
-	
-	def SaveFigure(self, figure_type):
-		
-		options = QFileDialog.Options()
-		options |= QFileDialog.DontUseNativeDialog
-		filename, extension_type = QFileDialog.getSaveFileName(caption = "Save "+figure_type+" Figure", filter = "Portable Network Graphics (*.png);;" \
-																										+"Portable Document Format (*.pdf);;" \
-																										+"Scalable Vector Graphics (*.svg);;" \
-																										+"Encapsulated PostScript (*.eps)", options=options)
-		if filename:
-			extension = extension_type.split(".")[-1].split(")")[0]
-			if filename.split(".")[-1] == extension:
-				if figure_type == "Phase Diagram 3D":
-					self.PhaseDiagram3D.chemicalpotential_phasediagram_plot_figure.savefig(filename, bbox_inches='tight')
-			else:
-				if figure_type == "Phase Diagram 3D":
-					self.PhaseDiagram3D.chemicalpotential_phasediagram_plot_figure.savefig(filename+"."+extension, bbox_inches='tight')
-
-
-
-
-
 
 
 

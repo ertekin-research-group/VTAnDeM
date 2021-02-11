@@ -119,7 +119,6 @@ class Welcome_VTAnDeM_Window(QMainWindow):
 		self.show()
 	
 	
-	# 
 	def Import_Compounds_Data_Function(self):
 		
 		self.import_compounds_window = Import_Data_Window("Compounds")

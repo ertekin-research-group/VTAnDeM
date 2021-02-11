@@ -9,11 +9,8 @@ from matplotlib.figure import Figure
 from labellines import labelLine, labelLines
 
 from vtandem.visualization.utils.defect_formation_energy import *
-"""
-from vtandem.visualization.defect_formation_energy import Calculate_IntrinsicDefectFormationEnthalpies
-from vtandem.visualization.defect_formation_energy import Calculate_ExtrinsicDefectFormationEnthalpies
-from vtandem.visualization.defect_formation_energy import Find_MinimumDefectFormationEnthalpies
-"""
+
+
 
 class Plot_DefectsDiagram:
 	

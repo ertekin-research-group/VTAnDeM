@@ -45,15 +45,6 @@ class Plot_Composition_Quaternary_PhaseDiagram(Plot_Composition_PhaseDiagram):
 		
 		
 		### Find all four-phase regions after compositional phase diagram is drawn.
-		
-		"""
-		# Store lists of four points constituting the four-phase regions.
-		self.fourphaseregions = []
-		# Store names of the four-phase regions (in the same order as self.fourphaseregions).
-		self.fourphaseregion_names = []
-		# Store the centroid of each four-phase region (in the same order as self.fourphaseregions).
-		self.fourphaseregion_centroids = []
-		"""
 		self.four_phase_region_objects = []
 		# Find all four-phase regions in the quaternary composition space.
 		self.Find_All_FourPhaseRegions()
@@ -70,7 +61,6 @@ class Plot_Composition_Quaternary_PhaseDiagram(Plot_Composition_PhaseDiagram):
 		
 		
 		self.composition_phasediagram_plot_figure.canvas.mpl_connect('motion_notify_event', self.Hover)
-		
 		
 		self.fourphaseregion_annotation = self.composition_phasediagram_plot_drawing.annotate("", xy=(0,0), xytext=(20,20), textcoords="offset points",
 																								bbox = dict(boxstyle="round", fc="w"),
@@ -153,6 +143,7 @@ class Plot_Composition_Quaternary_PhaseDiagram(Plot_Composition_PhaseDiagram):
 		
 		# Set color of scatter plot points
 		scatterplot_color = 'k'
+		scatterplot_marker = '*'
 		
 		# Plot all centroids individually in scatter plot
 		centroids = []
@@ -163,7 +154,7 @@ class Plot_Composition_Quaternary_PhaseDiagram(Plot_Composition_PhaseDiagram):
 																									centroid[1],
 																									centroid[2],
 																									color = scatterplot_color,
-																									marker = '*'	)
+																									marker = scatterplot_marker	)
 		
 		# Plot all centroids together in scatter plot
 		centroids = np.asarray(centroids)
@@ -171,7 +162,7 @@ class Plot_Composition_Quaternary_PhaseDiagram(Plot_Composition_PhaseDiagram):
 																					centroids[:,1],
 																					centroids[:,2],
 																					color = scatterplot_color,
-																					marker = '*' )
+																					marker = scatterplot_marker )
 	
 	
 	

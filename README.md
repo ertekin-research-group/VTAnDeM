@@ -14,6 +14,8 @@ Required Packages
 -----------------
 - Numpy >= 1.16
 - Matplotlib >= 3.0
+- Click
+	- `pip3 install click`
 - LabelLines
 	- `pip3 install matplotlib-label-lines`
 - PeriodicTable
