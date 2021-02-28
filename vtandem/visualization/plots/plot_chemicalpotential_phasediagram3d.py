@@ -33,8 +33,10 @@ from PyQt5.QtGui import *
 
 from vtandem.visualization.utils.compound_name import Compound_Name_Formal
 
+from vtandem.visualization.plots.save_plot import SaveFigure
 
-class Plot_ChemicalPotential_PhaseDiagram3D:
+
+class Plot_ChemicalPotential_PhaseDiagram3D(SaveFigure):
 	
 	def __init__(self, type: str):
 		
@@ -52,7 +54,9 @@ class Plot_ChemicalPotential_PhaseDiagram3D:
 		self.font = {'family': 'sans-serif', 'color':  'black', 'weight': 'normal', 'size': 14 }
 		
 		# Store all extracted DFT data
+		self.main_compound_info = {}
 		self.compounds_info = {}
+		self.main_compound_enthalpy = 0.0
 		
 		# Store colors of all competing compounds
 		self.competing_compounds_colorwheel = {}
@@ -65,9 +69,12 @@ class Plot_ChemicalPotential_PhaseDiagram3D:
 		self.path = None
 		
 		self.chemicalpotential_phasediagram_plot_axes.view_init(elev=15, azim=145)
-	
-	
-	
+		
+		
+		print("Chemical potential 3d set up!")
+		
+		# Save figure feature
+		SaveFigure.__init__(self, self.chemicalpotential_phasediagram_plot_figure)
 	
 	
 	
@@ -86,8 +93,8 @@ class Plot_ChemicalPotential_PhaseDiagram3D:
 		
 		main_compound_element_count_reduced = {}
 		for element in self.elements_list[:-1]:	# Exclude dependent element
-			main_compound_element_count_reduced[element] = float(self.compounds_info[self.main_compound][element]) / float(self.compounds_info[self.main_compound][self.dependent_element])
-		main_compound_enthalpy_reduced = float(self.compounds_info[self.main_compound]["enthalpy"]) / float(self.compounds_info[self.main_compound][self.dependent_element])
+			main_compound_element_count_reduced[element] = float(self.main_compound_info["dft_"+element]) / float(self.main_compound_info["dft_"+self.dependent_element])
+		main_compound_enthalpy_reduced = float(self.main_compound_enthalpy) / float(self.main_compound_info["dft_"+self.dependent_element])
 		
 		
 		for competing_compound in self.compounds_info.keys():
@@ -99,44 +106,23 @@ class Plot_ChemicalPotential_PhaseDiagram3D:
 			competing_compound_element_count = {}
 			for element in self.elements_list:
 				try:
-					competing_compound_element_count[element] = float(self.compounds_info[competing_compound][element])
+					competing_compound_element_count[element] = float(self.compounds_info[competing_compound]["dft_"+element])
 				except:
 					competing_compound_element_count[element] = 0.0
-			"""
-			try:
-				competing_compound_element_x = float(self.compounds_info[competing_compound][self.element_x])
-			except:
-				competing_compound_element_x = 0.0
-				pass
 			
-			try:
-				competing_compound_element_y = float(self.compounds_info[competing_compound][self.element_y])
-			except:
-				competing_compound_element_y = 0.0
-				pass
 			
-			try:
-				competing_compound_dependent_element = float(self.compounds_info[competing_compound][self.dependent_element])
-			except:
-				competing_compound_dependent_element = 0.0
-				pass
-			"""
+			# Get enthalpy of competing compound
+			competing_compound_enthalpy_tracker = self.compounds_info[competing_compound]["dft_total_energy"]
+			for element in self.elements_list:
+				competing_compound_enthalpy_tracker -= competing_compound_element_count[element] * self.compounds_info[element]["mu0"]
+			
 			
 			coefficients = []
 			for element in self.elements_list[:-1]:
 				coefficients.append(competing_compound_element_count[element] - competing_compound_element_count[self.dependent_element]*main_compound_element_count_reduced[element])
-			b = float(self.compounds_info[competing_compound]["enthalpy"]) - competing_compound_element_count[self.dependent_element]*main_compound_enthalpy_reduced
+			b = competing_compound_enthalpy_tracker - competing_compound_element_count[self.dependent_element]*main_compound_enthalpy_reduced
 			
 			
-			"""
-			coefficient_x = competing_compound_element_x - competing_compound_dependent_element*main_compound_x_reduced
-			coefficient_y = competing_compound_element_y - competing_compound_dependent_element*main_compound_y_reduced
-			b = float(self.compounds_info[competing_compound]["enthalpy"]) - competing_compound_dependent_element*main_compound_enthalpy_reduced
-			"""
-			
-			
-			
-			#A_matrix.append(np.array([coefficient_x, coefficient_y]))
 			A_matrix.append(np.asarray(coefficients))
 			b_vector.append(b)
 			compounds_list.append(competing_compound)
@@ -187,6 +173,7 @@ class Plot_ChemicalPotential_PhaseDiagram3D:
 		else:
 			cmap = plt.get_cmap("Set1")
 		
+		
 		# draw plane
 		color_counter = 0
 		for i, ininc_i in enumerate(ininc):
@@ -203,7 +190,7 @@ class Plot_ChemicalPotential_PhaseDiagram3D:
 				for v in ininc_i:
 					x.append(verts[v][0])
 					y.append(verts[v][1])
-					z_point = ( self.compounds_info[self.main_compound]["enthalpy"] - self.compounds_info[self.main_compound][self.element_x]*verts[v][0] - self.compounds_info[self.main_compound][self.element_y]*verts[v][1] ) / float(self.compounds_info[self.main_compound][self.dependent_element])
+					z_point = ( self.main_compound_enthalpy - self.main_compound_info["dft_"+self.element_x]*verts[v][0] - self.main_compound_info["dft_"+self.element_y]*verts[v][1] ) / float(self.main_compound_info["dft_"+self.dependent_element])
 					z.append(z_point)
 			elif self.type == "quaternary":
 				for v in ininc_i:
@@ -222,8 +209,9 @@ class Plot_ChemicalPotential_PhaseDiagram3D:
 			self.competing_compounds_colorwheel[Compound_Name_Formal(label, self.compounds_info, "unicode")] = cmap(color_counter)
 			color_counter += 1
 			
-			polygon._facecolors2d=polygon._facecolors3d
-			polygon._edgecolors2d=polygon._edgecolors3d
+			polygon._facecolors2d = polygon._facecolors3d
+			polygon._edgecolors2d = polygon._edgecolors3d
+			
 			
 			self.chemicalpotential_phasediagram_plot_axes.add_collection3d(polygon)
 			path = Line3DCollection(coord, lw=1, color=self.competing_compounds_colorwheel[Compound_Name_Formal(label, self.compounds_info, "unicode")])
@@ -247,19 +235,19 @@ class Plot_ChemicalPotential_PhaseDiagram3D:
 		buffer = 0.2 # eV
 		
 		# Endpoints of phase diagram
-		main_compound_enthalpy = self.compounds_info[self.main_compound]["enthalpy"]
 		endpoint_candidates = []
 		for element in self.elements_list:
-			endpoint_candidates.append( main_compound_enthalpy/self.compounds_info[self.main_compound][element] )
+			endpoint_candidates.append( self.main_compound_enthalpy/self.main_compound_info["dft_"+element] )
 		phasediagram_endpoints = min(endpoint_candidates)
 		
 		self.chemicalpotential_phasediagram_plot_axes.set_xlim([phasediagram_endpoints - buffer, 0 + buffer])
 		self.chemicalpotential_phasediagram_plot_axes.set_ylim([phasediagram_endpoints - buffer, 0 + buffer])
 		self.chemicalpotential_phasediagram_plot_axes.set_zlim([phasediagram_endpoints - buffer, 0 + buffer])
 		
-		self.chemicalpotential_phasediagram_plot_axes.set_xlabel(r"$\Delta\mu_{"+self.element_x+"}$ (eV)", fontdict=self.font)  
-		self.chemicalpotential_phasediagram_plot_axes.set_ylabel(r"$\Delta\mu_{"+self.element_y+"}$ (eV)", fontdict=self.font)  
-		self.chemicalpotential_phasediagram_plot_axes.set_zlabel(r"$\Delta\mu_{"+self.dependent_element+"}$ (eV)", fontdict=self.font)
+		self.chemicalpotential_phasediagram_plot_axes.set_xlabel(r"$\Delta\mu_{"+self.element_x+"}$ (eV)", fontdict=self.font)
+		self.chemicalpotential_phasediagram_plot_axes.set_ylabel(r"$\Delta\mu_{"+self.element_y+"}$ (eV)", fontdict=self.font)
+		#self.chemicalpotential_phasediagram_plot_axes.set_zlabel(r"$\Delta\mu_{"+self.dependent_element+"}$ (eV)", fontdict=self.font)
+		self.chemicalpotential_phasediagram_plot_axes.set_zlabel(r"$\Delta\mu_{"+self.element_z+"}$ (eV)", fontdict=self.font)
 		
 		
 		self.chemicalpotential_phasediagram_plot_axes.set_aspect("auto")
@@ -276,42 +264,11 @@ class Plot_ChemicalPotential_PhaseDiagram3D:
 	def Draw_PhaseDiagram3D(self):
 		
 		A_matrix, b_vector, compounds_list = self.Obtain_PhaseDiagram3D_Inequalities()
-		
 		phasediagram_polyhedron = Hrep(A_matrix, b_vector)	# H-representation of Ax <= b
-		
 		self.Draw_PhaseDiagram_Planes(phasediagram_polyhedron.generators, phasediagram_polyhedron.ininc, phasediagram_polyhedron.adj, compounds_list)
 		
 		self.Activate_PhaseDiagram3D_Plot_Axes()
-		
 		self.chemicalpotential_phasediagram_plot_canvas.draw()
-	
-	
-	
-	
-	
-	
-	###############################################################################################
-	###################################### Save Figure ############################################
-	###############################################################################################
-	
-	def SaveFigure(self):
-		
-		options = QFileDialog.Options()
-		options |= QFileDialog.DontUseNativeDialog
-		filename, extension_type = QFileDialog.getSaveFileName(caption = "Save Figure", filter = "Portable Network Graphics (*.png);;" \
-																								+"Portable Document Format (*.pdf);;" \
-																								+"Scalable Vector Graphics (*.svg);;" \
-																								+"Encapsulated PostScript (*.eps)", options=options)
-		
-		if filename:
-			extension = extension_type.split(".")[-1].split(")")[0]
-			if filename.split(".")[-1] == extension:
-				self.chemicalpotential_phasediagram_plot_figure.savefig(filename, bbox_inches='tight')
-			else:
-				self.chemicalpotential_phasediagram_plot_figure.savefig(filename+"."+extension, bbox_inches='tight')
-	
-	
-	
 	
 	
 	

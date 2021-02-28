@@ -22,7 +22,7 @@ from vtandem.dft.obtain_dft import *
 
 class Tab_Ternary_Dopants(object):
 	
-	def __init__(self, main_compound=None, first_element=None, second_element=None, third_element=None, compounds_info=None, defects_data=None):	# User specifies the main compound and its constituents
+	def __init__(self, main_compound=None, first_element=None, second_element=None, third_element=None, compounds_info=None, defects_data=None, main_compound_info=None):	# User specifies the main compound and its constituents
 		
 		###############################################################################################
 		########################### Initialize materials-related variables ############################
@@ -39,18 +39,22 @@ class Tab_Ternary_Dopants(object):
 		
 		# Get extrinsic defects
 		self.extrinsic_defects = []
-		for defect in defects_data[self.main_compound].keys():
+		for defect in defects_data.keys():
 			if "_" not in defect:
 				continue
-			if defects_data[self.main_compound][defect]["Extrinsic"] == "Yes":
+			if defects_data[defect]["Extrinsic"] == "Yes":
 				self.extrinsic_defects.append(defect)
 		
 		# Track selected dopant
-		self.dopant = self.extrinsic_defects[0].split("_")[0]
+		try:
+			self.dopant = self.extrinsic_defects[0].split("_")[0]
+		except:
+			self.dopant = None
+		
 		
 		# Obtain DFT compounds data
 		self.compounds_info = Obtain_Compounds_Data( [self.first_element, self.second_element, self.third_element, self.dopant] )
-		self.defects_data = defects_data
+		#self.defects_data = defects_data
 		
 		
 		
@@ -65,19 +69,20 @@ class Tab_Ternary_Dopants(object):
 		
 		# Defects diagram
 		self.DefectsDiagram = Plot_Ternary_DefectsDiagram(main_compound = self.main_compound, first_element = self.first_element, second_element = self.second_element, third_element = self.third_element)
-		self.DefectsDiagram.defects_data = self.defects_data[self.main_compound]
+		self.DefectsDiagram.defects_data = defects_data
+		"""
 		self.DefectsDiagram.main_compound_number_first_specie = self.compounds_info[main_compound][self.first_element]
 		self.DefectsDiagram.main_compound_number_second_specie = self.compounds_info[main_compound][self.second_element]
 		self.DefectsDiagram.main_compound_number_third_specie = self.compounds_info[main_compound][self.third_element]
-		self.DefectsDiagram.main_compound_total_energy = self.compounds_info[main_compound]["total_energy"]
+		"""
 		self.DefectsDiagram.mu_elements[self.first_element]["mu0"] = self.compounds_info[self.first_element]["mu0"]
 		self.DefectsDiagram.mu_elements[self.second_element]["mu0"] = self.compounds_info[self.second_element]["mu0"]
 		self.DefectsDiagram.mu_elements[self.third_element]["mu0"] = self.compounds_info[self.third_element]["mu0"]
 		self.DefectsDiagram.mu_elements[self.first_element]["deltamu"] = self.Compositional_PhaseDiagram.deltamu_values[self.first_element]
 		self.DefectsDiagram.mu_elements[self.second_element]["deltamu"] = self.Compositional_PhaseDiagram.deltamu_values[self.second_element]
 		self.DefectsDiagram.mu_elements[self.third_element]["deltamu"] = self.Compositional_PhaseDiagram.deltamu_values[self.third_element]
-		self.DefectsDiagram.EVBM = self.compounds_info[main_compound]["vbm"]
-		self.DefectsDiagram.ECBM = self.DefectsDiagram.EVBM + self.compounds_info[main_compound]["band_gap"]
+		self.DefectsDiagram.EVBM = main_compound_info["VBM"]
+		self.DefectsDiagram.ECBM = self.DefectsDiagram.EVBM + main_compound_info["BandGap"]
 		self.DefectsDiagram.fermi_energy_array = np.linspace(self.DefectsDiagram.EVBM, self.DefectsDiagram.ECBM, 100)
 		self.DefectsDiagram.Activate_DefectsDiagram_Plot_Axes()
 		self.DefectsDiagram.dopant = self.dopant
@@ -153,7 +158,7 @@ class Tab_Ternary_Dopants(object):
 		
 		# (WIDGET) Save defects diagram as figure
 		self.defects_diagram_savefigure_button = QPushButton("Save Defects Diagram Figure")
-		self.defects_diagram_savefigure_button.clicked[bool].connect(lambda: self.SaveFigure_Function())
+		self.defects_diagram_savefigure_button.clicked[bool].connect(lambda: self.DefectsDiagram.SaveFigure())
 		self.defectsdiagram_window_layout.addWidget(self.defects_diagram_savefigure_button)
 		
 		self.tab4_layout.addWidget(self.defectsdiagram_window)
@@ -224,26 +229,6 @@ class Tab_Ternary_Dopants(object):
 		self.DefectsDiagram.extrinsic_defect_plots = {}
 		self.DefectsDiagram.Initialize_Intrinsic_DefectsDiagram_Plot()
 		self.DefectsDiagram.Initialize_Extrinsic_DefectsDiagram_Plot()
-	
-	
-	
-	
-	
-	###############################################################################################
-	###################################### Save Figure ############################################
-	###############################################################################################
-	
-	def SaveFigure_Function(self):
-		
-		options = QFileDialog.Options()
-		options |= QFileDialog.DontUseNativeDialog
-		filename, extension_type = QFileDialog.getSaveFileName(filter = "Portable Network Graphics (*.png);;" \
-																+"Portable Document Format (*.pdf);;" \
-																+"Scalable Vector Graphics (*.svg);;" \
-																+"Encapsulated PostScript (*.eps)", options=options)
-		self.DefectsDiagram.SaveFigure(filename, extension_type)
-
-
 
 
 

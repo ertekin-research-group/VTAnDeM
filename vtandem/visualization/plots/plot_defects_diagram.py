@@ -8,11 +8,17 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from labellines import labelLine, labelLines
 
+import PyQt5
+from PyQt5.QtWidgets import *
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+
 from vtandem.visualization.utils.defect_formation_energy import *
 
+from vtandem.visualization.plots.save_plot import SaveFigure
 
 
-class Plot_DefectsDiagram:
+class Plot_DefectsDiagram(SaveFigure):
 	
 	def __init__(self):
 		
@@ -23,7 +29,8 @@ class Plot_DefectsDiagram:
 				'size': 14 }
 		
 		# Store all extracted DFT data
-		self.defects_data = None
+		self.defects_data = {}
+		self.main_compound_info = {}
 		self.EVBM = 0.0
 		self.ECBM = 0.0
 		self.fermi_energy_array = None
@@ -52,6 +59,9 @@ class Plot_DefectsDiagram:
 		self.defects_diagram_plot_figure.subplots_adjust(left=0.225)
 		self.defects_diagram_plot_drawing = self.defects_diagram_plot_figure.add_subplot(111)
 		self.defects_diagram_plot_canvas = FigureCanvas(self.defects_diagram_plot_figure)
+		
+		# Save figure feature
+		SaveFigure.__init__(self, self.defects_diagram_plot_figure)
 		
 		# Equilibrium Fermi energy vertical line
 		self.equilibrium_fermi_energy_plot = None
@@ -97,14 +107,14 @@ class Plot_DefectsDiagram:
 	def Calculate_DefectFormations(self):
 		
 		intrinsic_defects_enthalpy_data = Calculate_IntrinsicDefectFormationEnthalpies(	self.defects_data, \
-																						self.main_compound_total_energy, \
+																						self.main_compound_info, \
 																						self.fermi_energy_array, \
 																						self.mu_elements	)
 		self.intrinsic_defects_enthalpy_data = Find_MinimumDefectFormationEnthalpies(intrinsic_defects_enthalpy_data)
 		
 		if self.dopant != "None":
 			extrinsic_defects_enthalpy_data = Calculate_ExtrinsicDefectFormationEnthalpies(	self.defects_data, \
-																							self.main_compound_total_energy, \
+																							self.main_compound_info, \
 																							self.fermi_energy_array, \
 																							self.mu_elements, \
 																							self.extrinsic_defects, \
@@ -198,23 +208,6 @@ class Plot_DefectsDiagram:
 		
 		# Draw defects diagram canvas
 		self.defects_diagram_plot_canvas.draw()
-	
-	
-	
-	
-	
-	###############################################################################################
-	###################################### Save Figure ############################################
-	###############################################################################################
-	
-	def SaveFigure(self, filename, extension_type):
-		if filename:
-			extension = extension_type.split(".")[-1].split(")")[0]
-			if filename.split(".")[-1] == extension:
-				self.defects_diagram_plot_figure.savefig(filename, bbox_inches='tight')
-			else:
-				self.defects_diagram_plot_figure.savefig(filename+"."+extension, bbox_inches='tight')
-
 
 
 

@@ -84,31 +84,14 @@ class Compounds_Import:
 		element_data["formula_units"] = element_data["dft_"+element_name]
 		element_data["number_species"] = 1
 		
-		# Find total energy of element in OUTCAR/OSZICAR
-		if ("OUTCAR" not in os.listdir(directory_name)) and ("OSZICAR" not in os.listdir(directory_name)):
-			print("WARNING: Cannot find total energy (neither OUTCAR nor OSZICAR) of "+element_name+". Exiting...")
+		# Find total energy of element in OUTCAR
+		if "OUTCAR" not in os.listdir(directory_name):
+			print("WARNING: Cannot find OUTCAR file of "+element_name+". Exiting...")
 			return False
-		try:
-			outcar_file = open(directory_name+"/OUTCAR").readlines()
-			for line in outcar_file:
-				columns = line.split()
-				number_columns = len(columns)
-				if (number_columns > 4) and (columns[2] == "TOTEN"):
-					total_energy = float(columns[4])
-			element_data["total_energy"] = total_energy
-		except:
-			oszicar_file = open(directory_name+"/OSZICAR").readlines()
-			for line in oszicar_file:
-				if line.split()[1] == "F=":
-					total_energy = float(line.split()[2])
-			element_data["total_energy"] = total_energy
-			pass
+		element_data["dft_total_energy"] = self.Get_Total_Energy(directory_name)
 		
 		# Calculate total energy per formula unit of compound
-		element_data["mu0"] = element_data["total_energy"] / element_data["formula_units"]
-		
-		# Set enthalpy to zero
-		element_data["enthalpy"] = 0.0
+		element_data["mu0"] = element_data["dft_total_energy"] / element_data["formula_units"]
 		
 		# Store data
 		self.compounds_info["Elements"][element_name] = element_data
@@ -181,33 +164,23 @@ class Compounds_Import:
 			compound_data["formula_units"] = compound_data["dft_"+element]/compound_data[element]
 		compound_data["number_species"] = len(number_species)
 		
+		"""
 		# Find volume of compound from lattice vectors in POSCAR/CONTCAR
 		lattice_vector_x = np.asarray([float(i) for i in structure_file[2].split()])
 		lattice_vector_y = np.asarray([float(i) for i in structure_file[3].split()])
 		lattice_vector_z = np.asarray([float(i) for i in structure_file[4].split()])
 		volume = np.dot(lattice_vector_x, np.cross(lattice_vector_y, lattice_vector_z))
 		compound_data["volume"] = volume*1E-24
+		"""
 		
-		# Find total energy of compound in OUTCAR/OSZICAR
-		if ("OUTCAR" not in os.listdir(directory_name)) and ("OSZICAR" not in os.listdir(directory_name)):
-			print("WARNING: Cannot find total energy (neither OUTCAR nor OSZICAR). Exiting...")
+		# Find total energy of compound in OUTCAR
+		if "OUTCAR" not in os.listdir(directory_name):
+			print("WARNING: Cannot find OUTCAR file of '"+compound_name+"' in '"+directory_name+"'. Exiting...")
 			return False
-		try:
-			outcar_file = open(directory_name+"/OUTCAR").readlines()
-			for line in outcar_file:
-				columns = line.split()
-				number_columns = len(columns)
-				if (number_columns > 4) and (columns[2] == "TOTEN"):
-					total_energy = float(columns[4])
-			compound_data["total_energy"] = total_energy
-		except:
-			oszicar_file = open(directory_name+"/OSZICAR").readlines()
-			for line in oszicar_file:
-				if line.split()[1] == "F=":
-					total_energy = float(line.split()[2])
-			compound_data["total_energy"] = total_energy
-			pass
+		#compound_data["total_energy"] = self.Get_Total_Energy(directory_name)
+		compound_data["dft_total_energy"] = self.Get_Total_Energy(directory_name)
 		
+		"""
 		# Calculate total energy per formula unit of compound
 		compound_data["mu0"] = compound_data["total_energy"] / compound_data["formula_units"]
 		
@@ -216,7 +189,9 @@ class Compounds_Import:
 		for element in elements_list:
 			enthalpy_tracker -= compound_data[element]*self.compounds_info["Elements"][element]["mu0"]
 		compound_data["enthalpy"] = enthalpy_tracker
+		"""
 		
+		"""
 		# Find band gap and valence band maximum of compound in vasprun.xml
 		if "vasprun.xml" not in os.listdir(directory_name):
 			print("WARNING: Cannot find band gap nor valence band maximum (vasprun.xml file). Exiting...")
@@ -225,11 +200,26 @@ class Compounds_Import:
 		(bandgap, cbm, vbm, is_direct) = vasprun.eigenvalue_band_properties
 		compound_data["band_gap"] = bandgap
 		compound_data["vbm"] = vbm
+		"""
 		
 		# Store data
 		self.compounds_info["Compounds"][compound_name] = compound_data
 		
 		return True
+	
+	
+	
+	def Get_Total_Energy(self, directory_name):
+		
+		outcar_file = open(directory_name+"/OUTCAR").readlines()
+		for line in outcar_file:
+			if "entropy" not in line:
+				continue
+			if line.split()[4] == "energy(sigma->0)":
+				total_energy = float(line.split()[-1])
+		
+		return total_energy
+	
 	
 	
 	####################################################################################################################
@@ -290,10 +280,12 @@ class Defects_Import:
 		self.Run_Checks(compound_name, directory_name)
 		
 		# Create list of possible defects in compound
-		self.possible_defect_site_list = [ ''.join( [letter for letter in element_segment if not letter.isdigit()] ) for element_segment in re.findall("[A-Z][^A-Z]*", compound_name) ]
+		defect_sites = [ ''.join( [letter for letter in element_segment if not letter.isdigit()] ) for element_segment in re.findall("[A-Z][^A-Z]*", compound_name) ]
+		for site in defect_sites:
+			self.possible_defect_site_list.append(site)
 		
 		# Get bulk data first (needs to run before importing defects in order to update site multiplicities)
-		self.Add_Bulk_Info(compound_name=compound_name, bulk_folder=directory_name+"/"+directory)
+		self.Add_Bulk_Info(compound_name=compound_name, bulk_folder=directory_name+"/Bulk")
 		
 		# Loop through each item in the given directory
 		for directory in os.listdir(directory_name):
@@ -304,7 +296,7 @@ class Defects_Import:
 			elif (directory == "Bulk"):
 				continue
 			else:
-				print("'"+directory+"' in '"+directory_name+"' is neither a legitimate defect name for '"+compound_name+"' nor the 'Bulk' folder. Skipping...")
+				print("Defect '"+directory+"' in directory '"+directory_name+"' is neither 1) a legitimate defect name for compound '"+compound_name+"' nor 2) the 'Bulk' folder. Skipping...")
 				continue
 	
 	
@@ -324,8 +316,8 @@ class Defects_Import:
 				continue
 			
 			# Check that the data exists
-			if ("OUTCAR" not in os.listdir(directory)) and ("OSZICAR" not in os.listdir(directory)):
-				print("WARNING: Cannot find total energy (neither OUTCAR nor OSZICAR files) for defect '"+defect_name+"' with charge state '"+charge_state+"' in '"+directory+"'. Skipping...")
+			if "OUTCAR" not in os.listdir(directory_name+"/"+directory):
+				print("WARNING: Cannot find OUTCAR file for defect '"+defect_name+"' with charge state '"+charge_state+"' in '"+directory_name+"/"+directory+"'. Skipping...")
 				continue
 			
 			self.Add_Defect_Charge(compound_name=compound_name, defect_name=defect_name, charge_state=directory.split("q")[-1], directory_name=directory_name+"/"+directory)
@@ -381,8 +373,8 @@ class Defects_Import:
 				elif defect_name.split("_")[-1] == specie:
 					self.defects_data[compound_name][defect_name]["n_"+specie] = -1
 		
-		# Record site multiplicity (from bulk POSCAR file)
-		self.defects_data[compound_name][defect_name]["site_multiplicity"] = self.site_multiplicity[ defect_name.split("_")[-1] ]
+		# Record site multiplicity (from bulk POSCAR/CONTCAR file)
+		self.defects_data[compound_name][defect_name]["site_multiplicity"] = self.site_multiplicities[ defect_name.split("_")[-1] ]
 	
 	
 	####################################################################################################################
@@ -395,12 +387,42 @@ class Defects_Import:
 		if compound_name not in self.defects_data.keys():
 			self.defects_data[compound_name] = {}
 		
+		# Open POSCAR/CONTCAR file
+		try:
+			structure_file = open(bulk_folder+"/CONTCAR").readlines()
+		except:
+			structure_file = open(bulk_folder+"/POSCAR").readlines()
+			pass
+		
+		# Initialize
+		self.defects_data[compound_name]["Bulk"] = {}
+		
+		# Update atom counts
+		atom_types = structure_file[5].split()
+		atom_counts = structure_file[6].split()
+		for type, count in zip(atom_types, atom_counts):
+			self.defects_data[compound_name]["Bulk"]["dft_"+type] = float(count)
+		
 		# Update total energy of bulk
 		total_energy = self.Get_Total_Energy(bulk_folder)
-		self.defects_data[compound_name]["Bulk_Energy"] = total_energy
+		self.defects_data[compound_name]["Bulk"]["dft_BulkEnergy"] = total_energy
+		
+		# Find band gap and valence band maximum of compound in vasprun.xml
+		vasprun = Vasprun(bulk_folder+"/vasprun.xml")
+		(bandgap, cbm, vbm, is_direct) = vasprun.eigenvalue_band_properties
+		self.defects_data[compound_name]["Bulk"]["BandGap"] = bandgap
+		self.defects_data[compound_name]["Bulk"]["VBM"] = vbm
+		
+		# Find volume of compound from lattice vectors in POSCAR/CONTCAR
+		lattice_vector_x = np.asarray([float(i) for i in structure_file[2].split()])
+		lattice_vector_y = np.asarray([float(i) for i in structure_file[3].split()])
+		lattice_vector_z = np.asarray([float(i) for i in structure_file[4].split()])
+		volume = np.dot(lattice_vector_x, np.cross(lattice_vector_y, lattice_vector_z))
+		self.defects_data[compound_name]["Bulk"]["Volume"] = volume*1E-24
 		
 		# Update site multiplicities
 		self.Update_Site_Multiplicities(compound_name, bulk_folder)
+	
 	
 	
 	####################################################################################################################
@@ -409,19 +431,12 @@ class Defects_Import:
 	
 	def Get_Total_Energy(self, directory_name):
 		
-		try:
-			outcar_file = open(directory_name+"/OUTCAR").readlines()
-			for line in outcar_file:
-				columns = line.split()
-				number_columns = len(columns)
-				if (number_columns > 4) and (columns[2] == "TOTEN"):
-					total_energy = float(columns[4])
-		except:
-			oszicar_file = open(directory_name+"/OSZICAR").readlines()
-			for line in oszicar_file:
-				if "F=" in line:
-					total_energy = float(line.split()[2])
-			pass
+		outcar_file = open(directory_name+"/OUTCAR").readlines()
+		for line in outcar_file:
+			if "entropy" not in line:
+				continue
+			if line.split()[4] == "energy(sigma->0)":
+				total_energy = float(line.split()[-1])
 		
 		return total_energy
 	
@@ -449,36 +464,9 @@ class Defects_Import:
 		
 		# Update site multiplicities dictionary
 		for atom_type, natoms in zip(atom_types, number_atoms):
-			self.site_multiplicities[atom_type] = natoms
+			self.site_multiplicities[atom_type] = float(natoms)
+		self.site_multiplicities["i"] = 0.0
 	
-	
-	####################################################################################################################
-	########################################## Check Legitimacy of User Input ##########################################
-	####################################################################################################################
-	
-	def Run_Checks(self, compound_name, directory_name):
-		
-		# Check if the directory is indeed a directory
-		if not os.path.isdir(directory_name):
-			raise Exception("The directory '"+directory_name+"' cannot be found. Exiting...")
-		
-		# Check if the Compounds_Tracker.json file exists
-		if not os.path.exists("Compounds_Tracker.json"):
-			raise Exception("The Compounds_Tracker.json file does not exist. Make sure you import the compounds data first. Exiting...")
-		
-		# Check if compound exists in Compounds_Tracker.json
-		if compound_name not in json.load(open("Compounds_Tracker.json"))["Compounds"].keys():
-			raise Exception("The compound '"+compound_name+"' does not exist in Compounds_Tracker.json. Exiting...")
-		
-		# Check if directory contains the 'Bulk' folder
-		if "Bulk" not in os.listdir(directory_name):
-			raise Exception("A folder named 'Bulk' must exist in '"+directory_name+"'. Exiting...")
-		
-		# Check if POSCAR/CONTCAR and OUTCAR/OSZICAR are in the 'Bulk' folder
-		if ("POSCAR" not in os.listdir(directory_name+"/Bulk")) and ("CONTCAR" not in os.listdir(directory_name+"/Bulk")):
-			raise Exception("POSCAR/CONTCAR missing from 'Bulk' folder. Exiting...")
-		if ("OUTCAR" not in os.listdir(directory_name+"/Bulk")) and ("OSZICAR" not in os.listdir(directory_name+"/Bulk")):
-			raise Exception("OUTCAR/OSZICAR missing from 'Bulk' folder. Exiting...")
 	
 	
 	####################################################################################################################
@@ -497,6 +485,7 @@ class Defects_Import:
 		
 		# Loop through lines of CSV file
 		for line in open(csv_filename).readlines():
+			line = line.replace("\n", "")
 			data = line.split(",")
 			
 			# Check to see if the line indeed has 4 entries
@@ -521,6 +510,47 @@ class Defects_Import:
 			
 			# Update energy correction
 			self.defects_data[compound_name][data[1]]["charge"][data[2]]["ECorr"] = float(data[3])
+	
+	
+	
+	####################################################################################################################
+	########################################## Check Legitimacy of User Input ##########################################
+	####################################################################################################################
+	
+	def Run_Checks(self, compound_name, directory_name):
+		
+		# Check if the directory is indeed a directory
+		if not os.path.isdir(directory_name):
+			raise Exception("The directory '"+directory_name+"' cannot be found. Exiting...")
+		
+		# Check if the Compounds_Tracker.json file exists
+		if not os.path.exists("Compounds_Tracker.json"):
+			raise Exception("The Compounds_Tracker.json file does not exist. Make sure you import the compounds data first. Exiting...")
+		
+		"""
+		# Check if compound exists in Compounds_Tracker.json
+		if compound_name not in json.load(open("Compounds_Tracker.json"))["Compounds"].keys():
+			raise Exception("The compound '"+compound_name+"' does not exist in Compounds_Tracker.json. Exiting...")
+		"""
+		# Check if elements in compound exist in Compounds_Tracker.json
+		elements_in_compound = [ ''.join( [letter for letter in element_segment if not letter.isdigit()] ) for element_segment in re.findall("[A-Z][^A-Z]*", compound_name) ]
+		elements_in_database = json.load(open("Compounds_Tracker.json"))["Elements"].keys()
+		for element in elements_in_compound:
+			if element not in elements_in_database:
+				raise Exception("The element '"+element+"' of compound '"+compound_name+"' is not in Compounds_Tracker.json. Exiting...")
+		
+		# Check if directory contains the 'Bulk' folder
+		if "Bulk" not in os.listdir(directory_name):
+			raise Exception("A folder named 'Bulk' must exist in '"+directory_name+"'. Exiting...")
+		
+		# Check if POSCAR/CONTCAR, OUTCAR, and vasprun.xml are in the 'Bulk' folder
+		if ("POSCAR" not in os.listdir(directory_name+"/Bulk")) and ("CONTCAR" not in os.listdir(directory_name+"/Bulk")):
+			raise Exception("POSCAR/CONTCAR missing from 'Bulk' folder. Exiting...")
+		if "OUTCAR" not in os.listdir(directory_name+"/Bulk"):
+			raise Exception("OUTCAR missing from 'Bulk' folder. Exiting...")
+		if "vasprun.xml" not in os.listdir(directory_name+"/Bulk"):
+			raise Exception("vasprun.xml missing from 'Bulk' folder. Exiting...")
+	
 	
 	
 	####################################################################################################################
@@ -583,23 +613,28 @@ class DOS_Import:
 		dos_info = {}
 		
 		# DOSCAR normalizer
-		volume = float(open(filename).readlines()[1].split()[0])
-		normalizing_constant = 1E24/volume # VASP outputs DOS values normalized by volume of unit cell in A^3, this needs to be un-normalized and in cm^3
+		volume = float(open(filename).readlines()[1].split()[0])	# CHECK LATER (VASP may be reporting the wrong volume)
 		
 		# Extract data
 		for line in open(filename).readlines():
 			
-			#Skip lines that describe the partial DOS with respect to orbital projections
+			# Skip lines that don't have the total DOS
 			if len(line.split()) != 3:
+				continue
+			try:
+				float(line.split()[0])
+				float(line.split()[1])
+				float(line.split()[2])
+			except:
 				continue
 			
 			try:
-				dos_info[float(line.split()[0])] = float(line.split()[1]) * normalizing_constant
+				dos_info[float(line.split()[0])] = float(line.split()[1])
 			except:
 				dos_info[float(line.split()[0])] = 0.0	# Sometimes the DOS can be an extremely small number that VASP outputs e.g. "0.5E-111" as "0.5-111", which is not readable by python
 		
 		# Store data
-		self.dos_data[compound_name] = dos_info
+		self.dos_data[compound_name] = {"Volume": volume, "DOS": dos_info}
 	
 	
 	####################################################################################################################
@@ -612,6 +647,7 @@ class DOS_Import:
 			copyfile("DOS_Tracker.json", ".vtandem/DOS_Tracker_Backup.json")
 		except:
 			pass
+		
 		with open("DOS_Tracker.json", "w") as jsonfile:
 			json.dump(self.dos_data, jsonfile, indent=4, sort_keys=True)
 

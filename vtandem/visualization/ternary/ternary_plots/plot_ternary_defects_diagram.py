@@ -5,8 +5,6 @@ __author__ = 'Michael_Lidia_Jiaxing_Elif'
 # Import defect formation energy diagram object
 from vtandem.visualization.plots.plot_defects_diagram import Plot_DefectsDiagram
 
-
-
 class Plot_Ternary_DefectsDiagram(Plot_DefectsDiagram):
 	
 	def __init__(self, main_compound = None, first_element = None, second_element = None, third_element = None):
@@ -28,7 +26,6 @@ class Plot_Ternary_DefectsDiagram(Plot_DefectsDiagram):
 							self.third_element: {"mu0": 0.0, "deltamu": 0.0} }
 		
 		# Store all extracted DFT data
-		self.main_compound_total_energy = 0.0
 		self.first_element_mu0 = 0.0
 		self.second_element_mu0 = 0.0
 		self.third_element_mu0 = 0.0

@@ -13,7 +13,8 @@ from PyQt5.QtGui import *
 from vtandem.visualization.binary.binary_plots.plot_binary_defects_diagram import Plot_Binary_DefectsDiagram
 from vtandem.visualization.binary.binary_plots.plot_binary_carrier_concentration import Plot_Binary_Carrier_Concentration
 
-from vtandem.visualization.binary.binary_windows.window_binary_defectsdiagram import Window_Binary_DefectsDiagram
+#from vtandem.visualization.binary.binary_windows.window_binary_defectsdiagram import Window_Binary_DefectsDiagram
+from vtandem.visualization.windows.window_defectsdiagram import Window_DefectsDiagram
 
 
 
@@ -40,8 +41,8 @@ class Tab_Binary_DefectsDiagram_CarrierConcentration(QWidget):
 		
 		# Obtain DFT data
 		self.compounds_info = compounds_info
-		self.defects_data = defects_data
-		self.dos_data = dos_data
+		#self.defects_data = defects_data
+		#self.dos_data = dos_data
 		
 		# Information about main binary compound
 		self.main_compound_number_first_specie = self.compounds_info[self.main_compound][self.first_element]	# Number of first species in binary compound
@@ -89,10 +90,11 @@ class Tab_Binary_DefectsDiagram_CarrierConcentration(QWidget):
 			
 			# Set up defects diagram object
 			self.DefectsDiagram = Plot_Binary_DefectsDiagram(self, main_compound = main_compound, first_element = first_element, second_element = second_element)
-			self.DefectsDiagram.defects_data = self.defects_data[self.main_compound]
+			self.DefectsDiagram.defects_data = defects_data[self.main_compound]
+			"""
 			self.DefectsDiagram.main_compound_number_first_specie = self.main_compound_number_first_specie
 			self.DefectsDiagram.main_compound_number_second_specie = self.main_compound_number_second_specie
-			self.DefectsDiagram.main_compound_total_energy = self.compounds_info[main_compound]["total_energy"]
+			"""
 			self.DefectsDiagram.mu_elements[self.first_element]["mu0"] = self.compounds_info[self.first_element]["mu0"]
 			self.DefectsDiagram.mu_elements[self.second_element]["mu0"] = self.compounds_info[self.second_element]["mu0"]
 			self.DefectsDiagram.mu_elements[self.first_element]["deltamu"] = self.deltamu_values[self.first_element]
@@ -210,10 +212,10 @@ class Tab_Binary_DefectsDiagram_CarrierConcentration(QWidget):
 			# Extrinsic defect selection box
 			self.extrinsic_defect_selection_box = QComboBox()
 			self.extrinsic_defect_selection_box.addItem("None")
-			for defect in self.defects_data[self.main_compound].keys():
+			for defect in self.defects_data.keys():
 				if "_" not in defect:
 					continue
-				if self.defects_data[self.main_compound][defect]["Extrinsic"] == "Yes":
+				if self.defects_data[defect]["Extrinsic"] == "Yes":
 					self.extrinsic_defect_selection_box.addItem(defect)
 			self.extrinsic_defect_selection_box.setCurrentIndex(0)
 			self.extrinsic_defect_selection_box.activated.connect(self.Update_ExtrinsicDefect)
@@ -246,7 +248,7 @@ class Tab_Binary_DefectsDiagram_CarrierConcentration(QWidget):
 			
 			# (WIDGET) Save defects diagram as figure
 			self.defects_diagram_savefigure_button = QPushButton("Save Defects Diagram Figure")
-			self.defects_diagram_savefigure_button.clicked[bool].connect(lambda: self.SaveFigure("Defects Diagram"))
+			self.defects_diagram_savefigure_button.clicked[bool].connect(lambda: self.DefectsDiagram.SaveFigure())
 			self.tab1_defectsdiagram_widget_layout.addWidget(self.defects_diagram_savefigure_button)
 			
 			# Add the defects diagram widget to Tab 1
@@ -271,11 +273,10 @@ class Tab_Binary_DefectsDiagram_CarrierConcentration(QWidget):
 			
 			# Set up carrier concentration plot object
 			self.CarrierConcentration = Binary_Carrier_Concentration(self, main_compound = main_compound, first_element = first_element, second_element = second_element)
-			self.CarrierConcentration.binary_defects_data = self.defects_data[self.main_compound]
-			self.CarrierConcentration.binary_dos_data = self.dos_data[self.main_compound]
+			self.CarrierConcentration.binary_defects_data = defects_data[self.main_compound]
+			self.CarrierConcentration.binary_dos_data = dos_data[self.main_compound]
 			self.CarrierConcentration.main_compound_number_first_specie = self.main_compound_number_first_specie
 			self.CarrierConcentration.main_compound_number_second_specie = self.main_compound_number_second_specie
-			self.CarrierConcentration.main_compound_total_energy = self.compounds_info[main_compound]["total_energy"]
 			self.CarrierConcentration.mu_elements[self.first_element]["mu0"] = self.compounds_info[self.first_element]["mu0"]
 			self.CarrierConcentration.mu_elements[self.second_element]["mu0"] = self.compounds_info[self.second_element]["mu0"]
 			self.CarrierConcentration.mu_elements[self.first_element]["deltamu"] = self.deltamu_values[self.first_element]
@@ -335,7 +336,7 @@ class Tab_Binary_DefectsDiagram_CarrierConcentration(QWidget):
 			
 			# (WIDGET) Save carrier concentration plot as figure
 			self.carrier_concentration_savefigure_button = QPushButton("Save Carrier Concentration Plot")
-			self.carrier_concentration_savefigure_button.clicked[bool].connect(lambda: self.SaveFigure("Carrier Concentration"))
+			self.carrier_concentration_savefigure_button.clicked[bool].connect(lambda: self.CarrierConcentration.SaveFigure())
 			self.tab1_carrierconcentration_widget_layout.addWidget(self.carrier_concentration_savefigure_button)
 			
 			self.tab1_layout.addWidget(self.tab1_carrierconcentration_widget)
@@ -731,39 +732,6 @@ class Tab_Binary_DefectsDiagram_CarrierConcentration(QWidget):
 				self.CarrierConcentration.ymax = float(self.carrierconcentration_Ymax_box.text())
 			self.CarrierConcentration.carrier_concentration_plot_drawing.set_ylim(self.CarrierConcentration.ymin, self.CarrierConcentration.ymax)
 			self.CarrierConcentration.carrier_concentration_plot_canvas.draw()
-	
-	
-	
-	
-	###############################################################################################
-	###################################### Save Figure ############################################
-	###############################################################################################
-	
-	def SaveFigure(self, figure_type):
-		
-		options = QFileDialog.Options()
-		options |= QFileDialog.DontUseNativeDialog
-		filename, extension_type = QFileDialog.getSaveFileName(self, "Save "+figure_type+" Figure", "", "Portable Network Graphics (*.png);;" \
-																										+"Portable Document Format (*.pdf);;" \
-																										+"Scalable Vector Graphics (*.svg);;" \
-																										+"Encapsulated PostScript (*.eps)", options=options)
-		if filename:
-			extension = extension_type.split(".")[-1].split(")")[0]
-			if filename.split(".")[-1] == extension:
-				if figure_type == "Phase Diagram":
-					self.PhaseDiagram.binary_phase_diagram_plot_figure.savefig(filename, bbox_inches='tight')
-				elif figure_type == "Defects Diagram":
-					self.DefectsDiagram.defects_diagram_plot_figure.savefig(filename, bbox_inches='tight')
-				elif figure_type == "Carrier Concentration":
-					self.CarrierConcentration.carrier_concentration_plot_figure.savefig(filename, bbox_inches='tight')
-			else:
-				if figure_type == "Phase Diagram":
-					self.PhaseDiagram.binary_phase_diagram_plot_figure.savefig(filename+"."+extension, bbox_inches='tight')
-				elif figure_type == "Defects Diagram":
-					self.DefectsDiagram.defects_diagram_plot_figure.savefig(filename+"."+extension, bbox_inches='tight')
-				elif figure_type == "Carrier Concentration":
-					self.CarrierConcentration.carrier_concentration_plot_figure.savefig(filename+"."+extension, bbox_inches='tight')
-
 
 
 

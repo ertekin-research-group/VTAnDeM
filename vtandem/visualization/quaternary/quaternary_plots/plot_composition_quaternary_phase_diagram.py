@@ -9,16 +9,15 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
 # Import compositional phase diagram object
-from vtandem.visualization.plots.plot_composition_phasediagram import Plot_Composition_PhaseDiagram
+from vtandem.visualization.plots.plot_composition_phasediagram import Plot_Composition_PhaseDiagram, PhaseRegion
+
+from pymatgen.core.composition import Composition
 
 
 
 class Plot_Composition_Quaternary_PhaseDiagram(Plot_Composition_PhaseDiagram):
 	
-	def __init__(self, main_compound = None, first_element = None, second_element = None, third_element = None, fourth_element = None, compounds_info = None):
-		
-		# Inherit all variables (plot object, etc.) from parent object (Composition_PhaseDiagram)
-		super().__init__(type = "quaternary")
+	def __init__(self, main_compound = None, first_element = None, second_element = None, third_element = None, fourth_element = None, compounds_info = None, main_compound_info = None):
 		
 		# Establish the first, second, third, and fourth species of the quaternary compound.
 		self.main_compound  = main_compound
@@ -28,106 +27,82 @@ class Plot_Composition_Quaternary_PhaseDiagram(Plot_Composition_PhaseDiagram):
 		self.fourth_element	= fourth_element
 		self.elements_list  = [self.first_element, self.second_element, self.third_element, self.fourth_element]
 		
-		# Record DFT data
-		self.compounds_info = compounds_info
+		
+		
+		# Calculate deltamu for third element
+		try:
+			main_compound_enthalpy = main_compound_info["dft_BulkEnergy"]
+			for element in self.elements_list:
+				main_compound_enthalpy -= main_compound_info["dft_"+element] * compounds_info[element]["mu0"]
+			deltamu_fourth_element = main_compound_enthalpy / main_compound_info["dft_"+self.fourth_element]
+		except:
+			main_compound_enthalpy = compounds_info[self.main_compound]["dft_total_energy"]
+			for element in self.elements_list:
+				main_compound_enthalpy -= compounds_info[self.main_compound]["dft_"+element] * compounds_info[element]["mu0"]
+			deltamu_fourth_element = main_compound_enthalpy / compounds_info[self.main_compound]["dft_"+self.fourth_element]
+			pass
 		
 		# Record delta mu values
 		self.deltamu_values = {}
 		self.deltamu_values[first_element] = 0.0
 		self.deltamu_values[second_element] = 0.0
 		self.deltamu_values[third_element] = 0.0
-		self.deltamu_values[fourth_element] = self.compounds_info[main_compound]["enthalpy"] / self.compounds_info[main_compound][self.fourth_element]
+		self.deltamu_values[fourth_element] = deltamu_fourth_element
 		
 		
+		
+		
+		
+		
+		# Inherit all variables (plot object, etc.) from parent object (Composition_PhaseDiagram)
+		super().__init__(type = "quaternary", main_compound_info = main_compound_info, compounds_info = compounds_info)
+		
+		
+		
+		
+		
+		
+		
+		"""
 		# Generate compositional phase diagram
 		self.Create_Compositional_PhaseDiagram()
 		self.Plot_Compositional_PhaseDiagram()
 		
 		
+		
 		### Find all four-phase regions after compositional phase diagram is drawn.
 		self.four_phase_region_objects = []
+		"""
 		# Find all four-phase regions in the quaternary composition space.
-		self.Find_All_FourPhaseRegions()
-		# Plot all the centroids as a scatter plot in the compositional phase diagram.
+		self.Find_All_PhaseRegions()
+		
+		# Plot all the centroids as a scatter plot (MUST come after generating four-phase regions).
 		self.Plot_Centroids()
 		
+		
+		
+		"""
 		# Plot selected four-phase region.
 		#	Store list of the four points constituting the four-phase region in self.fourphaseregion_selected.
 		#	Store the polygon plot object in self.fourphaseregion_shade.
 		self.fourphaseregion_selected = None
 		self.fourphaseregion_shade = []
+		"""
 		self.composition_phasediagram_plot_figure.canvas.mpl_connect('button_press_event', self.Shade_FourPhaseRegion)
+		
+		"""
 		self.composition_phasediagram_plot_figure.canvas.mpl_connect('button_press_event', self.Calculate_ChemicalPotentials_FourPhaseRegion)
-		
-		
 		self.composition_phasediagram_plot_figure.canvas.mpl_connect('motion_notify_event', self.Hover)
 		
 		self.fourphaseregion_annotation = self.composition_phasediagram_plot_drawing.annotate("", xy=(0,0), xytext=(20,20), textcoords="offset points",
 																								bbox = dict(boxstyle="round", fc="w"),
 																								arrowprops = dict(arrowstyle = "->") )
+		"""
 	
 	
 	
 	
-	###############################################################################################
-	################## Find All Four-Phase Regions in Compositional Phase Diagram #################
-	###############################################################################################
 	
-	def Find_All_FourPhaseRegions(self):
-		
-		# Obtain all four-phase regions.
-		#	The data structure is as follows:
-		#		lines --> List of arrays, each array is 2x2 for ternary (3x2 for quaternary, etc.), column vector represents point on phase diagram.
-		#					ex: array([ [0.3, 0.5], [1.0, 0.0] ]) is a line that goes from point [x=0.3, y=1.0] to point [x=0.5, y=0.0]
-		#		labels --> Dictionary with point-PDEntry pairs.
-		#	Algorithm works as follows:
-		#		1) Loop through all lines and get the endpoints.
-		#		2) Loop through all points.
-		#		3) If the endpoints both draw lines to the third point, then a four-phase region exists between the four points.
-		#		4) Loop through all points.
-		#		5) If the four points all draw lines to the fourth point, then a four-phase region exists between the four points.
-		for line in self.lines:
-			endpoint1, endpoint2 = np.transpose(line)
-			for point in self.labels.keys():
-				point = np.asarray(point)
-				
-				# Check if the four points form a connected triangle
-				if 		( any(np.array_equal(np.transpose(np.vstack((point, endpoint1))), i) for i in self.lines) or any(np.array_equal(np.transpose(np.vstack((endpoint1, point))), i) for i in self.lines) ) \
-					and ( any(np.array_equal(np.transpose(np.vstack((point, endpoint2))), i) for i in self.lines) or any(np.array_equal(np.transpose(np.vstack((endpoint2, point))), i) for i in self.lines) ):
-					
-					for point2 in self.labels.keys():
-						point2 = np.asarray(point2)
-						
-						# Check if the four points form a connected tetrahedron
-						if 		( any(np.array_equal(np.transpose(np.vstack((point2, endpoint1))), i) for i in self.lines) or any(np.array_equal(np.transpose(np.vstack((endpoint1, point2))), i) for i in self.lines) ) \
-							and	( any(np.array_equal(np.transpose(np.vstack((point2, endpoint2))), i) for i in self.lines) or any(np.array_equal(np.transpose(np.vstack((endpoint2, point2))), i) for i in self.lines) ) \
-							and ( any(np.array_equal(np.transpose(np.vstack((point2, point))), i) for i in self.lines) or any(np.array_equal(np.transpose(np.vstack((point, point2))), i) for i in self.lines) ):
-							
-							# Check if four-phase region has already been recorded
-							if any( all( list(x) in fourphaseregion.vertices for x in [point, point2, endpoint1, endpoint2] ) for fourphaseregion in self.four_phase_region_objects ):
-								continue
-							
-							# Get names of compounds constituting the four-phase region
-							four_phase_region_compound_names = []
-							for pt in [point, point2, endpoint1, endpoint2]:
-								four_phase_region_compound_names.append( self.labels[tuple(pt)].name )
-							if self.main_compound not in four_phase_region_compound_names:
-								continue
-							
-							# Initialize four phase region object
-							four_phase_region = FourPhaseRegion()
-							
-							# Record four phase region
-							four_phase_region.vertices = [list(point), list(point2), list(endpoint1), list(endpoint2)]
-							
-							# Record names of compounds constituting the four-phase region
-							four_phase_region.name = ', '.join(four_phase_region_compound_names)
-							
-							# Find and record the centroid of the four-phase region
-							four_phase_region.centroid = ( point + point2 + endpoint1 + endpoint2 ) / 4.
-							
-							# Add four phase region object to list
-							self.four_phase_region_objects.append(four_phase_region)
 	
 	
 	
@@ -135,10 +110,10 @@ class Plot_Composition_Quaternary_PhaseDiagram(Plot_Composition_PhaseDiagram):
 	########################## Plot Centroids of All Four-Phase Regions ###########################
 	###############################################################################################
 	
-	def Plot_Centroids(self):
+	def Plot_Centroids_Quaternary(self):
 		
 		# Check that all four-phase regions have been found
-		if self.four_phase_region_objects == []:
+		if self.phase_region_objects == []:
 			return
 		
 		# Set color of scatter plot points
@@ -147,7 +122,7 @@ class Plot_Composition_Quaternary_PhaseDiagram(Plot_Composition_PhaseDiagram):
 		
 		# Plot all centroids individually in scatter plot
 		centroids = []
-		for four_phase_region in self.four_phase_region_objects:
+		for four_phase_region in self.phase_region_objects:
 			centroid = four_phase_region.centroid
 			centroids.append(centroid)
 			four_phase_region.centroid_plot = self.composition_phasediagram_plot_drawing.scatter(	centroid[0],
@@ -165,7 +140,7 @@ class Plot_Composition_Quaternary_PhaseDiagram(Plot_Composition_PhaseDiagram):
 																					marker = scatterplot_marker )
 	
 	
-	
+	"""
 	def Update_Annotation(self, index, event):
 		
 		# Get xy position of cursor on screen
@@ -198,7 +173,7 @@ class Plot_Composition_Quaternary_PhaseDiagram(Plot_Composition_PhaseDiagram):
 				if is_visible:
 					self.fourphaseregion_annotation.set_visible(False)
 					self.composition_phasediagram_plot_canvas.draw()
-	
+	"""
 	
 	
 	
@@ -208,36 +183,38 @@ class Plot_Composition_Quaternary_PhaseDiagram(Plot_Composition_PhaseDiagram):
 	
 	def Shade_FourPhaseRegion(self, event):
 		
+		print("Four phase region selected...")
+		
 		# Check to see that all four-phase regions have been calculated
-		if self.four_phase_region_objects == []:
+		if self.phase_region_objects == []:
 			return
 		
 		# Read coordinates of clicked point
 		contains, index = self.centroids_plot.contains(event)
 		if not contains:
 			# Remove selection
-			if self.fourphaseregion_shade != []:
-				for triangle_plot in self.fourphaseregion_shade:
+			if self.phaseregion_shade != []:
+				for triangle_plot in self.phaseregion_shade:
 					triangle_plot.remove()
-			self.fourphaseregion_shade = []
+			self.phaseregion_shade = []
 			self.composition_phasediagram_plot_canvas.draw()
 			return
 		
 		# Clear previous four-phase region
-		if self.fourphaseregion_shade != []:
-			for triangle_plot in self.fourphaseregion_shade:
+		if self.phaseregion_shade != []:
+			for triangle_plot in self.phaseregion_shade:
 				triangle_plot.remove()
 		
 		# Get selected four-phase region
-		for four_phase_region in self.four_phase_region_objects:
+		for four_phase_region in self.phase_region_objects:
 			if four_phase_region.centroid_plot.contains(event)[0]:
-				self.fourphaseregion_selected = four_phase_region
+				self.phaseregion_selected = four_phase_region
 				break
 		
-		triangle1 = [self.fourphaseregion_selected.vertices[0], self.fourphaseregion_selected.vertices[1], self.fourphaseregion_selected.vertices[2]]
-		triangle2 = [self.fourphaseregion_selected.vertices[0], self.fourphaseregion_selected.vertices[1], self.fourphaseregion_selected.vertices[3]]
-		triangle3 = [self.fourphaseregion_selected.vertices[0], self.fourphaseregion_selected.vertices[2], self.fourphaseregion_selected.vertices[3]]
-		triangle4 = [self.fourphaseregion_selected.vertices[1], self.fourphaseregion_selected.vertices[2], self.fourphaseregion_selected.vertices[3]]
+		triangle1 = [self.phaseregion_selected.vertices[0], self.phaseregion_selected.vertices[1], self.phaseregion_selected.vertices[2]]
+		triangle2 = [self.phaseregion_selected.vertices[0], self.phaseregion_selected.vertices[1], self.phaseregion_selected.vertices[3]]
+		triangle3 = [self.phaseregion_selected.vertices[0], self.phaseregion_selected.vertices[2], self.phaseregion_selected.vertices[3]]
+		triangle4 = [self.phaseregion_selected.vertices[1], self.phaseregion_selected.vertices[2], self.phaseregion_selected.vertices[3]]
 		
 		alpha = 0.75
 		triangle_plot1 = Poly3DCollection(triangle1, fc='gray', ec='k', alpha=alpha)
@@ -252,12 +229,12 @@ class Plot_Composition_Quaternary_PhaseDiagram(Plot_Composition_PhaseDiagram):
 		
 		self.composition_phasediagram_plot_canvas.draw()
 		
-		self.fourphaseregion_shade = [triangle_plot1, triangle_plot2, triangle_plot3, triangle_plot4]
+		self.phaseregion_shade = [triangle_plot1, triangle_plot2, triangle_plot3, triangle_plot4]
 	
 	
 	
 	
-	
+	"""
 	###############################################################################################
 	################ Calculate Chemical Potentials of Elements in Four-Phase Region ###############
 	###############################################################################################
@@ -283,7 +260,12 @@ class Plot_Composition_Quaternary_PhaseDiagram(Plot_Composition_PhaseDiagram):
 		# Get the enthalpies of formation of each compound in the four-phase region
 		enthalpies_array = np.zeros((4, 1))
 		for compound_index, compound in enumerate(fourphaseregion_compounds):
-			enthalpies_array[compound_index] = self.compounds_info[compound]["enthalpy"]
+			competing_compound_enthalpy = self.compounds_info[compound]["dft_total_energy"] / self.compounds_info[compound]["formula_units"]
+			for element in self.elements_list:
+				if element not in self.compounds_info[compound].keys():
+					continue
+				competing_compound_enthalpy -= self.compounds_info[compound][element] * self.compounds_info[element]["mu0"]
+			enthalpies_array[compound_index] = competing_compound_enthalpy
 		
 		# Solve for the delta mu values
 		deltamus = np.dot( np.linalg.inv(composition_matrix), enthalpies_array )
@@ -291,16 +273,19 @@ class Plot_Composition_Quaternary_PhaseDiagram(Plot_Composition_PhaseDiagram):
 		# Record delta mu values
 		for element, deltamu in zip(self.elements_list, deltamus):
 			self.deltamu_values[element] = deltamu[0]
+	"""
 
 
 
+
+"""
 class FourPhaseRegion(object):
 	def __init__(self):
 		self.name = None
 		self.vertices = None
 		self.centroid = None
 		self.centroid_plot = None
-
+"""
 
 
 

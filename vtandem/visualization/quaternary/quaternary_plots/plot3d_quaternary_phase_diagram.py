@@ -56,7 +56,7 @@ class ChemicalPotential_Quaternary_PhaseDiagram3D(Plot_ChemicalPotential_PhaseDi
 		super().__init__(type = "quaternary")
 		
 		# Establish the first, second, and third elements along with the dependent element of the quaternary compound.
-		self.main_compound  = main_compound
+		self.main_compound = main_compound
 		self.element_x = first_element
 		self.element_y = second_element
 		self.element_z = third_element
@@ -89,42 +89,33 @@ class ChemicalPotential_Quaternary_PhaseDiagram3D(Plot_ChemicalPotential_PhaseDi
 		A_matrix = []
 		b_vector = []
 		
-		main_compound_coefficient1 = self.compounds_info[self.main_compound][self.element_x] / self.compounds_info[self.main_compound][self.element_z]
-		main_compound_coefficient2 = self.compounds_info[self.main_compound][self.element_y] / self.compounds_info[self.main_compound][self.element_z]
+		main_compound_coefficient1 = self.main_compound_info["dft_"+self.element_x] / self.main_compound_info["dft_"+self.element_z]
+		main_compound_coefficient2 = self.main_compound_info["dft_"+self.element_y] / self.main_compound_info["dft_"+self.element_z]
 		
-		main_compound_enthalpy_reduced = (self.compounds_info[self.main_compound]["enthalpy"] - self.compounds_info[self.main_compound][self.dependent_element]*self.mu4) / self.compounds_info[self.main_compound][self.element_z]
+		main_compound_enthalpy_reduced = (self.main_compound_enthalpy - self.main_compound_info["dft_"+self.dependent_element]*self.mu4) / self.main_compound_info["dft_"+self.element_z]
 		
 		for competing_compound in self.compounds_info.keys():
 			
-			try:
-				competing_compound_x = self.compounds_info[competing_compound][self.element_x]
-			except:
-				competing_compound_x = 0.0
-				pass
+			# Check whether compound is "competing"
+			if (not set(self.compounds_info[competing_compound]["elements_list"]).issubset(self.elements_list_original)) or (competing_compound == self.main_compound):
+				continue
 			
-			try:
-				competing_compound_y = self.compounds_info[competing_compound][self.element_y]
-			except:
-				competing_compound_y = 0.0
-				pass
+			competing_compound_element_count = {}
+			for element in self.elements_list:
+				try:
+					competing_compound_element_count[element] = float(self.compounds_info[competing_compound]["dft_"+element])
+				except:
+					competing_compound_element_count[element] = 0.0
 			
-			try:
-				competing_compound_z = self.compounds_info[competing_compound][self.element_z]
-			except:
-				competing_compound_z = 0.0
-				pass
+			# Get enthalpy of competing compound
+			competing_compound_enthalpy_tracker = self.compounds_info[competing_compound]["dft_total_energy"]
+			for element in self.elements_list:
+				competing_compound_enthalpy_tracker -= competing_compound_element_count[element] * self.compounds_info[element]["mu0"]
 			
-			try:
-				competing_compound_dependent = self.compounds_info[competing_compound][self.dependent_element]
-			except:
-				competing_compound_dependent = 0.0
-				pass
-			
-			coefficient1 = competing_compound_x - competing_compound_z*main_compound_coefficient1
-			coefficient2 = competing_compound_y - competing_compound_z*main_compound_coefficient2
-			
-			competing_compound_enthalpy_reduced = self.compounds_info[competing_compound]["enthalpy"] - competing_compound_dependent*self.mu4
-			b = competing_compound_enthalpy_reduced - competing_compound_z*main_compound_enthalpy_reduced
+			coefficient1 = competing_compound_element_count[self.element_x] - competing_compound_element_count[self.element_z]*main_compound_coefficient1
+			coefficient2 = competing_compound_element_count[self.element_y] - competing_compound_element_count[self.element_z]*main_compound_coefficient2
+			competing_compound_enthalpy_reduced = competing_compound_enthalpy_tracker - competing_compound_element_count[self.dependent_element]*self.mu4
+			b = competing_compound_enthalpy_reduced - competing_compound_element_count[self.element_z]*main_compound_enthalpy_reduced
 			
 			A_matrix.append(np.array([coefficient1, coefficient2]))
 			b_vector.append(b)
@@ -135,13 +126,22 @@ class ChemicalPotential_Quaternary_PhaseDiagram3D(Plot_ChemicalPotential_PhaseDi
 	
 	def Draw_Mu4_Outline_Region(self, verts, ininc, adj):
 		
+		"""
 		verts_z = (self.compounds_info[self.main_compound]["enthalpy"] - self.compounds_info[self.main_compound][self.dependent_element]*self.mu4 \
 					- self.compounds_info[self.main_compound][self.element_x]*verts[:,0] \
 					- self.compounds_info[self.main_compound][self.element_y]*verts[:,1] ) \
 					/ self.compounds_info[self.main_compound][self.element_z]
+		"""
+		verts_z = (self.main_compound_enthalpy - self.main_compound_info["dft_"+self.dependent_element]*self.mu4 \
+					- self.main_compound_info["dft_"+self.element_x]*verts[:,0] \
+					- self.main_compound_info["dft_"+self.element_y]*verts[:,1] ) \
+					/ self.main_compound_info["dft_"+self.element_z]
+		
 		
 		verts_z = verts_z.reshape((len(verts),1))
 		plane_vertices = np.hstack((verts, verts_z))
+		
+		print(ininc)
 		
 		for i, ininc_i in enumerate(ininc):
 			if len(ininc_i) < 3:
@@ -173,9 +173,7 @@ class ChemicalPotential_Quaternary_PhaseDiagram3D(Plot_ChemicalPotential_PhaseDi
 	def Draw_Mu4_Outline(self):
 		
 		A_matrix, b_vector = self.Obtain_Mu4_Outline_Inequalities()
-		
 		phasediagram_projection2d = Hrep(A_matrix, b_vector)	# H-representation of Ax <= b
-		
 		self.Draw_Mu4_Outline_Region(phasediagram_projection2d.generators, phasediagram_projection2d.ininc, phasediagram_projection2d.adj)
 		
 		self.chemicalpotential_phasediagram_plot_canvas.draw()

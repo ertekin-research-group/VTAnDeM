@@ -19,7 +19,7 @@ from vtandem.visualization.utils.compound_name import Compound_Name_Formal
 
 class Tab_Ternary_PhaseDiagram3D(object):
 	
-	def __init__(self, parent = None, main_compound = None, first_element = None, second_element = None, third_element = None, compounds_info = None):	# User specifies the main compound and its constituents
+	def __init__(self, parent = None, main_compound = None, first_element = None, second_element = None, third_element = None, compounds_info = None, main_compound_info = None):	# User specifies the main compound and its constituents
 		
 		self.main_compound = main_compound
 		self.first_element = first_element
@@ -28,13 +28,32 @@ class Tab_Ternary_PhaseDiagram3D(object):
 		self.elements_list = [self.first_element, self.second_element, self.third_element]					# Species list (order MAY change)
 		
 		self.compounds_info = compounds_info
+		self.main_compound_info = main_compound_info
+		
+		
+		
+		# Get enthalpy of main compound (for fourth element slider bar)
+		enthalpy_tracker = self.main_compound_info["dft_BulkEnergy"]
+		for element in self.elements_list:
+			enthalpy_tracker -= self.main_compound_info["dft_"+element] * self.compounds_info[element]["mu0"]
+		self.main_compound_enthalpy = enthalpy_tracker
+		
+		
+		
 		
 		self.PhaseDiagram3D = ChemicalPotential_Ternary_PhaseDiagram3D(self, main_compound = self.main_compound, first_element = self.first_element, second_element = self.second_element, third_element = self.third_element)
+		self.PhaseDiagram3D.main_compound_enthalpy = self.main_compound_enthalpy
 		self.PhaseDiagram3D.compounds_info = self.compounds_info
+		self.PhaseDiagram3D.main_compound_info = self.main_compound_info
+		
+		
 		
 		self.PhaseDiagram2D_TripleView = ChemicalPotential_Ternary_PhaseDiagramProjected2D_TripleView(self, main_compound = main_compound, first_element = self.second_element, second_element = self.third_element, third_element = self.first_element)
+		self.PhaseDiagram2D_TripleView.main_compound_enthalpy = self.main_compound_enthalpy
 		self.PhaseDiagram2D_TripleView.compounds_info = self.compounds_info
-		self.PhaseDiagram2D_TripleView.Update_PhaseDiagram_Object()
+		self.PhaseDiagram2D_TripleView.main_compound_info = self.main_compound_info
+		self.PhaseDiagram2D_TripleView.phasediagram_endpoints = min(self.main_compound_enthalpy/self.main_compound_info["dft_"+self.first_element], self.main_compound_enthalpy/self.main_compound_info["dft_"+self.second_element], self.main_compound_enthalpy/self.main_compound_info["dft_"+self.third_element])
+		#self.PhaseDiagram2D_TripleView.Update_PhaseDiagram_Object()
 		self.PhaseDiagram2D_TripleView.Update_PhaseDiagram_Plot_Axes()
 		
 		
@@ -114,35 +133,8 @@ class Tab_Ternary_PhaseDiagram3D(object):
 		self.tab2_layout.addWidget(self.chemicalpotentialPD_projected_window)
 		
 		
-		
-		"""
-		# (WIDGET) Three projected chemical potential phase diagrams
-		self.phase_diagram_plot_2d_tripleview = self.PhaseDiagram2D_TripleView.tripleview_phase_diagram_plot_canvas
-		
-		# Add the three projected chemical potential phase diagrams to tab2
-		self.tab2_layout.addWidget(self.phase_diagram_plot_2d_tripleview)
-		"""
-		
-		
 		# Draw phase diagrams
 		self.Generate_PhaseDiagram3D_Function()
-		
-		
-		"""
-		# Add window object to tab
-		self.ChemicalPotential_PhaseDiagram_Window = ChemicalPotential_PhaseDiagram_Window(self.main_compound, self.PhaseDiagram3D, self.PhaseDiagram2D_TripleView)
-		self.tab2_layout.addWidget(self.ChemicalPotential_PhaseDiagram_Window.chemicalpotential_phasediagram3d_window)
-		
-		# Add widgets to window
-		self.ChemicalPotential_PhaseDiagram_Window.chemicalpotential_phasediagram3d_window_layout.addWidget(self.ChemicalPotential_PhaseDiagram_Window.compound_title)
-		self.ChemicalPotential_PhaseDiagram_Window.chemicalpotential_phasediagram3d_window_layout.addWidget(self.ChemicalPotential_PhaseDiagram_Window.chemicalpotential_phase_diagram_plot)
-		self.ChemicalPotential_PhaseDiagram_Window.chemicalpotential_phasediagram3d_window_layout.addWidget(self.ChemicalPotential_PhaseDiagram_Window.generate_phasediagram3d_button_widget)
-		self.ChemicalPotential_PhaseDiagram_Window.chemicalpotential_phasediagram3d_window_layout.addWidget(self.ChemicalPotential_PhaseDiagram_Window.phasediagram3d_savefigure_button)
-		self.ChemicalPotential_PhaseDiagram_Window.chemicalpotential_phasediagram3d_window_layout.addWidget(self.ChemicalPotential_PhaseDiagram_Window.generate_phasediagram3d_animation_button)
-		
-		# Add triple view phase diagram to tab2
-		self.tab2_layout.addWidget(self.ChemicalPotential_PhaseDiagram_Window.phase_diagram_plot_2d_tripleview)
-		"""
 	
 	
 	
@@ -161,12 +153,13 @@ class Tab_Ternary_PhaseDiagram3D(object):
 		
 		self.PhaseDiagram3D.chemicalpotential_phasediagram_plot_axes.clear()
 		
-		self.PhaseDiagram3D.Set_Elements(element_x = self.first_element, element_y = self.second_element, dependent_element = self.third_element)
+		#self.PhaseDiagram3D.Set_Elements(element_x = self.first_element, element_y = self.second_element, dependent_element = self.third_element)
+		self.PhaseDiagram3D.Set_Elements(element_x = self.first_element, element_y = self.second_element, element_z = self.third_element)
 		
 		self.PhaseDiagram3D.Draw_PhaseDiagram3D()
 		
 		self.PhaseDiagram2D_TripleView.Set_Elements(first_element = self.first_element, second_element = self.second_element, third_element = self.third_element)
-		self.PhaseDiagram2D_TripleView.Update_PhaseDiagram_Object()
+		#self.PhaseDiagram2D_TripleView.Update_PhaseDiagram_Object()
 		self.PhaseDiagram2D_TripleView.Update_PhaseDiagram_Plot_Axes()
 		
 		self.PhaseDiagram2D_TripleView.competing_compounds_colorwheel = self.PhaseDiagram3D.competing_compounds_colorwheel

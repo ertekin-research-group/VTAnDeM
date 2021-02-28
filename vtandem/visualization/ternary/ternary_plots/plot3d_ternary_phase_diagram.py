@@ -67,12 +67,15 @@ class ChemicalPotential_Ternary_PhaseDiagram3D(Plot_ChemicalPotential_PhaseDiagr
 	################################## Set the dependent element ##################################
 	###############################################################################################
 	
-	def Set_Elements(self, element_x, element_y, dependent_element):
+	#def Set_Elements(self, element_x, element_y, dependent_element):
+	def Set_Elements(self, element_x, element_y, element_z):
 		
 		self.element_x = element_x
 		self.element_y = element_y
-		self.dependent_element = dependent_element
-		self.elements_list = [self.element_x, self.element_y, self.dependent_element]
+		self.element_z = element_z
+		#self.dependent_element = dependent_element
+		#self.elements_list = [self.element_x, self.element_y, self.dependent_element]
+		self.elements_list = [self.element_x, self.element_y, self.element_z]
 
 
 

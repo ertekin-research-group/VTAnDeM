@@ -26,7 +26,6 @@ class Plot_Binary_DefectsDiagram(Plot_DefectsDiagram):
 							self.second_element: {"mu0": 0.0, "deltamu": 0.0} }
 		
 		# Store all extracted DFT data
-		self.main_compound_total_energy = 0.0
 		self.first_element_mu0 = 0.0
 		self.second_element_mu0 = 0.0
 

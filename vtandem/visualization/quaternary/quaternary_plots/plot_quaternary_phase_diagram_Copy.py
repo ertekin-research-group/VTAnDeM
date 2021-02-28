@@ -3,11 +3,40 @@ __author__ = 'Michael_Lidia_Jiaxing_Elif'
 __name__ = 'VTAnDeM_Visualization-Toolkit-for-Analyzing-Defects-in-Materials'
 
 
+###############################################################################################################################
+###############################################################################################################################
+##################################################### Introduction ############################################################
+###############################################################################################################################
+###############################################################################################################################
+
+# 	This script stores the phase stability diagram of a single quaternary compound as an object within VTAnDeM.
+#
+# 	The stability of any compound is dictated by thermodynamic principles. All materials are made of atoms, and multicomponent
+#		systems in particular (e.g. systems of two or more types of atoms, like GaAs) can exhibit distinct phases/materials
+#		depending on how the atoms are arranged. Therefore, for a given set of atoms, there is a myriad of possible materials 
+#		that can be formed by e.g. different synthesis methods. Fundamentally, the material with the lowest formation energy in some
+#		environmental condition (e.g. GaAs in a 'Ga-rich' environment) is most and will likely form in a lab. Accordingly, if
+#		we are studying some quaternary system, there may be other compounds that "compete" with the main compound to become the
+#		most stable. For example, if we are interested in studying the quaternary compound Cu2HgGeTe4, in regions that are Cu-rich
+#		or Hg-poor (or any combination of the sorts), another compound such as CuTe may be more stable than Cu2HgGeTe4. It is 
+#		therefore crucial for material/device processing purposes that we know the exact environmental conditions necessary to create a 
+#		stable version of the quaternary compound of interest. The stability of compounds can fortunately be studied using Density 
+#		Functional Theory (DFT) calculations.
+
+
+
+###############################################################################################################################
+###############################################################################################################################
+################################################### Import Libraries ##########################################################
+###############################################################################################################################
+###############################################################################################################################
+
 import numpy as np
 import itertools
 import copy
 import periodictable
 import matplotlib.pyplot as plt
+import matplotlib.gridspec as gridspec
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 
@@ -16,40 +45,42 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 
+from vtandem.visualization.utils.chemicalpotential_phasediagram import Calculate_PhaseDiagram_Projected2D
+from vtandem.visualization.utils.compound_name import Compound_Name_Formal
+
 from vtandem.visualization.plots.plot_chemicalpotential_phasediagram import ChemicalPotential_PhaseDiagramProjected2D
-from vtandem.visualization.plots.plot_chemicalpotential_phasediagram_projectedtripleview import ChemicalPotential_PhaseDiagramProjected2D_TripleView
 
 
 
-class ChemicalPotential_Ternary_PhaseDiagramProjected2D(ChemicalPotential_PhaseDiagramProjected2D):
+class ChemicalPotential_Quaternary_PhaseDiagramProjected2D(ChemicalPotential_PhaseDiagramProjected2D):
 	
-	def __init__(self, parent = None, main_compound = None, first_element = None, second_element = None, third_element = None):
+	def __init__(self, parent = None, main_compound = None, first_element = None, second_element = None, third_element = None, fourth_element = None):
 		
-		super().__init__(main_compound, "ternary")
+		super().__init__(main_compound, "quaternary")
 		
-		# Establish the first, second, and third species of the quaternary compound.
+		# Establish the first, second, third, and fourth species of the quaternary compound.
 		# Note that this list is subject to change, depending on what the user chooses.
 		self.main_compound  = main_compound
-		self.first_element  = first_element
-		self.second_element = second_element
-		self.third_element  = third_element
-		self.elements_list  = [self.first_element, self.second_element, self.third_element]		# Species list (order MAY change)
+		self.first_element	= first_element
+		self.second_element	= second_element
+		self.third_element	= third_element
+		self.fourth_element	= fourth_element
+		self.elements_list  = [self.first_element, self.second_element, self.third_element, self.fourth_element]	# List of elements that gets updated as user selects element order
+		self.elements_list_original = [self.first_element, self.second_element, self.third_element, self.fourth_element]	# Unchanged list of elements for compound naming purposes (e.g. see Compound_Name_Formal)
 		
-		# Information about main ternary compound
-		self.main_compound_number_first_specie  = 0	# Number of each specie in ternary compound
-		self.main_compound_number_second_specie = 0
-		self.main_compound_number_third_specie  = 0
-		self.main_compound_enthalpy = 0.0			# Enthalpy of ternary compound
-		self.phasediagram_endpoints = 0.0			# Endpoints for ternary phase diagram
-		self.deltamu = {1: 0.0, 2: 0.0, 3: 0.0}
+		# Necessary numerical variables
+		self.main_compound_elements_count = {}
+		self.main_compound_enthalpy = 0.0			# Enthalpy of the main quaternary compound
+		self.phasediagram_endpoints = 0.0			# Endpoints for quaternary phase diagram
+		#self.mu4 = 0.0								# Track the fourth species mu value as the user changes it
+		self.deltamu = {1: 0.0, 2: 0.0, 3: 0.0, 4: 0.0}
 
 
 
 
-
-class ChemicalPotential_Ternary_PhaseDiagramProjected2D_TripleView(ChemicalPotential_PhaseDiagramProjected2D_TripleView):
+class ChemicalPotential_Quaternary_PhaseDiagramProjected2D_TripleView(QWidget):
 	
-	def __init__(self, parent = None, main_compound = None, first_element = None, second_element = None, third_element = None):
+	def __init__(self, parent = None, main_compound = None, first_element = None, second_element = None, third_element = None, fourth_element = None):
 		
 		"""
 		# All elements in the periodic table
@@ -64,30 +95,39 @@ class ChemicalPotential_Ternary_PhaseDiagramProjected2D_TripleView(ChemicalPoten
 				'size': 12 }
 		"""
 		
-		# Establish the first, second, and third species of the quaternary compound.
+		# Establish the first, second, third, and fourth species of the quaternary compound.
 		# Note that this list is subject to change, depending on what the user chooses.
 		self.main_compound  = main_compound
 		self.first_element	= first_element
 		self.second_element	= second_element
 		self.third_element	= third_element
-		self.elements_list  = [self.first_element, self.second_element, self.third_element]	# List of elements that gets updated as user selects element order
-		self.elements_list_original = [self.first_element, self.second_element, self.third_element]	# Unchanged list of elements for compound naming purposes
-		
-		self.deltamu = {1: 0.0, 2: 0.0, 3: 0.0}
+		self.fourth_element	= fourth_element
+		self.elements_list  = [self.first_element, self.second_element, self.third_element, self.fourth_element]	# List of elements that gets updated as user selects element order
+		self.elements_list_original = [self.first_element, self.second_element, self.third_element, self.fourth_element]	# Unchanged list of elements for compound naming purposes (e.g. see Compound_Name_Formal)
 		
 		"""
 		# Store all extracted DFT data
 		self.compounds_info = {}
+		"""
 		
 		# Necessary numerical variables
+		"""
 		self.main_compound_number_first_specie  = 0	# Number of each specie in the main quaternary compound
 		self.main_compound_number_second_specie = 0
 		self.main_compound_number_third_specie  = 0
+		self.main_compound_number_fourth_specie = 0
+		"""
+		
+		"""
+		self.main_compound_elements_count = {}
 		self.main_compound_enthalpy = 0.0			# Enthalpy of the main quaternary compound
 		self.phasediagram_endpoints = 0.0			# Endpoints for quaternary phase diagram
-		self.deltamu = {1: 0.0, 2: 0.0, 3: 0.0}
+		#self.mu4 = 0.0								# Track the fourth species mu value as the user changes it
+		"""
+		self.deltamu = {1: 0.0, 2: 0.0, 3: 0.0, 4: 0.0}								# Track the fourth species mu value as the user changes it
 		
-		# Ternary phase diagram object
+		"""
+		# Quaternary phase diagram object
 		self.tripleview_phase_diagram_plot_figure = plt.figure(figsize=(7,7))
 		
 		self.tripleview_phase_diagram_plot_drawing12 = self.tripleview_phase_diagram_plot_figure.add_subplot(221)
@@ -95,6 +135,7 @@ class ChemicalPotential_Ternary_PhaseDiagramProjected2D_TripleView(ChemicalPoten
 		self.tripleview_phase_diagram_plot_drawing23 = self.tripleview_phase_diagram_plot_figure.add_subplot(223)
 		
 		self.tripleview_phase_diagram_plot_canvas = FigureCanvas(self.tripleview_phase_diagram_plot_figure)
+		
 		
 		
 		# Necessary plot-related variables
@@ -106,8 +147,6 @@ class ChemicalPotential_Ternary_PhaseDiagramProjected2D_TripleView(ChemicalPoten
 		self.competing_compound_plots23 = {}			# Competing compound plots (holds plot objects)
 		self.competing_compounds_colorwheel = {}		# Legend
 		"""
-		
-		super().__init__("ternary")
 	
 	
 	
@@ -115,29 +154,46 @@ class ChemicalPotential_Ternary_PhaseDiagramProjected2D_TripleView(ChemicalPoten
 	################################## Set the dependent element ##################################
 	###############################################################################################
 	
-	def Set_Elements(self, first_element, second_element, third_element):
+	def Set_Elements(self, first_element, second_element, third_element, fourth_element):
 		
 		self.first_element = first_element
 		self.second_element = second_element
 		self.third_element = third_element
-		self.elements_list = [self.first_element, self.second_element, self.third_element]
+		self.fourth_element = fourth_element
+		self.elements_list = [self.first_element, self.second_element, self.third_element, self.fourth_element]
 	
 	
-	"""
+	
+	
+	
 	def Update_PhaseDiagram_Object(self):
 		
 		# Number of elements in main compound
+		"""
 		self.main_compound_number_first_specie = self.compounds_info[self.main_compound][self.first_element]	# Number of first species in quaternary compound
 		self.main_compound_number_second_specie = self.compounds_info[self.main_compound][self.second_element]	# Number of second species in quaternary compound
 		self.main_compound_number_third_specie = self.compounds_info[self.main_compound][self.third_element]	# Number of third species in quaternary compound
+		self.main_compound_number_fourth_specie = self.compounds_info[self.main_compound][self.fourth_element]	# Number of fourth species in quaternary compound
+		"""
 		
+		"""
+		for element in self.elements_list:
+			main_compound_elements_count[element] = 
+		"""
+		
+		"""
 		# Enthalpy of quaternary compound
-		self.main_compound_enthalpy = self.compounds_info[self.main_compound]["enthalpy"]	# Enthalpy of quaternary compound
+		#self.main_compound_enthalpy = self.compounds_info[self.main_compound]["enthalpy"]	# Enthalpy of quaternary compound
+		enthalpy_tracker = defects_data["Bulk"]["dft_BulkEnergy"]
+		for element in self.elements_list:
+			enthalpy_tracker -= self.main_compound_elements_count[element] * self.compounds_info[element]["mu0"]
+		self.main_compound_enthalpy = enthalpy_tracker
 		
 		# Endpoints of phase diagram
-		self.phasediagram_endpoints = min(self.main_compound_enthalpy/self.main_compound_number_first_specie, self.main_compound_enthalpy/self.main_compound_number_second_specie, self.main_compound_enthalpy/self.main_compound_number_third_specie)
+		self.phasediagram_endpoints = min(self.main_compound_enthalpy/self.main_compound_number_first_specie, self.main_compound_enthalpy/self.main_compound_number_second_specie, self.main_compound_enthalpy/self.main_compound_number_third_specie, self.main_compound_enthalpy/self.main_compound_number_fourth_specie)
+		"""
 	
-	
+	"""
 	def Update_PhaseDiagram_Plot_Axes(self):
 		
 		self.tripleview_phase_diagram_plot_drawing12.set_xlim(self.phasediagram_endpoints, 0.0)
@@ -177,7 +233,7 @@ class ChemicalPotential_Ternary_PhaseDiagramProjected2D_TripleView(ChemicalPoten
 		self.tripleview_phase_diagram_plot_drawing23.set_aspect("equal")
 		
 		self.tripleview_phase_diagram_plot_figure.tight_layout()
-	
+	"""
 	
 	
 	def Establish_CompetingCompounds_Colorwheel(self):
@@ -185,7 +241,7 @@ class ChemicalPotential_Ternary_PhaseDiagramProjected2D_TripleView(ChemicalPoten
 		color_counter = 0
 		
 		# Loop through all compounds in the database
-		for competing_compound in self.compounds_info.keys():
+		for competing_compound in self.compounds_info.keys():	
 			
 			# Skip if compound is either the main compound or one of the elements
 			if (competing_compound in self.all_elements) or (competing_compound == self.main_compound):
@@ -202,7 +258,9 @@ class ChemicalPotential_Ternary_PhaseDiagramProjected2D_TripleView(ChemicalPoten
 		main_compound_deltamu_first_element12, main_compound_stability_limit12, \
 			competing_compounds_deltamu_first_element_limit12, competing_compounds_deltamu_second_element_limit12, \
 			main_compound_deltamu_first_element_cutoff12, stability_minimum_cutoff12, stability_maximum_cutoff12 \
-			= Calculate_PhaseDiagram_Projected2D(self.main_compound, {1: self.first_element, 2: self.second_element, 3: self.third_element}, self.compounds_info, self.deltamu)
+			= Calculate_PhaseDiagram_Projected2D(self.main_compound, {1: self.first_element, 2: self.second_element, 3: self.third_element, 4: self.fourth_element}, self.compounds_info, self.deltamu)
+		
+		#print(self.competing_compounds_colorwheel)
 		
 		try:
 			self.main_compound_plot12.set_data(main_compound_deltamu_first_element12, main_compound_stability_limit12)
@@ -230,11 +288,14 @@ class ChemicalPotential_Ternary_PhaseDiagramProjected2D_TripleView(ChemicalPoten
 		
 		
 		
+		
+		
+		
 		# First-third elements
 		main_compound_deltamu_first_element13, main_compound_stability_limit13, \
 			competing_compounds_deltamu_first_element_limit13, competing_compounds_deltamu_second_element_limit13, \
 			main_compound_deltamu_first_element_cutoff13, stability_minimum_cutoff13, stability_maximum_cutoff13 \
-			= Calculate_PhaseDiagram_Projected2D(self.main_compound, {1: self.first_element, 2: self.third_element, 3: self.second_element}, self.compounds_info, self.deltamu)
+			= Calculate_PhaseDiagram_Projected2D(self.main_compound, {1: self.first_element, 2: self.third_element, 3: self.second_element, 4: self.fourth_element}, self.compounds_info, self.deltamu)
 		
 		try:
 			self.main_compound_plot13.set_data(main_compound_deltamu_first_element13, main_compound_stability_limit13)
@@ -263,11 +324,12 @@ class ChemicalPotential_Ternary_PhaseDiagramProjected2D_TripleView(ChemicalPoten
 		
 		
 		
-		# Second-third_elements
+		
+		# Second-third elements
 		main_compound_deltamu_first_element23, main_compound_stability_limit23, \
 			competing_compounds_deltamu_first_element_limit23, competing_compounds_deltamu_second_element_limit23, \
 			main_compound_deltamu_first_element_cutoff23, stability_minimum_cutoff23, stability_maximum_cutoff23 \
-			= Calculate_PhaseDiagram_Projected2D(self.main_compound, {1: self.second_element, 2: self.third_element, 3: self.first_element}, self.compounds_info, self.deltamu)
+			= Calculate_PhaseDiagram_Projected2D(self.main_compound, {1: self.second_element, 2: self.third_element, 3: self.first_element, 4: self.fourth_element}, self.compounds_info, self.deltamu)
 		
 		try:
 			self.main_compound_plot23.set_data(main_compound_deltamu_first_element23, main_compound_stability_limit23)
@@ -294,55 +356,9 @@ class ChemicalPotential_Ternary_PhaseDiagramProjected2D_TripleView(ChemicalPoten
 			self.phase_stability_region23 = self.tripleview_phase_diagram_plot_drawing23.fill_between(main_compound_deltamu_first_element_cutoff23, stability_maximum_cutoff23, stability_minimum_cutoff23, facecolor='0.75')
 		
 		
+		
 		# Draw the phase diagram
 		self.tripleview_phase_diagram_plot_canvas.draw()
-	"""
-
-
-
-
-
-
-
-"""
-def Find_PhaseStabilityRegion_Vertices(phase_stability_region):
-	
-	# This function finds the vertices bounding the phase stability region. It takes
-	#	the points of the phase stability region as input.
-	
-	PSR_Vertices_Unrepeated = []
-	
-	if phase_stability_region.get_paths() != []:
-		
-		PSR_Vertices = []
-		PSR_Bound_Slope_Previous = None
-		PSR_Bounding_Point_Previous = None
-		tolerance = 1E-6
-		for PSR_Bounds in phase_stability_region.get_paths()[0].iter_segments():
-			PSR_Bounding_Point = PSR_Bounds[0]
-			try:
-				PSR_Bound_Slope = (PSR_Bounding_Point[1]-PSR_Bounding_Point_Previous[1]) / (PSR_Bounding_Point[0]-PSR_Bounding_Point_Previous[0])
-			except:
-				PSR_Bounding_Point_Previous = PSR_Bounding_Point
-				PSR_Bound_Slope_Previous = 0.0
-				continue
-			if (PSR_Bound_Slope < PSR_Bound_Slope_Previous - tolerance) or (PSR_Bound_Slope > PSR_Bound_Slope_Previous + tolerance):
-				PSR_Vertices.append(PSR_Bounding_Point_Previous)
-				PSR_Vertices.append(PSR_Bounding_Point)
-			PSR_Bound_Slope_Previous = PSR_Bound_Slope
-			PSR_Bounding_Point_Previous = PSR_Bounding_Point
-		PSR_Vertices_Omit = []
-		for PSR_Vertices_Index in range(len(PSR_Vertices)-1):
-			if (np.linalg.norm(PSR_Vertices[PSR_Vertices_Index]-PSR_Vertices[PSR_Vertices_Index+1]) < 0.01):
-				PSR_Vertices_Omit.append(PSR_Vertices[PSR_Vertices_Index])
-		PSR_Vertices_Unrepeated = [x for x in PSR_Vertices if (not any((x is y for y in PSR_Vertices_Omit)))]
-	
-	return PSR_Vertices_Unrepeated
-"""
-
-
-
-
 
 
 

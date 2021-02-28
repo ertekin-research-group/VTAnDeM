@@ -36,7 +36,6 @@ class Plot_Ternary_Carrier_Concentration(Plot_CarrierConcentration):
 								self.third_element: self.main_compound_number_third_specie }
 		
 		# Store all extracted DFT data
-		self.main_compound_total_energy = 0.0
 		self.first_element_mu0 = 0.0
 		self.second_element_mu0 = 0.0
 		self.third_element_mu0 = 0.0

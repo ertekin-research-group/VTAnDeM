@@ -7,7 +7,7 @@ import numpy as np
 
 
 def Calculate_IntrinsicDefectFormationEnthalpies(	defects_data, \
-													main_compound_total_energy, \
+													main_compound_info, \
 													fermi_energy_array, \
 													mu_elements	):
 	
@@ -26,7 +26,7 @@ def Calculate_IntrinsicDefectFormationEnthalpies(	defects_data, \
 			intrinsic_defects_enthalpy_data[defect] = {}
 			for charge in defects_data[defect]["charge"].keys():
 				defect_formation_enthalpy = defects_data[defect]["charge"][charge]["Energy"] \
-											- defects_data["supercellsize"] * main_compound_total_energy \
+											- main_compound_info["dft_BulkEnergy"] \
 											+ float(charge) * fermi_energy_array \
 											+ defects_data[defect]["charge"][charge]["ECorr"]
 				for element in mu_elements.keys():
@@ -39,7 +39,7 @@ def Calculate_IntrinsicDefectFormationEnthalpies(	defects_data, \
 
 
 def Calculate_ExtrinsicDefectFormationEnthalpies(	defects_data, \
-													main_compound_total_energy, \
+													main_compound_info, \
 													fermi_energy_array, \
 													mu_elements, \
 													extrinsic_defects, \
@@ -61,7 +61,7 @@ def Calculate_ExtrinsicDefectFormationEnthalpies(	defects_data, \
 		# Loop through charge states of extrinsic defect
 		for charge in defects_data[extrinsic_defect]["charge"].keys():
 			defect_formation_enthalpy = defects_data[extrinsic_defect]["charge"][charge]["Energy"] \
-										- defects_data["supercellsize"] * main_compound_total_energy \
+										- main_compound_info["dft_BulkEnergy"] \
 										- (dopant_mu0 + dopant_deltamu) \
 										+ float(charge) * fermi_energy_array \
 										+ defects_data[extrinsic_defect]["charge"][charge]["ECorr"]
@@ -88,7 +88,7 @@ def Find_MinimumDefectFormationEnthalpies(defect_formation_enthalpy_data):
 	return minimum_defect_formation_enthalpy_data
 
 
-
+"""
 def Find_SiteMultiplicity(defect_name, number_species, element_count, volume):
 	
 	# Check that the number of species matches the number of elements
@@ -103,7 +103,7 @@ def Find_SiteMultiplicity(defect_name, number_species, element_count, volume):
 			N = element_count[defect_name.split("_")[-1]] / volume
 	
 	return N
-
+"""
 
 
 

@@ -12,7 +12,7 @@ for element in periodictable.elements:
 
 
 
-def Calculate_PhaseDiagram_Projected2D(main_compound, elements_dict: dict, compounds_info, deltamu: dict):
+def Calculate_PhaseDiagram_Projected2D(main_compound, elements_dict: dict, compounds_info: dict, deltamu: dict, main_compound_info: dict):
 	
 	# Plotting the phase diagram from DFT data is one of the main features of this app. This function
 	#	single-handedly plots the phase diagram, so it's arguably one of the most important block of
@@ -28,12 +28,17 @@ def Calculate_PhaseDiagram_Projected2D(main_compound, elements_dict: dict, compo
 	# Number of elements in main_compound
 	main_compound_elements_count = {}
 	for element_index in sorted(elements_dict.keys()):
-		main_compound_elements_count[element_index] = compounds_info[main_compound][elements_dict[element_index]]
+		#main_compound_elements_count[element_index] = compounds_info[main_compound][elements_dict[element_index]]
+		main_compound_elements_count[element_index] = main_compound_info["dft_"+elements_dict[element_index]]
 	
 	
 	# Enthalpy of compound
-	main_compound_enthalpy = compounds_info[main_compound]["enthalpy"]
-	main_compound_enthalpy_adjusted = main_compound_enthalpy	# Enthalpy adjusted for mu4 value (main compound)
+	main_compound_enthalpy = main_compound_info["dft_BulkEnergy"]
+	for element in elements_dict.values():
+		main_compound_enthalpy -= main_compound_info["dft_"+element] * compounds_info[element]["mu0"]
+	
+	# Enthalpy adjusted for mu4 value (main compound)
+	main_compound_enthalpy_adjusted = main_compound_enthalpy
 	for element_index in sorted(elements_dict.keys()):
 		if element_index in [1, 2, 3]:
 			continue
@@ -64,13 +69,18 @@ def Calculate_PhaseDiagram_Projected2D(main_compound, elements_dict: dict, compo
 		competing_compound_elements_count = {}
 		for element_index in sorted(elements_dict.keys()):
 			try:
-				competing_compound_elements_count[element_index] = compounds_info[competing_compound][elements_dict[element_index]]
+				#competing_compound_elements_count[element_index] = compounds_info[competing_compound][elements_dict[element_index]]
+				competing_compound_elements_count[element_index] = compounds_info[competing_compound]["dft_"+elements_dict[element_index]]
 			except:
 				competing_compound_elements_count[element_index] = 0.0
 				pass
 		
-		competing_compound_enthalpy = compounds_info[competing_compound]["enthalpy"]
-		#competing_compound_enthalpy_adjusted = competing_compound_enthalpy - competing_compound_number_fourth_specie*self.mu4		# Enthalpy adjusted for mu4 value (competing compound)
+		competing_compound_enthalpy = compounds_info[competing_compound]["dft_total_energy"]
+		for element in elements_dict.values():
+			try:
+				competing_compound_enthalpy -= compounds_info[competing_compound]["dft_"+element] * compounds_info[element]["mu0"]
+			except:
+				continue
 		competing_compound_enthalpy_adjusted = competing_compound_enthalpy		# Enthalpy adjusted for mu4 value (competing compound)
 		for element_index in sorted(elements_dict.keys()):
 			if element_index in [1, 2, 3]:

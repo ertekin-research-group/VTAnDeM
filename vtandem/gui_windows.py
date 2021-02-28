@@ -767,23 +767,32 @@ class Quaternary_Main_VTAnDeM_Window(QMainWindow):
 		# Set up the framework of the application window (including file menu, exit function, etc.)
 		self.Setup_Window_Framework()
 		
-		
-		
-		
 		self.elements_list = [first_element, second_element, third_element, fourth_element]					# Species list (order MAY change)
 		
 		
 		
-		# Obtain DFT data
+		# Obtain compounds data
 		self.compounds_info = Obtain_Compounds_Data(self.elements_list)		# Total energies/enthalpies for phase diagram
-		self.defects_data = Obtain_Defects_Data()	# Defect energies for defects diagram
+		
+		# Obtain defects data
+		if show_defects_diagram:
+			self.defects_data = Obtain_Defects_Data()[main_compound]	# Defect energies for defects diagram
+			self.main_compound_info = self.defects_data["Bulk"]
+			del self.defects_data["Bulk"]	# Remove bulk information from defects_data
+		else:
+			self.defects_data = {}
+			self.main_compound_info = {"dft_BulkEnergy": self.compounds_info[main_compound]["dft_total_energy"]}
+			for element in self.compounds_info[main_compound]["elements_list"]:
+				self.main_compound_info["dft_"+element] = self.compounds_info[main_compound]["dft_"+element]
+		
+		# Obtain DOS data
 		self.dos_data = Obtain_DOS_Data()
 		
 		
 		
-		self.Tab1_PhasesDefectsCarriers_Object = Tab_PhaseDiagram_DefectsDiagram_CarrierConcentration(self, main_compound = main_compound, first_element = first_element, second_element = second_element, third_element = third_element, fourth_element = fourth_element, compounds_info = self.compounds_info, defects_data = self.defects_data, dos_data = self.dos_data, show_defects_diagram = show_defects_diagram, show_carrier_concentration = show_carrier_concentration)
-		self.Tab2_PhaseDiagram3D_Object = Tab_PhaseDiagram3D(self, main_compound = main_compound, first_element = first_element, second_element = second_element, third_element = third_element, fourth_element = fourth_element, compounds_info = self.compounds_info)
-		self.Tab3_PhaseDiagram3D_Object = Tab_Quaternary_Compositional_PhaseDiagram3D(main_compound = main_compound, first_element = first_element, second_element = second_element, third_element = third_element, fourth_element = fourth_element, compounds_info = self.compounds_info, defects_data = self.defects_data, show_defects_diagram = show_defects_diagram)
+		self.Tab1_PhasesDefectsCarriers_Object = Tab_PhaseDiagram_DefectsDiagram_CarrierConcentration(self, main_compound = main_compound, first_element = first_element, second_element = second_element, third_element = third_element, fourth_element = fourth_element, compounds_info = self.compounds_info, defects_data = self.defects_data, main_compound_info = self.main_compound_info, dos_data = self.dos_data, show_defects_diagram = show_defects_diagram, show_carrier_concentration = show_carrier_concentration)
+		self.Tab2_PhaseDiagram3D_Object = Tab_PhaseDiagram3D(self, main_compound = main_compound, first_element = first_element, second_element = second_element, third_element = third_element, fourth_element = fourth_element, compounds_info = self.compounds_info, main_compound_info = self.main_compound_info)
+		self.Tab3_PhaseDiagram3D_Object = Tab_Quaternary_Compositional_PhaseDiagram3D(main_compound = main_compound, first_element = first_element, second_element = second_element, third_element = third_element, fourth_element = fourth_element, compounds_info = self.compounds_info, defects_data = self.defects_data, main_compound_info = self.main_compound_info, dos_data = self.dos_data, show_defects_diagram = show_defects_diagram, show_carrier_concentration = show_carrier_concentration)
 		
 		
 		
@@ -897,18 +906,34 @@ class Ternary_Main_VTAnDeM_Window(QMainWindow):
 		# Establish list of elements in compound
 		self.elements_list = [first_element, second_element, third_element]					# Species list (order MAY change)
 		
-		# Obtain DFT data
+		# Obtain compounds data
 		self.compounds_info = Obtain_Compounds_Data(self.elements_list)	# Total energies/enthalpies for phase diagram
-		self.defects_data = Obtain_Defects_Data()		# Defect energies for defects diagram
+		
+		# Obtain defects data
+		if show_defects_diagram:
+			self.defects_data = Obtain_Defects_Data()[main_compound]	# Defect energies for defects diagram
+			self.main_compound_info = self.defects_data["Bulk"]
+			del self.defects_data["Bulk"]	# Remove bulk information from defects_data
+		else:
+			self.defects_data = {}
+			self.main_compound_info = {}
+		
+		# Obtain DOS data
 		self.dos_data = Obtain_DOS_Data()
 		
 		
-		self.Tab1_PhasesDefectsCarriers_Object = Tab_Ternary_PhaseDiagram_DefectsDiagram_CarrierConcentration(main_compound = main_compound, first_element = first_element, second_element = second_element, third_element = third_element, compounds_info = self.compounds_info, defects_data = self.defects_data, dos_data = self.dos_data, show_defects_diagram = show_defects_diagram, show_carrier_concentration = show_carrier_concentration)
-		self.Tab2_PhaseDiagram3D_Object = Tab_Ternary_PhaseDiagram3D(self, main_compound = main_compound, first_element = first_element, second_element = second_element, third_element = third_element, compounds_info = self.compounds_info)
-		self.Tab3_PhaseDiagram_Object = Tab_Ternary_Compositional_PhaseDiagram(main_compound = main_compound, first_element = first_element, second_element = second_element, third_element = third_element, compounds_info = self.compounds_info, defects_data = self.defects_data, show_defects_diagram = show_defects_diagram)
+		self.Tab1_PhasesDefectsCarriers_Object = Tab_Ternary_PhaseDiagram_DefectsDiagram_CarrierConcentration(main_compound = main_compound, first_element = first_element, second_element = second_element, third_element = third_element, compounds_info = self.compounds_info, defects_data = self.defects_data, main_compound_info = self.main_compound_info, dos_data = self.dos_data, show_defects_diagram = show_defects_diagram, show_carrier_concentration = show_carrier_concentration)
+		self.Tab2_PhaseDiagram3D_Object = Tab_Ternary_PhaseDiagram3D(self, main_compound = main_compound, first_element = first_element, second_element = second_element, third_element = third_element, compounds_info = self.compounds_info, main_compound_info = self.main_compound_info)
+		self.Tab3_PhaseDiagram_Object = Tab_Ternary_Compositional_PhaseDiagram(main_compound = main_compound, first_element = first_element, second_element = second_element, third_element = third_element, compounds_info = self.compounds_info, defects_data = self.defects_data, main_compound_info = self.main_compound_info, dos_data = self.dos_data, show_defects_diagram = show_defects_diagram, show_carrier_concentration = show_carrier_concentration)
 		
+		# Check for dopants in defects database
 		if show_defects_diagram:
-			self.Tab4_Ternary_Dopants = Tab_Ternary_Dopants(main_compound = main_compound, first_element = first_element, second_element = second_element, third_element = third_element, compounds_info = self.compounds_info, defects_data = self.defects_data)
+			dopants_exist = False
+			for defect in self.defects_data.keys():
+				if self.defects_data[defect]["Extrinsic"] == "Yes":
+					dopants_exist = True
+			if dopants_exist:
+				self.Tab4_Ternary_Dopants = Tab_Ternary_Dopants(main_compound = main_compound, first_element = first_element, second_element = second_element, third_element = third_element, compounds_info = self.compounds_info, defects_data = self.defects_data, main_compound_info = self.main_compound_info)
 		
 		
 		
@@ -935,7 +960,8 @@ class Ternary_Main_VTAnDeM_Window(QMainWindow):
 		self.plot_tabs_widget.addTab(self.Tab3_PhaseDiagram_Object.tab3, "Phase Diagram, Composition Space")
 		
 		if show_defects_diagram:
-			self.plot_tabs_widget.addTab(self.Tab4_Ternary_Dopants.tab4, "Dopants")
+			if dopants_exist:
+				self.plot_tabs_widget.addTab(self.Tab4_Ternary_Dopants.tab4, "Dopants")
 		
 		
 		self.widgets_grid.addWidget(self.plot_tabs_widget)
@@ -1026,13 +1052,24 @@ class Binary_Main_VTAnDeM_Window(QMainWindow):
 		# Establish list of elements in compound
 		self.elements_list = [first_element, second_element]					# Species list (order MAY change)
 		
-		# Obtain DFT data
+		# Obtain compounds data
 		self.compounds_info = Obtain_Compounds_Data(self.elements_list)	# Total energies/enthalpies for phase diagram
-		self.defects_data = Obtain_Defects_Data()		# Defect energies for defects diagram
+		
+		# Obtain defects data
+		if show_defects_diagram:
+			self.defects_data = Obtain_Defects_Data()[main_compound]	# Defect energies for defects diagram
+			self.main_compound_info = self.defects_data["Bulk"]
+			del self.defects_data["Bulk"]	# Remove bulk information from defects_data
+		else:
+			self.defects_data = {}
+			self.main_compound_info = {}
+		
+		# Obtain DOS data
 		self.dos_data = Obtain_DOS_Data()
 		
 		
-		self.Tab1_PhasesDefectsCarriers_Object = Tab_Binary_DefectsDiagram_CarrierConcentration(self, main_compound = main_compound, first_element = first_element, second_element = second_element, compounds_info = self.compounds_info, defects_data = self.defects_data, dos_data = self.dos_data, show_defects_diagram = show_defects_diagram, show_carrier_concentration = show_carrier_concentration)
+		
+		self.Tab1_PhasesDefectsCarriers_Object = Tab_Binary_DefectsDiagram_CarrierConcentration(self, main_compound = main_compound, first_element = first_element, second_element = second_element, compounds_info = self.compounds_info, defects_data = self.defects_data, main_compound_info = self.main_compound_info, dos_data = self.dos_data, show_defects_diagram = show_defects_diagram, show_carrier_concentration = show_carrier_concentration)
 		
 		
 		
