@@ -38,7 +38,7 @@ class Tab_Compositional_PhaseDiagram(Window_DefectsDiagram, Window_CarrierConcen
 			
 			self.DefectsDiagram.EVBM = main_compound_info["VBM"]
 			self.DefectsDiagram.ECBM = self.DefectsDiagram.EVBM + main_compound_info["BandGap"]
-			self.DefectsDiagram.fermi_energy_array = np.linspace(self.DefectsDiagram.EVBM, self.DefectsDiagram.ECBM, 100)
+			self.DefectsDiagram.fermi_energy_array = np.linspace(self.DefectsDiagram.EVBM, self.DefectsDiagram.ECBM, 884)
 			self.DefectsDiagram.Activate_DefectsDiagram_Plot_Axes()
 			
 			# Update defects diagram in response to clicking on phase diagram
@@ -60,7 +60,7 @@ class Tab_Compositional_PhaseDiagram(Window_DefectsDiagram, Window_CarrierConcen
 			self.CarrierConcentration.vol = main_compound_info["Volume"]
 			self.CarrierConcentration.EVBM = self.DefectsDiagram.EVBM
 			self.CarrierConcentration.ECBM = self.DefectsDiagram.ECBM
-			self.CarrierConcentration.fermi_energy_array = np.linspace(self.CarrierConcentration.EVBM, self.CarrierConcentration.ECBM, 100)
+			self.CarrierConcentration.fermi_energy_array = self.DefectsDiagram.fermi_energy_array
 			self.CarrierConcentration.Activate_CarrierConcentration_Plot_Axes()
 			self.CarrierConcentration.Organize_DOS_Data()
 			self.CarrierConcentration.Extract_Relevant_Energies_DOSs()

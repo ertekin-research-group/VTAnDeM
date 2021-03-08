@@ -29,18 +29,6 @@ class Plot_Quaternary_Carrier_Concentration(Plot_CarrierConcentration):
 							self.third_element: {"mu0": 0.0, "deltamu": 0.0},
 							self.fourth_element: {"mu0": 0.0, "deltamu": 0.0} }
 		
-		# Number of each specie in the main quaternary compound
-		"""
-		self.main_compound_number_first_specie  = 0	# Number of each specie in the main quaternary compound
-		self.main_compound_number_second_specie = 0
-		self.main_compound_number_third_specie  = 0
-		self.main_compound_number_fourth_specie = 0
-		self.number_species = {	self.first_element: self.main_compound_number_first_specie,
-								self.second_element: self.main_compound_number_second_specie,
-								self.third_element: self.main_compound_number_third_specie,
-								self.fourth_element: self.main_compound_number_fourth_specie }
-		"""
-		
 		# Store all extracted DFT data
 		self.first_element_mu0 = 0.0
 		self.second_element_mu0 = 0.0

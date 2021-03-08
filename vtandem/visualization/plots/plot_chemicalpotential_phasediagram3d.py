@@ -116,12 +116,10 @@ class Plot_ChemicalPotential_PhaseDiagram3D(SaveFigure):
 			for element in self.elements_list:
 				competing_compound_enthalpy_tracker -= competing_compound_element_count[element] * self.compounds_info[element]["mu0"]
 			
-			
 			coefficients = []
 			for element in self.elements_list[:-1]:
 				coefficients.append(competing_compound_element_count[element] - competing_compound_element_count[self.dependent_element]*main_compound_element_count_reduced[element])
 			b = competing_compound_enthalpy_tracker - competing_compound_element_count[self.dependent_element]*main_compound_enthalpy_reduced
-			
 			
 			A_matrix.append(np.asarray(coefficients))
 			b_vector.append(b)
@@ -136,20 +134,20 @@ class Plot_ChemicalPotential_PhaseDiagram3D(SaveFigure):
 	
 	
 	
-	
-	
-	
-	
-	
 	def Sort_Plane_Vertices(self, ininc_i, adj):
+		
 		ininc_sorted = []
 		ininc_i = list(ininc_i)
+		
 		while len(ininc_i) > 0:
+			
 			v = ininc_i.pop()
 			ininc_sorted.append(v)
-			# find adj
+			
+			# Find adjacent
 			adj_i = adj[v]
 			ininc_i = sorted(ininc_i, reverse = True, key = lambda x: np.where(np.concatenate([adj_i, np.arange(1000)]) == x)[0][0])
+		
 		return ininc_sorted
 	
 	
@@ -180,12 +178,12 @@ class Plot_ChemicalPotential_PhaseDiagram3D(SaveFigure):
 			
 			if len(ininc_i) < len(self.elements_list)-1:
 				continue
+			
 			ininc_i = self.Sort_Plane_Vertices(ininc_i, adj)
 			
 			x = []
 			y = []
 			z = []
-			
 			if self.type == "ternary":
 				for v in ininc_i:
 					x.append(verts[v][0])
@@ -223,8 +221,6 @@ class Plot_ChemicalPotential_PhaseDiagram3D(SaveFigure):
 			if label not in self.competing_compounds_colorwheel.keys():
 				self.competing_compounds_colorwheel[label] = cmap(color_counter)
 				color_counter += 1
-	
-	
 	
 	
 	

@@ -40,12 +40,11 @@ def Calculate_Defect_Carrier_Concentration(	defects_data, \
 	# Loop through intrinsic defects
 	for intrinsic_defect in intrinsic_defects_enthalpy_data.keys():
 		
-		# Prefactor
-		#N = Find_SiteMultiplicity(intrinsic_defect, len(number_species), number_species, volume)
-		N = defects_data[intrinsic_defect]["site_multiplicity"] / volume
-		
 		# Loop through charge states
 		for charge in intrinsic_defects_enthalpy_data[intrinsic_defect].keys():
+			
+			# Prefactor
+			N = defects_data[intrinsic_defect]["site_multiplicity"] / volume
 			
 			# Defect concentration
 			for temperature in temperature_array:
@@ -55,7 +54,7 @@ def Calculate_Defect_Carrier_Concentration(	defects_data, \
 					defect_carrier_concentration = float(charge) * N * np.exp( -intrinsic_defects_enthalpy_data[intrinsic_defect][charge] / (k * synthesis_temperature) )
 				intrinsic_defect_carrier_concentration_temperature[temperature] += defect_carrier_concentration
 	
-	# Check that user-selected extrinsic defect is not "None"
+	# Check if the user-selected extrinsic defect is "None"
 	if extrinsic_defect == "None":
 		return intrinsic_defect_carrier_concentration_temperature, extrinsic_defect_carrier_concentration_temperature
 	
@@ -69,7 +68,6 @@ def Calculate_Defect_Carrier_Concentration(	defects_data, \
 																					extrinsic_defect_deltamu )
 	
 	# Carrier concentration prefactor
-	#N_extrinsic = Find_SiteMultiplicity(extrinsic_defect, len(number_species), number_species, volume)
 	N_extrinsic = defects_data[extrinsic_defect]["site_multiplicity"] / volume
 	
 	# Calculate extrinsic defect carrier concentration
@@ -109,18 +107,6 @@ def Calculate_CarrierConcentration(	EVBM, \
 									check_outside_bandgap, \
 									synthesis_temperature = None ):
 	
-	# Carrier concentrations from intrinsic defects only
-	intrinsic_defect_hole_concentration = []
-	intrinsic_defect_electron_concentration = []
-	
-	# Carrier concentration from both intrinsic and extrinsic defects
-	total_hole_concentration = []
-	total_electron_concentration = []
-	
-	# Track equilibrium Fermi energy for both intrinsic defects only and total at each temperature
-	intrinsic_equilibrium_fermi_energy_temperature = {}
-	total_equilibrium_fermi_energy_temperature = {}
-	
 	# Calculate defect carrier concentration (for intrinsic defects and extrinsic defects)
 	intrinsic_defect_carrier_concentration_temperature, extrinsic_defect_carrier_concentration_temperature = Calculate_Defect_Carrier_Concentration(	defects_data, \
 																																						main_compound_info, \
@@ -132,6 +118,18 @@ def Calculate_CarrierConcentration(	EVBM, \
 																																						extrinsic_defect_mu0, \
 																																						extrinsic_defect_deltamu, \
 																																						synthesis_temperature )
+	
+	# Carrier concentrations from intrinsic defects only
+	intrinsic_defect_hole_concentration = []
+	intrinsic_defect_electron_concentration = []
+	
+	# Carrier concentration from both intrinsic and extrinsic defects
+	total_hole_concentration = []
+	total_electron_concentration = []
+	
+	# Track equilibrium Fermi energy for both intrinsic defects only and total at each temperature
+	intrinsic_equilibrium_fermi_energy_temperature = {}
+	total_equilibrium_fermi_energy_temperature = {}
 	
 	for temperature in temperature_array:
 		
@@ -189,6 +187,7 @@ def Calculate_CarrierConcentration(	EVBM, \
 				if np.sign(intrinsic_defect_charge_density_array[intrinsic_defect_charge_density_index]) != np.sign(intrinsic_defect_charge_density_array[intrinsic_defect_charge_density_index+1]):
 					intrinsic_equilibrium_fermi_energy = fermi_energy_array[intrinsic_defect_charge_density_index]
 					intrinsic_equilibrium_fermi_energy_index = intrinsic_defect_charge_density_index
+					break
 			
 			intrinsic_equilibrium_fermi_energy_temperature[temperature] = intrinsic_equilibrium_fermi_energy - EVBM
 			intrinsic_defect_hole_concentration.append(hole_concentrations_dict[temperature][intrinsic_equilibrium_fermi_energy_index])
@@ -239,6 +238,7 @@ def Calculate_CarrierConcentration(	EVBM, \
 				if np.sign(total_charge_density_array[total_charge_density_index]) != np.sign(total_charge_density_array[total_charge_density_index+1]):
 					total_equilibrium_fermi_energy = fermi_energy_array[total_charge_density_index]
 					total_equilibrium_fermi_energy_index = total_charge_density_index
+					break
 			
 			total_equilibrium_fermi_energy_temperature[temperature] = total_equilibrium_fermi_energy - EVBM
 			total_hole_concentration.append(hole_concentrations_dict[temperature][total_equilibrium_fermi_energy_index])

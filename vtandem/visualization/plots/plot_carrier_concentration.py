@@ -27,7 +27,7 @@ class Plot_CarrierConcentration(SaveFigure):
 		self.defects_data = None
 		self.main_compound_info = None
 		self.dos_data = None
-		self.vol = 0.0
+		self.vol = 0.0	# Volume of defect supercell (NOT the DOS cell)
 		self.EVBM = 0.0
 		self.ECBM = 0.0
 		self.fermi_energy_array = None
@@ -136,7 +136,15 @@ class Plot_CarrierConcentration(SaveFigure):
 		energies_ConductionBand = []
 		gE_ConductionBand = []
 		
+		# The DOS band gap may not be the band gap for the defect formation energy
+		#	diagram, especially band gap corrections are applied. To mitigate this
+		#	problem, we use a scissor operator where the VBM and CBM in the DOSCAR
+		#	file are repositioned to the band gap of the defect formation energy
+		#	diagram.
+		past_dos_bandgap = False
+		
 		for energy, gE in zip(self.energy, self.gE):
+			"""
 			# Get all energies and corresponding DOSs below VBM
 			if energy <= self.EVBM:
 				energies_ValenceBand.append(energy)
@@ -145,12 +153,42 @@ class Plot_CarrierConcentration(SaveFigure):
 			if energy >= self.ECBM:
 				energies_ConductionBand.append(energy)
 				gE_ConductionBand.append(gE)
+			"""
+			# Get all energies and corresponding DOSs below VBM
+			if energy <= 0.0:
+				energies_ValenceBand.append(energy)
+				gE_ValenceBand.append(gE)
+			else:
+				# Get all energies and corresponding DOSs above CBM
+				if (not past_dos_bandgap) and (gE <= 1E-4):
+					continue
+				else:
+					past_dos_bandgap = True
+					energies_ConductionBand.append(energy)
+					gE_ConductionBand.append(gE)
+				"""
+				# Get all energies and corresponding DOSs above CBM
+				if (energy < band_gap) and (gE <= 0.0):
+					continue
+				else:
+					energies_ConductionBand.append(energy)
+					gE_ConductionBand.append(gE)
+				"""
+		
 		
 		# Make data into numpy arrays
 		self.energies_ValenceBand = np.asarray(energies_ValenceBand)
 		self.gE_ValenceBand = np.asarray(gE_ValenceBand)
 		self.energies_ConductionBand = np.asarray(energies_ConductionBand)
 		self.gE_ConductionBand = np.asarray(gE_ConductionBand)
+		
+		# Reposition band edges to corrected values
+		self.energies_ValenceBand += self.EVBM
+		self.energies_ConductionBand += self.ECBM - np.min(self.energies_ConductionBand)
+		
+		# Normalize DOS to be per volume
+		self.gE_ValenceBand /= self.dos_data["Volume"]
+		self.gE_ConductionBand /= self.dos_data["Volume"]
 	
 	
 	def Calculate_Hole_Electron_Concentration_Matrices(self):
@@ -165,15 +203,17 @@ class Plot_CarrierConcentration(SaveFigure):
 				# Hole concentration
 				fE_holes = self.gE_ValenceBand * (1. - 1./( 1. + np.exp( (self.energies_ValenceBand - ef) / (self.k * temperature) ) ) )
 				hole_concentration = integrate.simps(fE_holes, self.energies_ValenceBand)
-				self.hole_concentrations_dict[temperature].append(hole_concentration / 1E-24)	# In units of cm^-3
+				#self.hole_concentrations_dict[temperature].append(hole_concentration / 1E-24)	# In units of cm^-3
+				self.hole_concentrations_dict[temperature].append(hole_concentration)	# In units of cm^-3
 				
 				# Electron concentration
 				fE_electrons = self.gE_ConductionBand / (1. + np.exp( (self.energies_ConductionBand - ef) / (self.k * temperature) ) )
 				electron_concentration = integrate.simps(fE_electrons, self.energies_ConductionBand)
-				self.electron_concentrations_dict[temperature].append(electron_concentration / 1E-24)	# In units of cm^-3
+				#self.electron_concentrations_dict[temperature].append(electron_concentration / 1E-24)	# In units of cm^-3
+				self.electron_concentrations_dict[temperature].append(electron_concentration)	# In units of cm^-3
 			
 			self.hole_concentrations_dict[temperature] = np.asarray(self.hole_concentrations_dict[temperature])
-			self.electron_concentrations_dict[temperature] = np.asarray(self.hole_concentrations_dict[temperature])
+			self.electron_concentrations_dict[temperature] = np.asarray(self.electron_concentrations_dict[temperature])
 	
 	
 	def Initialize_HoleConcentration_Plot(self):

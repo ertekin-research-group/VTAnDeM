@@ -593,30 +593,46 @@ class DOS_Import:
 	############################################### Add DOS to Database ################################################
 	####################################################################################################################
 	
-	def Add_DOS(self, compound_name, filename):
+	def Add_DOS(self, compound_name, directory_name):
 		
 		# Check if the directory name is legitimate
-		if not os.path.isfile(filename):
-			print("WARNING: Cannot find file: '"+directory_name+"'. Exiting...")
-			return ""
+		if not os.path.isdir(directory_name):
+			raise Exception("The directory '"+directory_name+"' cannot be found. Exiting...")
+		
+		# Check that both the DOSCAR file and either POSCAR and/or CONTCAR are in the folder
+		if ("DOSCAR" not in os.listdir(directory_name)) and ( ("POSCAR" not in os.listdir(directory_name)) and ("CONTCAR" not in os.listdir(directory_name)) ):
+			raise Exception("Either the DOSCAR and/or the POSCAR/CONTCAR file is missing from directory '"+directory_name+"'. Exiting...")
+		
+		# If compound does not exists in Compounds_Tracker.json, then don't import
+		if compound_name not in json.load(open("Compounds_Tracker.json"))["Compounds"].keys():
+			raise Exception("The compound '"+compound_name+"' does not exist in Compounds_Tracker.json. Skipping...")
 		
 		# Check if the compound already exists in the database
 		if compound_name in self.dos_data.keys():
 			print("The compound '"+compound_name+"' is already in the DOS database (DOS_Tracker.json). The imported data will replace the old data.")
 		
-		# If compound does not exists in Compounds_Tracker.json, then don't import
-		if compound_name not in json.load(open("Compounds_Tracker.json"))["Compounds"].keys():
-			print("The compound '"+compound_name+"' does not exist in Compounds_Tracker.json. Skipping...")
-			return
+		# Open files
+		if "POSCAR" in os.listdir(directory_name):
+			lattice_vectors_str = open(directory_name+"/POSCAR").readlines()[2:5]
+		elif "CONTCAR" in os.listdir(directory_name):
+			lattice_vectors_str = open(directory_name+"/CONTCAR").readlines()[2:5]
+		dos_file = open(directory_name+"/DOSCAR").readlines()
 		
 		# Initialize
 		dos_info = {}
 		
-		# DOSCAR normalizer
-		volume = float(open(filename).readlines()[1].split()[0])	# CHECK LATER (VASP may be reporting the wrong volume)
+		# Volume to normalize DOS
+		lat_a = np.array([float(x) for x in lattice_vectors_str[0].split()])
+		lat_b = np.array([float(x) for x in lattice_vectors_str[1].split()])
+		lat_c = np.array([float(x) for x in lattice_vectors_str[2].split()])
+		#volume = float(open(filename).readlines()[1].split()[0])*1E-24	# CHECK LATER (VASP may be reporting the wrong volume)
+		volume = np.dot( lat_a, np.cross(lat_b, lat_c) ) * 1E-24
+		
+		# Fermi energy
+		fermi_energy = float( dos_file[5].split()[-2] )
 		
 		# Extract data
-		for line in open(filename).readlines():
+		for line in dos_file:
 			
 			# Skip lines that don't have the total DOS
 			if len(line.split()) != 3:
@@ -629,9 +645,9 @@ class DOS_Import:
 				continue
 			
 			try:
-				dos_info[float(line.split()[0])] = float(line.split()[1])
+				dos_info[float(line.split()[0])-fermi_energy] = float(line.split()[1])
 			except:
-				dos_info[float(line.split()[0])] = 0.0	# Sometimes the DOS can be an extremely small number that VASP outputs e.g. "0.5E-111" as "0.5-111", which is not readable by python
+				dos_info[float(line.split()[0])-fermi_energy] = 0.0	# Sometimes the DOS can be an extremely small number that VASP outputs e.g. "0.5E-111" as "0.5-111", which is not readable by python
 		
 		# Store data
 		self.dos_data[compound_name] = {"Volume": volume, "DOS": dos_info}

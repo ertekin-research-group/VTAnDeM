@@ -114,39 +114,44 @@ class ChemicalPotential_Quaternary_PhaseDiagram3D(Plot_ChemicalPotential_PhaseDi
 			
 			coefficient1 = competing_compound_element_count[self.element_x] - competing_compound_element_count[self.element_z]*main_compound_coefficient1
 			coefficient2 = competing_compound_element_count[self.element_y] - competing_compound_element_count[self.element_z]*main_compound_coefficient2
+			
 			competing_compound_enthalpy_reduced = competing_compound_enthalpy_tracker - competing_compound_element_count[self.dependent_element]*self.mu4
 			b = competing_compound_enthalpy_reduced - competing_compound_element_count[self.element_z]*main_compound_enthalpy_reduced
 			
 			A_matrix.append(np.array([coefficient1, coefficient2]))
 			b_vector.append(b)
 		
+		A_matrix = np.asarray(A_matrix)
+		b_vector = np.asarray(b_vector)
+		
 		return A_matrix, b_vector
 	
 	
-	
+	"""
 	def Draw_Mu4_Outline_Region(self, verts, ininc, adj):
 		
-		"""
-		verts_z = (self.compounds_info[self.main_compound]["enthalpy"] - self.compounds_info[self.main_compound][self.dependent_element]*self.mu4 \
-					- self.compounds_info[self.main_compound][self.element_x]*verts[:,0] \
-					- self.compounds_info[self.main_compound][self.element_y]*verts[:,1] ) \
-					/ self.compounds_info[self.main_compound][self.element_z]
-		"""
 		verts_z = (self.main_compound_enthalpy - self.main_compound_info["dft_"+self.dependent_element]*self.mu4 \
 					- self.main_compound_info["dft_"+self.element_x]*verts[:,0] \
 					- self.main_compound_info["dft_"+self.element_y]*verts[:,1] ) \
 					/ self.main_compound_info["dft_"+self.element_z]
 		
-		
 		verts_z = verts_z.reshape((len(verts),1))
 		plane_vertices = np.hstack((verts, verts_z))
 		
-		print(ininc)
+		print("verts: ", verts)
+		print("plane_vertices: ", plane_vertices)
+		print("ininc: ", ininc)
+		print("adj: ", adj)
 		
 		for i, ininc_i in enumerate(ininc):
+			
 			if len(ininc_i) < 3:
 				continue
+			
 			ininc_i = self.Sort_Plane_Vertices(ininc_i, adj)
+			
+			print("ininc_i: ", ininc_i)
+			
 			x = []
 			y = []
 			z = []
@@ -166,6 +171,64 @@ class ChemicalPotential_Quaternary_PhaseDiagram3D(Plot_ChemicalPotential_PhaseDi
 			
 			self.path = Line3DCollection(coord, lw=4, color='k')
 			self.chemicalpotential_phasediagram_plot_axes.add_collection3d(self.path)
+	"""
+	
+	def Draw_Mu4_Outline_Region(self, verts, ininc, adj):
+		
+		# Remove current mu4 outline
+		try:
+			self.path.remove()
+		except:
+			pass
+		
+		# Make vertices have three coordinates instead of two
+		verts_z = (self.main_compound_enthalpy - self.main_compound_info["dft_"+self.dependent_element]*self.mu4 \
+					- self.main_compound_info["dft_"+self.element_x]*verts[:,0] \
+					- self.main_compound_info["dft_"+self.element_y]*verts[:,1] ) \
+					/ self.main_compound_info["dft_"+self.element_z]
+		verts_z = verts_z.reshape((len(verts),1))
+		plane_vertices = np.hstack((verts, verts_z))
+		
+		
+		# Find path of mu4 outline
+		new_ininc = []
+		for i in ininc:
+			if len(i) == 2:
+				new_ininc.append(i)
+		
+		# If there is no path, then continue without executing further
+		if len(new_ininc) == 0:
+			return
+		
+		# Order the vertices in the mu4 outline
+		vertices_order = [new_ininc[0][0], new_ininc[0][1]]
+		new_ininc.pop(0)
+		while len(new_ininc) > 0:
+			for index, current_ininc in enumerate(new_ininc):
+				if vertices_order[-1] in current_ininc:
+					if current_ininc[0] not in vertices_order:
+						vertices_order.append(current_ininc[0]) 
+					elif current_ininc[1] not in vertices_order:
+						vertices_order.append(current_ininc[1])
+					new_ininc.pop(index)
+					break
+		
+		
+		x = []
+		y = []
+		z = []
+		for v in vertices_order:
+			x.append(plane_vertices[v][0])
+			y.append(plane_vertices[v][1])
+			z.append(plane_vertices[v][2])
+		x.append(plane_vertices[vertices_order[0]][0])
+		y.append(plane_vertices[vertices_order[0]][1])
+		z.append(plane_vertices[vertices_order[0]][2])
+		coord = [list(zip(x, y, z))]
+		
+		self.path = Line3DCollection(coord, lw=4, color='k')
+		self.chemicalpotential_phasediagram_plot_axes.add_collection3d(self.path)
+	
 	
 	
 	

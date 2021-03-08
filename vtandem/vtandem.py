@@ -119,9 +119,16 @@ def vtandem(import_element, import_compound, import_defects, import_defect_energ
 	[5] Importing Density of States
 	When importing the DOS using the --import_dos option, the argument  <TEXT
 	PATH> should be in the form:
-	    'Compound_Name /path/to/DOSCAR'
+	    'Compound_Name /path/to/DOSCAR/folder'
 	'Compound_Name' is case-sensitive (e.g. Cu2HgGeTe4).
-	/path/to/DOSCAR is the full path to the DOSCAR file you want to import.
+	/path/to/DOSCAR/folder should have the file structure:
+	
+	\b
+	  /path/to/DOSCAR/folder
+	    |-- DOSCAR
+		|-- POSCAR/CONTCAR
+	
+	\b
 	
 	"""
 	
