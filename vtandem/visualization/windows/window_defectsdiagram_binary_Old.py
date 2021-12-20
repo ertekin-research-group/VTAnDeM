@@ -1,6 +1,6 @@
 
-__name__ = 'VTAnDeM_Visualization-Toolkit-for-Analyzing-Defects-in-Materials'
 __author__ = 'Michael_Lidia_Jiaxing_Elif'
+__name__ = 'VTAnDeM_Visualization-Toolkit-for-Analyzing-Defects-in-Materials'
 
 
 import numpy as np
@@ -12,7 +12,7 @@ from PyQt5.QtGui import *
 
 
 
-class Window_DefectsDiagram(QWidget):
+class Window_DefectsDiagram_Binary(QWidget):
 	
 	def __init__(self, show_dopant):
 		
@@ -39,52 +39,99 @@ class Window_DefectsDiagram(QWidget):
 		# Axis limits for defects diagram
 		self.defectsdiagram_viewport = QWidget()
 		self.defectsdiagram_viewport_layout = QHBoxLayout(self.defectsdiagram_viewport)
-		self.defectsdiagram_axislim_boxes = {}
-
+		
 		# X-axis limits for defects diagram
 		defectsdiagram_Xmin_label = QLabel(u"x"+"<sub>min</sub>")
 		defectsdiagram_Xmin_label.setAlignment(Qt.AlignCenter)
 		self.defectsdiagram_viewport_layout.addWidget(defectsdiagram_Xmin_label)
 		self.defectsdiagram_Xmin_box = QLineEdit("0.0")
-		self.defectsdiagram_axislim_boxes["XMin"] = self.defectsdiagram_Xmin_box
-		self.defectsdiagram_Xmin_box.editingFinished.connect(lambda: self.DefectsDiagram.Update_WindowSize("XMin", self.defectsdiagram_axislim_boxes))
+		self.defectsdiagram_Xmin_box.editingFinished.connect(lambda: self.DefectsDiagram.Update_WindowSize("XMin", self.defectsdiagram_Xmin_box))
 		self.defectsdiagram_viewport_layout.addWidget(self.defectsdiagram_Xmin_box)
 		defectsdiagram_Xmax_label = QLabel(u"x"+"<sub>max</sub>")
 		defectsdiagram_Xmax_label.setAlignment(Qt.AlignCenter)
 		self.defectsdiagram_viewport_layout.addWidget(defectsdiagram_Xmax_label)
 		self.defectsdiagram_Xmax_box = QLineEdit(str(round(self.DefectsDiagram.ECBM-self.DefectsDiagram.EVBM,4)))
-		self.defectsdiagram_axislim_boxes["XMax"] = self.defectsdiagram_Xmax_box
-		self.defectsdiagram_Xmax_box.editingFinished.connect(lambda: self.DefectsDiagram.Update_WindowSize("XMax", self.defectsdiagram_axislim_boxes))
+		self.defectsdiagram_Xmax_box.editingFinished.connect(lambda: self.DefectsDiagram.Update_WindowSize("XMax", self.defectsdiagram_Xmax_box))
 		self.defectsdiagram_viewport_layout.addWidget(self.defectsdiagram_Xmax_box)
+
 
 		# Y-axis limits for defects diagram
 		defectsdiagram_Ymin_label = QLabel(u"y"+"<sub>min</sub>")
 		defectsdiagram_Ymin_label.setAlignment(Qt.AlignCenter)
 		self.defectsdiagram_viewport_layout.addWidget(defectsdiagram_Ymin_label)
 		self.defectsdiagram_Ymin_box = QLineEdit("-2.0")
-		self.defectsdiagram_axislim_boxes["YMin"] = self.defectsdiagram_Ymin_box
-		self.defectsdiagram_Ymin_box.editingFinished.connect(lambda: self.DefectsDiagram.Update_WindowSize("YMin", self.defectsdiagram_axislim_boxes))
+		self.defectsdiagram_Ymin_box.editingFinished.connect(lambda: self.DefectsDiagram.Update_WindowSize("YMin", self.defectsdiagram_Ymin_box))
 		self.defectsdiagram_viewport_layout.addWidget(self.defectsdiagram_Ymin_box)
 		defectsdiagram_Ymax_label = QLabel(u"y"+"<sub>max</sub>")
 		defectsdiagram_Ymax_label.setAlignment(Qt.AlignCenter)
 		self.defectsdiagram_viewport_layout.addWidget(defectsdiagram_Ymax_label)
 		self.defectsdiagram_Ymax_box = QLineEdit("2.0")
-		self.defectsdiagram_axislim_boxes["YMax"] = self.defectsdiagram_Ymax_box
-		self.defectsdiagram_Ymax_box.editingFinished.connect(lambda: self.DefectsDiagram.Update_WindowSize("YMax", self.defectsdiagram_axislim_boxes))
+		self.defectsdiagram_Ymax_box.editingFinished.connect(lambda: self.DefectsDiagram.Update_WindowSize("YMax", self.defectsdiagram_Ymax_box))
 		self.defectsdiagram_viewport_layout.addWidget(self.defectsdiagram_Ymax_box)
 		self.defectsdiagram_window_layout.addWidget(self.defectsdiagram_viewport)
 		
+
+		# Chemical potential tuners
+		self.chemical_potential_displays = QWidget()
+		self.chemical_potential_displays_layout = QVBoxLayout(self.chemical_potential_displays)
+		self.chemical_potential_first_element = QWidget()
+		self.chemical_potential_first_element_layout = QHBoxLayout(self.chemical_potential_first_element)
+		self.chemical_potential_first_element_label = QLabel(u"\u0394"+"\u03BC"+"<sub>"+self.first_element+"</sub> =")
+		self.chemical_potential_first_element_label.setAlignment(Qt.AlignCenter)
+		self.chemical_potential_first_element_layout.addWidget(self.chemical_potential_first_element_label)
+		self.chemical_potential_first_element_deltamu = QLabel("-0.0000")
+		self.chemical_potential_first_element_layout.addWidget(self.chemical_potential_first_element_deltamu)
+		self.chemical_potential_displays_layout.addWidget(self.chemical_potential_first_element)
+		self.chemical_potential_second_element = QWidget()
+		self.chemical_potential_second_element_layout = QHBoxLayout(self.chemical_potential_second_element)
+		self.chemical_potential_second_element_label = QLabel(u"\u0394"+"\u03BC"+"<sub>"+self.second_element+"</sub> =")
+		self.chemical_potential_second_element_label.setAlignment(Qt.AlignCenter)
+		self.chemical_potential_second_element_layout.addWidget(self.chemical_potential_second_element_label)
+		self.chemical_potential_second_element_deltamu = QLabel('{:.4f}'.format(round(self.deltamu_values[self.second_element], 4)))
+		self.chemical_potential_second_element_layout.addWidget(self.chemical_potential_second_element_deltamu)
+		self.chemical_potential_displays_layout.addWidget(self.chemical_potential_second_element)
+		
+		# Chemical potential tuners
+		self.chemical_potential_sliders = QWidget()
+		self.chemical_potential_sliders_layout = QVBoxLayout(self.chemical_potential_sliders)
+		self.chemical_potential_first_element_slider = QSlider(Qt.Horizontal)
+		self.chemical_potential_first_element_slider.setMinimum(0)
+		self.chemical_potential_first_element_slider.setMaximum(1000)
+		self.chemical_potential_first_element_slider.setValue(1000)
+		self.chemical_potential_first_element_slider.setSingleStep(1)
+		self.chemical_potential_first_element_slider.setTickInterval(1)
+		self.chemical_potential_first_element_slider.valueChanged.connect(lambda: self.Chemical_Potential_Slider(self.first_element))
+		self.chemical_potential_sliders_layout.addWidget(self.chemical_potential_first_element_slider)
+		self.chemical_potential_second_element_slider = QSlider(Qt.Horizontal)
+		self.chemical_potential_second_element_slider.setMinimum(0)
+		self.chemical_potential_second_element_slider.setMaximum(1000)
+		self.chemical_potential_second_element_slider.setValue(0)
+		self.chemical_potential_second_element_slider.setSingleStep(1)
+		self.chemical_potential_second_element_slider.setTickInterval(1)
+		self.chemical_potential_second_element_slider.valueChanged.connect(lambda: self.Chemical_Potential_Slider(self.second_element))
+		self.chemical_potential_sliders_layout.addWidget(self.chemical_potential_second_element_slider)
+		
+		# Chemical potentials section
+		self.chemical_potentials_section = QWidget()
+		self.chemical_potentials_section_layout = QHBoxLayout(self.chemical_potentials_section)
+		self.chemical_potentials_section_layout.addWidget(self.chemical_potential_displays)
+		self.chemical_potentials_section_layout.addWidget(self.chemical_potential_sliders)
+		self.defectsdiagram_window_layout.insertWidget(3, self.chemical_potentials_section)
+		
+		
+
 
 		# Synthesis temperature
 		self.defects_synthesis_temperature = QWidget()
 		self.defects_synthesis_temperature_layout = QHBoxLayout(self.defects_synthesis_temperature)
 		defects_synthesis_temperature_label = QLabel(u"T<sub>syn</sub> (K) = ")
-		defects_synthesis_temperature_label.setAlignment(Qt.AlignCenter)
+		defects_synthesis_temperature_label.setAlignment(Qt.AlignRight)
 		self.defects_synthesis_temperature_layout.addWidget(defects_synthesis_temperature_label)
 		self.defects_synthesis_temperature_box = QLineEdit("")
 		self.defects_synthesis_temperature_box.editingFinished.connect(self.Update_SynthesisTemperature)
 		self.defects_synthesis_temperature_box.setEnabled(False)
 		self.defects_synthesis_temperature_layout.addWidget(self.defects_synthesis_temperature_box)
+
 
 		
 		if self.show_dopant:
@@ -137,15 +184,14 @@ class Window_DefectsDiagram(QWidget):
 			
 			self.defectsdiagram_window_layout.addWidget(self.dopant_properties_widget)
 		
-
-		else:
-			if self.show_carrier_concentration:
-				# Add synthesis temperature button
-				self.defectsdiagram_window_layout.addWidget(self.defects_synthesis_temperature)
 		
 		
-
-
+		# (WIDGET) Button to generate defects diagram
+		self.generate_defects_diagram_plot_button_widget = QPushButton("Generate Defects Diagram")
+		self.generate_defects_diagram_plot_button_widget.clicked[bool].connect(self.Generate_DefectsDiagram_Plot_Function)
+		self.defectsdiagram_window_layout.addWidget(self.generate_defects_diagram_plot_button_widget)
+		
+		
 		
 		# (WIDGET) Save defects diagram as figure
 		self.defects_diagram_savefigure_button = QPushButton("Save Defects Diagram Figure")
@@ -199,8 +245,7 @@ class Window_DefectsDiagram(QWidget):
 		if self.DefectsDiagram.extrinsic_defect_plots != {}:
 			self.DefectsDiagram.Update_Extrinsic_DefectsDiagram_Plot()
 		
-		
-		
+
 		if self.show_carrier_concentration:
 			
 			# Recalculate carrier concentrations
@@ -252,13 +297,14 @@ class Window_DefectsDiagram(QWidget):
 			self.DefectsDiagram.Initialize_Extrinsic_DefectsDiagram_Plot()
 		
 		
+		
+		
 		if self.show_carrier_concentration:
 			
 			# Recalculate carrier concentrations
 			self.CarrierConcentration.dopant = self.DefectsDiagram.dopant
 			self.CarrierConcentration.dopant_mu0 = self.DefectsDiagram.dopant_mu0
 			self.CarrierConcentration.dopant_deltamu = self.DefectsDiagram.dopant_deltamu
-			
 			
 			# Redraw carrier concentration
 			self.CarrierConcentration.Initialize_CarrierConcentration_Plot()
@@ -277,20 +323,18 @@ class Window_DefectsDiagram(QWidget):
 		# Check whether the written synthesis temperature is a possible temperature
 		try:
 			float(synthesis_temperature) > 0.0
-			self.CarrierConcentration.synthesis_temperature = float(synthesis_temperature)
 		except:
 			self.defects_synthesis_temperature_box.setText("")
 			self.CarrierConcentration.synthesis_temperature = None
+			self.CarrierConcentration.Initialize_CarrierConcentration_Plot()
+			return
+
+		# Update synthesis temperature in CarrierConcentration_Plot object
+		self.CarrierConcentration.synthesis_temperature = float(synthesis_temperature)
 		
 		# Redraw carrier concentration plot with synthesis temperature
 		self.CarrierConcentration.Initialize_CarrierConcentration_Plot()
 
-		# Update equilibrium Fermi energy
-		# NOTE: The Update_Equilibrium_Fermi_Energy_Temperature function is in window_carrier_concentration
-		#		but it can be called because this defects diagram window object is inherited by the tab
-		#		objects, which also inherit the carrier concentration window object.
-		if self.DefectsDiagram.intrinsic_defect_plots != {}:
-			self.Update_Equilibrium_Fermi_Energy_Temperature()
 
 
 

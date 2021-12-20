@@ -1,6 +1,6 @@
 
-__author__ = 'Michael_Lidia_Jiaxing_Benita_Elif'
 __name__ = 'VTAnDeM_Visualization-Toolkit-for-Analyzing-Defects-in-Materials'
+__author__ = 'Michael_Lidia_Jiaxing_Elif'
 
 
 import numpy as np
@@ -46,16 +46,6 @@ class Window_Compositional_PhaseDiagram(QWidget):
 		# (WIDGET) Save phase diagram as figure
 		self.phasediagram_savefigure_button = QPushButton("Save Phase Diagram Figure")
 		self.phasediagram_savefigure_button.clicked[bool].connect(lambda: self.Compositional_PhaseDiagram.SaveFigure())
-
-
-
-
-
-
-
-
-
-
 
 
 

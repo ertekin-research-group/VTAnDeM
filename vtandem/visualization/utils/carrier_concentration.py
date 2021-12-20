@@ -10,6 +10,43 @@ from scipy import integrate
 from vtandem.visualization.utils.defect_formation_energy import *
 
 
+
+def Calculate_FreeHole_FreeElectron_Concentrations(	temperature_array, \
+													fermi_energy_array, \
+													gE_ValenceBand, \
+													energies_ValenceBand, \
+													gE_ConductionBand, \
+													energies_ConductionBand ):
+	
+	k = 8.6173303E-5
+
+	hole_concentrations_dict = {}
+	electron_concentrations_dict = {}
+
+	for temperature in temperature_array:
+		
+		hole_concentrations_dict[temperature] = []
+		electron_concentrations_dict[temperature] = []
+		
+		for ef in fermi_energy_array:
+			
+			# Hole concentration
+			fE_holes = gE_ValenceBand * (1. - 1./( 1. + np.exp( (energies_ValenceBand - ef) / (k * temperature) ) ) )
+			hole_concentration = integrate.simps(fE_holes, energies_ValenceBand)
+			hole_concentrations_dict[temperature].append(hole_concentration)	# In units of cm^-3
+			
+			# Electron concentration
+			fE_electrons = gE_ConductionBand / (1. + np.exp( (energies_ConductionBand - ef) / (k * temperature) ) )
+			electron_concentration = integrate.simps(fE_electrons, energies_ConductionBand)
+			electron_concentrations_dict[temperature].append(electron_concentration)	# In units of cm^-3
+		
+		hole_concentrations_dict[temperature] = np.asarray(hole_concentrations_dict[temperature])
+		electron_concentrations_dict[temperature] = np.asarray(electron_concentrations_dict[temperature])
+
+	return hole_concentrations_dict, electron_concentrations_dict
+
+
+
 def Calculate_Defect_Carrier_Concentration(	defects_data, \
 											main_compound_info, \
 											mu_elements, \
@@ -29,7 +66,7 @@ def Calculate_Defect_Carrier_Concentration(	defects_data, \
 	for temperature in temperature_array:
 		intrinsic_defect_carrier_concentration_temperature[temperature] = np.zeros(len(fermi_energy_array))
 		extrinsic_defect_carrier_concentration_temperature[temperature] = np.zeros(len(fermi_energy_array))
-	
+
 	# Obtain formation enthalpies of intrinsic defects
 	intrinsic_defects_enthalpy_data = Calculate_IntrinsicDefectFormationEnthalpies(	defects_data, \
 																					main_compound_info, \
@@ -52,6 +89,12 @@ def Calculate_Defect_Carrier_Concentration(	defects_data, \
 					defect_carrier_concentration = float(charge) * N * np.exp( -intrinsic_defects_enthalpy_data[intrinsic_defect][charge] / (k * temperature) )
 				elif synthesis_temperature is not None:
 					defect_carrier_concentration = float(charge) * N * np.exp( -intrinsic_defects_enthalpy_data[intrinsic_defect][charge] / (k * synthesis_temperature) )
+				
+				"""
+				if (intrinsic_defect == "V_Se") and (charge == "+2") and (temperature == 1000):
+					print(intrinsic_defect, charge, temperature, defect_carrier_concentration, intrinsic_defects_enthalpy_data[intrinsic_defect][charge], defects_data[intrinsic_defect]["site_multiplicity"], volume)
+				"""
+				
 				intrinsic_defect_carrier_concentration_temperature[temperature] += defect_carrier_concentration
 	
 	# Check if the user-selected extrinsic defect is "None"
@@ -104,7 +147,6 @@ def Calculate_CarrierConcentration(	EVBM, \
 									extrinsic_defect_deltamu, \
 									hole_concentrations_dict, \
 									electron_concentrations_dict, \
-									check_outside_bandgap, \
 									synthesis_temperature = None ):
 	
 	# Calculate defect carrier concentration (for intrinsic defects and extrinsic defects)
@@ -118,7 +160,7 @@ def Calculate_CarrierConcentration(	EVBM, \
 																																						extrinsic_defect_mu0, \
 																																						extrinsic_defect_deltamu, \
 																																						synthesis_temperature )
-	
+
 	# Carrier concentrations from intrinsic defects only
 	intrinsic_defect_hole_concentration = []
 	intrinsic_defect_electron_concentration = []
@@ -143,278 +185,39 @@ def Calculate_CarrierConcentration(	EVBM, \
 		total_equilibrium_fermi_energy = 0.0
 		total_equilibrium_fermi_energy_index = 0
 		
-		# Check if equilibrium Fermi energy can be found within band gap (for charge density including INTRINSIC DEFECTS ONLY)
-		if np.sign(intrinsic_defect_charge_density_array[0]) == np.sign(intrinsic_defect_charge_density_array[-1]):
+
+		# Search for equilibrium Fermi energy within band gap of material (for only intrinsic defects)
+		for intrinsic_defect_charge_density_index in range(len(fermi_energy_array)-1):
 			
-			if check_outside_bandgap:
-				# Find equilibrium Fermi energy and carrier concentration when EF is outside the band gap
-				intrinsic_equilibrium_fermi_energy, intrinsic_hole_concentration, intrinsic_electron_concentration = Check_Outside_BandGap(	intrinsic_defect_charge_density_array, \
-																																			EVBM, \
-																																			ECBM, \
-																																			energies_ValenceBand, \
-																																			gE_ValenceBand, \
-																																			energies_ConductionBand, \
-																																			gE_ConductionBand, \
-																																			temperature, \
-																																			defects_data, \
-																																			main_compound_info, \
-																																			mu_elements, \
-																																			volume, \
-																																			extrinsic_defect, \
-																																			extrinsic_defect_mu0, \
-																																			extrinsic_defect_deltamu, \
-																																			synthesis_temperature = synthesis_temperature, \
-																																			calculation_type = "intrinsic"	)
-				intrinsic_equilibrium_fermi_energy_temperature[temperature] = intrinsic_equilibrium_fermi_energy - EVBM
-				intrinsic_defect_hole_concentration.append(intrinsic_hole_concentration)
-				intrinsic_defect_electron_concentration.append(intrinsic_electron_concentration)
-			
-			else:
-				# Don't search for equilibrium Fermi energy, record carrier concentrations as 0.0
-				if ( (intrinsic_defect_charge_density_array[0] < intrinsic_defect_charge_density_array[-1]) and (np.sign(intrinsic_defect_charge_density_array[0]) == 1) ) or ( (intrinsic_defect_charge_density_array[0] > intrinsic_defect_charge_density_array[-1]) and (np.sign(intrinsic_defect_charge_density_array[0]) == -1) ):
-					intrinsic_equilibrium_fermi_energy_temperature[temperature] = "< EVBM"
-				elif ( (intrinsic_defect_charge_density_array[0] > intrinsic_defect_charge_density_array[-1]) and (np.sign(intrinsic_defect_charge_density_array[0]) == 1) ) or ( (intrinsic_defect_charge_density_array[0] < intrinsic_defect_charge_density_array[-1]) and (np.sign(intrinsic_defect_charge_density_array[0]) == -1) ):
-					intrinsic_equilibrium_fermi_energy_temperature[temperature] = "> ECBM"
-				intrinsic_defect_hole_concentration.append(0.0)
-				intrinsic_defect_electron_concentration.append(0.0)
+			# Find equilibrium Fermi energy from charge density including intrinsic defects only
+			if np.sign(intrinsic_defect_charge_density_array[intrinsic_defect_charge_density_index]) != np.sign(intrinsic_defect_charge_density_array[intrinsic_defect_charge_density_index+1]):
+				intrinsic_equilibrium_fermi_energy = fermi_energy_array[intrinsic_defect_charge_density_index]
+				intrinsic_equilibrium_fermi_energy_index = intrinsic_defect_charge_density_index
+				break
 		
-		elif np.sign(intrinsic_defect_charge_density_array[0]) != np.sign(intrinsic_defect_charge_density_array[-1]):
-			
-			# Search for equilibrium Fermi energy within band gap of material
-			for intrinsic_defect_charge_density_index in range(len(fermi_energy_array)-1):
-				
-				# Find equilibrium Fermi energy from charge density including intrinsic defects only
-				if np.sign(intrinsic_defect_charge_density_array[intrinsic_defect_charge_density_index]) != np.sign(intrinsic_defect_charge_density_array[intrinsic_defect_charge_density_index+1]):
-					intrinsic_equilibrium_fermi_energy = fermi_energy_array[intrinsic_defect_charge_density_index]
-					intrinsic_equilibrium_fermi_energy_index = intrinsic_defect_charge_density_index
-					break
-			
-			intrinsic_equilibrium_fermi_energy_temperature[temperature] = intrinsic_equilibrium_fermi_energy - EVBM
-			intrinsic_defect_hole_concentration.append(hole_concentrations_dict[temperature][intrinsic_equilibrium_fermi_energy_index])
-			intrinsic_defect_electron_concentration.append(electron_concentrations_dict[temperature][intrinsic_equilibrium_fermi_energy_index])
+		intrinsic_equilibrium_fermi_energy_temperature[temperature] = intrinsic_equilibrium_fermi_energy - EVBM
+		intrinsic_defect_hole_concentration.append(hole_concentrations_dict[temperature][intrinsic_equilibrium_fermi_energy_index])
+		intrinsic_defect_electron_concentration.append(electron_concentrations_dict[temperature][intrinsic_equilibrium_fermi_energy_index])
+
+
 		
+		# Search for equilibrium Fermi energy within band gap of material
+		for total_charge_density_index in range(len(fermi_energy_array)-1):
+			
+			# Find equilibrium Fermi energy from charge density including both intrinsic defects and user-selected extrinsic defect
+			if np.sign(total_charge_density_array[total_charge_density_index]) != np.sign(total_charge_density_array[total_charge_density_index+1]):
+				total_equilibrium_fermi_energy = fermi_energy_array[total_charge_density_index]
+				total_equilibrium_fermi_energy_index = total_charge_density_index
+				break
 		
-		# Check if equilibrium Fermi energy can be found within band gap (for charge density including BOTH intrinsic and extrinsic defects)
-		if np.sign(total_charge_density_array[0]) == np.sign(total_charge_density_array[-1]):
-			
-			if check_outside_bandgap:
-				# Find equilibrium Fermi energy and carrier concentration when EF is outside the band gap
-				total_equilibrium_fermi_energy, total_equilibrium_hole_concentration, total_equilibrium_electron_concentration = Check_Outside_BandGap(	total_charge_density_array, \
-																																						EVBM, \
-																																						ECBM, \
-																																						energies_ValenceBand, \
-																																						gE_ValenceBand, \
-																																						energies_ConductionBand, \
-																																						gE_ConductionBand, \
-																																						temperature, \
-																																						defects_data, \
-																																						main_compound_info, \
-																																						mu_elements, \
-																																						volume, \
-																																						extrinsic_defect, \
-																																						extrinsic_defect_mu0, \
-																																						extrinsic_defect_deltamu, \
-																																						synthesis_temperature = synthesis_temperature, \
-																																						calculation_type = "total"	)
-				total_equilibrium_fermi_energy_temperature[temperature] = total_equilibrium_fermi_energy - EVBM
-				total_hole_concentration.append(total_equilibrium_hole_concentration)
-				total_electron_concentration.append(total_equilibrium_electron_concentration)
-			
-			else:
-				# Don't search for equilibrium Fermi energy, record carrier concentrations as 0.0
-				if ( (total_charge_density_array[0] < total_charge_density_array[-1]) and (np.sign(total_charge_density_array[0]) == 1) ) or ( (total_charge_density_array[0] > total_charge_density_array[-1]) and (np.sign(total_charge_density_array[0]) == -1) ):
-					total_equilibrium_fermi_energy_temperature[temperature] = "< EVBM"
-				elif ( (total_charge_density_array[0] > total_charge_density_array[-1]) and (np.sign(total_charge_density_array[0]) == 1) ) or ( (total_charge_density_array[0] < total_charge_density_array[-1]) and (np.sign(total_charge_density_array[0]) == -1) ):
-					total_equilibrium_fermi_energy_temperature[temperature] = "> ECBM"
-				total_hole_concentration.append(0.0)
-				total_electron_concentration.append(0.0)
-		
-		elif np.sign(total_charge_density_array[0]) != np.sign(total_charge_density_array[-1]):
-			
-			# Search for equilibrium Fermi energy within band gap of material
-			for total_charge_density_index in range(len(fermi_energy_array)-1):
-				
-				# Find equilibrium Fermi energy from charge density including both intrinsic defects and user-selected extrinsic defect
-				if np.sign(total_charge_density_array[total_charge_density_index]) != np.sign(total_charge_density_array[total_charge_density_index+1]):
-					total_equilibrium_fermi_energy = fermi_energy_array[total_charge_density_index]
-					total_equilibrium_fermi_energy_index = total_charge_density_index
-					break
-			
-			total_equilibrium_fermi_energy_temperature[temperature] = total_equilibrium_fermi_energy - EVBM
-			total_hole_concentration.append(hole_concentrations_dict[temperature][total_equilibrium_fermi_energy_index])
-			total_electron_concentration.append(electron_concentrations_dict[temperature][total_equilibrium_fermi_energy_index])
-	
+		total_equilibrium_fermi_energy_temperature[temperature] = total_equilibrium_fermi_energy - EVBM
+		total_hole_concentration.append(hole_concentrations_dict[temperature][total_equilibrium_fermi_energy_index])
+		total_electron_concentration.append(electron_concentrations_dict[temperature][total_equilibrium_fermi_energy_index])
+
+
+
+
 	return intrinsic_defect_hole_concentration, intrinsic_defect_electron_concentration, total_hole_concentration, total_electron_concentration, intrinsic_equilibrium_fermi_energy_temperature, total_equilibrium_fermi_energy_temperature
-
-
-
-def Check_Outside_BandGap( 	charge_density_array, \
-							EVBM, \
-							ECBM, \
-							energies_ValenceBand, \
-							gE_ValenceBand, \
-							energies_ConductionBand, \
-							gE_ConductionBand, \
-							temperature, \
-							defects_data, \
-							main_compound_info, \
-							mu_elements, \
-							volume, \
-							extrinsic_defect, \
-							extrinsic_defect_mu0, \
-							extrinsic_defect_deltamu, \
-							synthesis_temperature, \
-							calculation_type="intrinsic"	):
-	
-	k = 8.6173303E-5
-	equilibrium_fermi_energy = 0.0
-	
-	# If not, determine whether it's in the valence or conduction band
-	if ( (charge_density_array[0] < charge_density_array[-1]) and (np.sign(charge_density_array[0]) == 1) ) or ( (charge_density_array[0] > charge_density_array[-1]) and (np.sign(charge_density_array[0]) == -1) ):
-		
-		# Equilibrium Fermi energy is in the VALENCE band
-		fermi_energy_increment = EVBM
-		while equilibrium_fermi_energy == 0.0:
-			
-			# Fermi energy 1
-			fermi_energy1 = fermi_energy_increment
-			
-			# Hole concentration
-			fE_holes1 = gE_ValenceBand * (1. - 1./( 1. + np.exp( (energies_ValenceBand - fermi_energy1) / (k * temperature) ) ) )
-			hole_concentration1 = integrate.simps(fE_holes1, energies_ValenceBand)
-			
-			# Electron concentration
-			fE_electrons1 = gE_ConductionBand / (1. + np.exp( (energies_ConductionBand - fermi_energy1) / (k * temperature) ) )
-			electron_concentration1 = integrate.simps(fE_electrons1, energies_ConductionBand)
-			
-			intrinsic_defect_carrier_concentration_temperature, extrinsic_defect_carrier_concentration_temperature = Calculate_Defect_Carrier_Concentration(	defects_data, \
-																																								main_compound_info, \
-																																								mu_elements, \
-																																								[temperature], \
-																																								[fermi_energy1], \
-																																								volume, \
-																																								extrinsic_defect, \
-																																								extrinsic_defect_mu0, \
-																																								extrinsic_defect_deltamu, \
-																																								synthesis_temperature )
-			defects_carrier_concentration1 = intrinsic_defect_carrier_concentration_temperature1[temperature] + extrinsic_defect_carrier_concentration_temperature1[temperature]
-			
-			
-			
-			# Total charge density at Fermi energy 1
-			defect_charge_density1 = hole_concentration1 + electron_concentration1 + defects_carrier_concentration1
-			
-			# Increment Fermi energy (since we are searching the valence band, decrease the energy to which to search)
-			fermi_energy_increment -= (ECBM-EVBM)/100.
-			
-			# Fermi energy 2 (incremented)
-			fermi_energy2 = fermi_energy_increment
-			
-			# Hole concentration
-			fE_holes2 = gE_ValenceBand * (1. - 1./( 1. + np.exp( (energies_ValenceBand - fermi_energy2) / (k * temperature) ) ) )
-			hole_concentration2 = integrate.simps(fE_holes2, energies_ValenceBand)
-			
-			# Electron concentration
-			fE_electrons2 = gE_ConductionBand / (1. + np.exp( (energies_ConductionBand - fermi_energy2) / (k * temperature) ) )
-			electron_concentration2 = integrate.simps(fE_electrons2, energies_ConductionBand)
-			
-			intrinsic_defect_carrier_concentration_temperature2, extrinsic_defect_carrier_concentration_temperature2 = Calculate_Defect_Carrier_Concentration(	defects_data, \
-																																								main_compound_info, \
-																																								mu_elements, \
-																																								[temperature], \
-																																								[fermi_energy2], \
-																																								volume, \
-																																								extrinsic_defect, \
-																																								extrinsic_defect_mu0, \
-																																								extrinsic_defect_deltamu, \
-																																								synthesis_temperature )
-			defects_carrier_concentration2 = intrinsic_defect_carrier_concentration_temperature2[temperature] + extrinsic_defect_carrier_concentration_temperature2[temperature]
-			
-			
-			
-			# Total charge density at Fermi energy 2
-			defect_charge_density2 = hole_concentration2 + electron_concentration2 + defects_carrier_concentration2
-			
-			# Check if Fermi energy admits equilibrium conditions
-			if np.sign(defect_charge_density1) != np.sign(defect_charge_density2):
-				equilibrium_fermi_energy = fermi_energy1
-				equilibrium_hole_concentration = hole_concentration1
-				equilibrium_electron_concentration = electron_concentration1
-	
-	
-	elif ( (charge_density_array[0] > charge_density_array[-1]) and (np.sign(charge_density_array[0]) == 1) ) or ( (charge_density_array[0] < charge_density_array[-1]) and (np.sign(charge_density_array[0]) == -1) ):
-		
-		# Equilibrium Fermi energy is in the CONDUCTION band
-		fermi_energy_increment = ECBM
-		while equilibrium_fermi_energy == 0.0:
-			
-			# Fermi energy 1
-			fermi_energy1 = fermi_energy_increment
-			
-			# Hole concentration
-			fE_holes1 = gE_ValenceBand * (1. - 1./( 1. + np.exp( (energies_ValenceBand - fermi_energy1) / (k * temperature) ) ) )
-			hole_concentration1 = integrate.simps(fE_holes1, energies_ValenceBand)
-			
-			# Electron concentration
-			fE_electrons1 = gE_ConductionBand / (1. + np.exp( (energies_ConductionBand - fermi_energy1) / (k * temperature) ) )
-			electron_concentration1 = integrate.simps(fE_electrons1, energies_ConductionBand)
-			
-			intrinsic_defect_carrier_concentration_temperature, extrinsic_defect_carrier_concentration_temperature = Calculate_Defect_Carrier_Concentration(	defects_data, \
-																																								main_compound_info, \
-																																								mu_elements, \
-																																								[temperature], \
-																																								[fermi_energy1], \
-																																								volume, \
-																																								extrinsic_defect, \
-																																								extrinsic_defect_mu0, \
-																																								extrinsic_defect_deltamu, \
-																																								synthesis_temperature )
-			defects_carrier_concentration1 = intrinsic_defect_carrier_concentration_temperature[temperature] + extrinsic_defect_carrier_concentration_temperature[temperature]
-			
-			
-			
-			
-			# Total charge density at Fermi energy 1
-			defect_charge_density1 = hole_concentration1 + electron_concentration1 + defects_carrier_concentration1
-			
-			# Increment Fermi energy (since we are searching the conduction band, inrease the energy to which to search)
-			fermi_energy_increment += (ECBM-EVBM)/100.
-			
-			# Fermi energy 2 (incremented)
-			fermi_energy2 = fermi_energy_increment
-			
-			# Hole concentration
-			fE_holes2 = gE_ValenceBand * (1. - 1./( 1. + np.exp( (energies_ValenceBand - fermi_energy2) / (k * temperature) ) ) )
-			hole_concentration2 = integrate.simps(fE_holes2, energies_ValenceBand)
-			
-			# Electron concentration
-			fE_electrons2 = gE_ConductionBand / (1. + np.exp( (energies_ConductionBand - fermi_energy2) / (k * temperature) ) )
-			electron_concentration2 = integrate.simps(fE_electrons2, energies_ConductionBand)
-			
-			intrinsic_defect_carrier_concentration_temperature2, extrinsic_defect_carrier_concentration_temperature2 = Calculate_Defect_Carrier_Concentration(	defects_data, \
-																																								main_compound_info, \
-																																								mu_elements, \
-																																								[temperature], \
-																																								[fermi_energy2], \
-																																								volume, \
-																																								extrinsic_defect, \
-																																								extrinsic_defect_mu0, \
-																																								extrinsic_defect_deltamu, \
-																																								synthesis_temperature )
-			defects_carrier_concentration2 = intrinsic_defect_carrier_concentration_temperature2[temperature] + extrinsic_defect_carrier_concentration_temperature2[temperature]
-			
-			
-			
-			# Total charge density at Fermi energy 2
-			defect_charge_density2 = hole_concentration2 + electron_concentration2 + defects_carrier_concentration2
-			
-			# Check if Fermi energy admits equilibrium conditions
-			if np.sign(defect_charge_density1) != np.sign(defect_charge_density2):
-				equilibrium_fermi_energy = fermi_energy1
-				equilibrium_hole_concentration = hole_concentration1
-				equilibrium_electron_concentration = electron_concentration1
-	
-	return equilibrium_fermi_energy, equilibrium_hole_concentration, equilibrium_electron_concentration
 
 
 

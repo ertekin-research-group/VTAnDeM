@@ -59,20 +59,6 @@ class Plot_Composition_Quaternary_PhaseDiagram(Plot_Composition_PhaseDiagram):
 		
 		
 		
-		
-		
-		
-		
-		"""
-		# Generate compositional phase diagram
-		self.Create_Compositional_PhaseDiagram()
-		self.Plot_Compositional_PhaseDiagram()
-		
-		
-		
-		### Find all four-phase regions after compositional phase diagram is drawn.
-		self.four_phase_region_objects = []
-		"""
 		# Find all four-phase regions in the quaternary composition space.
 		self.Find_All_PhaseRegions()
 		
@@ -81,29 +67,10 @@ class Plot_Composition_Quaternary_PhaseDiagram(Plot_Composition_PhaseDiagram):
 		
 		
 		
-		"""
-		# Plot selected four-phase region.
-		#	Store list of the four points constituting the four-phase region in self.fourphaseregion_selected.
-		#	Store the polygon plot object in self.fourphaseregion_shade.
-		self.fourphaseregion_selected = None
-		self.fourphaseregion_shade = []
-		"""
 		self.composition_phasediagram_plot_figure.canvas.mpl_connect('button_press_event', self.Shade_FourPhaseRegion)
-		
-		"""
-		self.composition_phasediagram_plot_figure.canvas.mpl_connect('button_press_event', self.Calculate_ChemicalPotentials_FourPhaseRegion)
-		self.composition_phasediagram_plot_figure.canvas.mpl_connect('motion_notify_event', self.Hover)
-		
-		self.fourphaseregion_annotation = self.composition_phasediagram_plot_drawing.annotate("", xy=(0,0), xytext=(20,20), textcoords="offset points",
-																								bbox = dict(boxstyle="round", fc="w"),
-																								arrowprops = dict(arrowstyle = "->") )
-		"""
 	
-	
-	
-	
-	
-	
+
+
 	
 	
 	###############################################################################################
@@ -140,42 +107,6 @@ class Plot_Composition_Quaternary_PhaseDiagram(Plot_Composition_PhaseDiagram):
 																					marker = scatterplot_marker )
 	
 	
-	"""
-	def Update_Annotation(self, index, event):
-		
-		# Get xy position of cursor on screen
-		screen_position_xy = self.centroids_plot.get_offsets()[index]
-		self.fourphaseregion_annotation.xy = screen_position_xy
-		
-		# Get name of four phase region
-		for four_phase_region in self.four_phase_region_objects:
-			if four_phase_region.centroid_plot.contains(event)[0]:
-				text = four_phase_region.name
-				break
-		
-		# Set annotation
-		self.fourphaseregion_annotation.set_text(text)
-		self.fourphaseregion_annotation.get_bbox_patch().set_facecolor("w")
-		self.fourphaseregion_annotation.get_bbox_patch().set_alpha(1.0)
-	
-	
-	
-	def Hover(self, event):
-		is_visible = self.fourphaseregion_annotation.get_visible()
-		
-		if event.inaxes == self.composition_phasediagram_plot_drawing:
-			contains, index = self.centroids_plot.contains(event)
-			if contains:
-				self.Update_Annotation(index["ind"][0], event)
-				self.fourphaseregion_annotation.set_visible(True)
-				self.composition_phasediagram_plot_canvas.draw()
-			else:
-				if is_visible:
-					self.fourphaseregion_annotation.set_visible(False)
-					self.composition_phasediagram_plot_canvas.draw()
-	"""
-	
-	
 	
 	###############################################################################################
 	############# Shade Four-Phase Region in Compositional Phase Diagram when Clicked #############
@@ -197,6 +128,7 @@ class Plot_Composition_Quaternary_PhaseDiagram(Plot_Composition_PhaseDiagram):
 				for triangle_plot in self.phaseregion_shade:
 					triangle_plot.remove()
 			self.phaseregion_shade = []
+			self.phaseregion_selected = None
 			self.composition_phasediagram_plot_canvas.draw()
 			return
 		
@@ -205,7 +137,8 @@ class Plot_Composition_Quaternary_PhaseDiagram(Plot_Composition_PhaseDiagram):
 			for triangle_plot in self.phaseregion_shade:
 				triangle_plot.remove()
 		
-		# Get selected four-phase region
+		# Get selected four-phase region, if any were selected
+		self.phaseregion_selected = None
 		for four_phase_region in self.phase_region_objects:
 			if four_phase_region.centroid_plot.contains(event)[0]:
 				self.phaseregion_selected = four_phase_region
@@ -230,63 +163,6 @@ class Plot_Composition_Quaternary_PhaseDiagram(Plot_Composition_PhaseDiagram):
 		self.composition_phasediagram_plot_canvas.draw()
 		
 		self.phaseregion_shade = [triangle_plot1, triangle_plot2, triangle_plot3, triangle_plot4]
-	
-	
-	
-	
-	"""
-	###############################################################################################
-	################ Calculate Chemical Potentials of Elements in Four-Phase Region ###############
-	###############################################################################################
-	
-	def Calculate_ChemicalPotentials_FourPhaseRegion(self, event):
-		
-		# Check to see that a four-phase region has been selected
-		if self.fourphaseregion_selected is None:
-			return
-		
-		# Get the names of compounds constituting the four-phase region
-		fourphaseregion_compounds = self.fourphaseregion_selected.name.replace(" ", "").split(",")
-		
-		# Get the matrix encoding the stoichiometry of each compound constituting the four-phase region
-		composition_matrix = np.zeros((4, 4))
-		for compound_index, compound in enumerate(fourphaseregion_compounds):
-			for element_index, element in enumerate(self.elements_list):
-				try:
-					composition_matrix[compound_index][element_index] = self.compounds_info[compound][element]
-				except:
-					composition_matrix[compound_index][element_index] = 0.0
-		
-		# Get the enthalpies of formation of each compound in the four-phase region
-		enthalpies_array = np.zeros((4, 1))
-		for compound_index, compound in enumerate(fourphaseregion_compounds):
-			competing_compound_enthalpy = self.compounds_info[compound]["dft_total_energy"] / self.compounds_info[compound]["formula_units"]
-			for element in self.elements_list:
-				if element not in self.compounds_info[compound].keys():
-					continue
-				competing_compound_enthalpy -= self.compounds_info[compound][element] * self.compounds_info[element]["mu0"]
-			enthalpies_array[compound_index] = competing_compound_enthalpy
-		
-		# Solve for the delta mu values
-		deltamus = np.dot( np.linalg.inv(composition_matrix), enthalpies_array )
-		
-		# Record delta mu values
-		for element, deltamu in zip(self.elements_list, deltamus):
-			self.deltamu_values[element] = deltamu[0]
-	"""
-
-
-
-
-"""
-class FourPhaseRegion(object):
-	def __init__(self):
-		self.name = None
-		self.vertices = None
-		self.centroid = None
-		self.centroid_plot = None
-"""
-
 
 
 

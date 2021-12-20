@@ -173,11 +173,13 @@ class Tab_PhaseDiagram_DefectsDiagram_CarrierConcentration(Tab_PhaseDiagram_Defe
 			self.CarrierConcentration.mu_elements[self.fourth_element]["deltamu"] = self.deltamu_values[self.fourth_element]
 			
 			# Redraw carrier concentration plot
+			"""
 			if self.CarrierConcentration.carrier_concentration_intrinsic_defect_hole_plot != None:
 				self.CarrierConcentration.Update_HoleConcentration_Plot()
 			if self.CarrierConcentration.carrier_concentration_intrinsic_defect_electron_plot != None:
 				self.CarrierConcentration.Update_ElectronConcentration_Plot()
-		
+			"""
+			self.CarrierConcentration.Update_CarrierConcentration_Plot()
 		
 		
 		if self.show_defects_diagram and self.show_carrier_concentration:

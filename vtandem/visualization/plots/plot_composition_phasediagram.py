@@ -1,7 +1,6 @@
 
-__author__ = 'Michael_Lidia_Jiaxing_Benita_Elif'
 __name__ = 'VTAnDeM_Visualization-Toolkit-for-Analyzing-Defects-in-Materials'
-
+__author__ = 'Michael_Lidia_Jiaxing_Elif'
 
 import numpy as np
 import itertools
@@ -21,6 +20,9 @@ from PyQt5.QtGui import *
 from vtandem.visualization.plots.save_plot import SaveFigure
 
 
+from vtandem.visualization.utils.compositional_phasediagram import *
+
+
 
 class Plot_Composition_PhaseDiagram(SaveFigure):
 	
@@ -31,11 +33,13 @@ class Plot_Composition_PhaseDiagram(SaveFigure):
 			raise ValueError("Argument 'type' can be either 'ternary' or 'quaternary'.")
 		self.type = type
 		
+		"""
 		# All elements in the periodic table
 		self.all_elements = []
 		for element in periodictable.elements:
 			self.all_elements.append(str(element))
-		
+		"""
+
 		# Font description for phase stability diagram plot
 		self.font = {'family': 'sans-serif', 'color':  'black', 'weight': 'bold', 'size': 10 }
 		
@@ -43,10 +47,20 @@ class Plot_Composition_PhaseDiagram(SaveFigure):
 		self.main_compound_info = main_compound_info
 		self.compounds_info = compounds_info
 		
+		
+
+
+
+		"""
 		# Initialize pymatgen phase diagram objects
 		self.pmg_phasediagram = None
 		self.pmg_phasediagram_plot_object = None
-		
+		"""
+
+
+
+
+
 		# Phase diagram (in composition space) object
 		self.composition_phasediagram_plot_figure = plt.figure()
 		self.composition_phasediagram_plot_canvas = FigureCanvas(self.composition_phasediagram_plot_figure)
@@ -58,19 +72,36 @@ class Plot_Composition_PhaseDiagram(SaveFigure):
 		# Save figure feature
 		SaveFigure.__init__(self, self.composition_phasediagram_plot_figure)
 		
+
+		"""
 		# Store all lines and labels of the compositional phase diagram
 		self.lines = []
 		self.labels = {}
-		
+		"""
+
+
 		# Store all plots of phase diagram vertices
 		self.vertices_plots = {}
 		
 		
+
+
 		# Generate compositional phase diagram
-		self.Create_Compositional_PhaseDiagram()
-		self.Plot_Compositional_PhaseDiagram()
+		self.pmg_phasediagram, self.lines, self.labels = Create_Compositional_PhaseDiagram(self.compounds_info, self.elements_list)
+		#self.Create_Compositional_PhaseDiagram()
+		#self.Plot_Compositional_PhaseDiagram()
+		newlabels = Plot_Compositional_PhaseDiagram(self.composition_phasediagram_plot_drawing, 
+													self.type,
+													self.lines,
+													self.labels,
+													self.font
+													)
+		self.composition_phasediagram_legend = self.composition_phasediagram_plot_figure.text(0.01, 0.01, "\n".join(newlabels))
+		self.composition_phasediagram_plot_canvas.draw()
+
 		
-		
+
+
 		### Find all phase regions after compositional phase diagram is drawn.
 		self.phase_region_objects = []
 		self.phaseregion_selected = None
@@ -94,7 +125,7 @@ class Plot_Composition_PhaseDiagram(SaveFigure):
 	
 	
 	
-	
+	"""
 	def Create_Compositional_PhaseDiagram(self):
 		
 		# Record all entries for the phase diagram
@@ -118,8 +149,6 @@ class Plot_Composition_PhaseDiagram(SaveFigure):
 			compound_total_energy = self.compounds_info[compound]["dft_total_energy"]
 			
 			# Record to list of entries
-			#phasediagram_entries.append(PDEntry(compound_composition, compound_total_energy, compound))
-			#phasediagram_entries.append(PDEntry(compound_composition, compound_total_energy))
 			phasediagram_entries.append(PDEntry(composition=Composition(compound_composition), energy=compound_total_energy, name=compound))
 		
 		# Calculate compositional phase diagram (using pymatgen)
@@ -134,11 +163,12 @@ class Plot_Composition_PhaseDiagram(SaveFigure):
 		# Record all lines and points of the compositional phase diagram
 		self.lines = lines
 		self.labels = labels
+	"""
+
 	
 	
 	
-	
-	
+	"""
 	def Plot_Compositional_PhaseDiagram(self, label_stable=True):
 		
 		# Plot settings
@@ -179,7 +209,7 @@ class Plot_Composition_PhaseDiagram(SaveFigure):
 		self.composition_phasediagram_legend = self.composition_phasediagram_plot_figure.text(0.01, 0.01, "\n".join(newlabels))
 		self.composition_phasediagram_plot_drawing.axis("off")
 		self.composition_phasediagram_plot_canvas.draw()
-	
+	"""
 	
 	
 	
@@ -198,7 +228,7 @@ class Plot_Composition_PhaseDiagram(SaveFigure):
 		pd_coordinates = {}
 		for coordinate in self.labels.keys():
 			pd_coordinates[ self.labels[coordinate].composition.reduced_composition ] = coordinate
-		
+
 		# Create and store phase region objects
 		for phase_region in all_phase_regions:
 			
@@ -208,7 +238,8 @@ class Plot_Composition_PhaseDiagram(SaveFigure):
 			
 			phase_region_vertices = []
 			for compound in phase_region_compounds:
-				phase_region_vertices.append( pd_coordinates[Composition(compound)] )
+				#phase_region_vertices.append( pd_coordinates[Composition(compound)] )
+				phase_region_vertices.append( pd_coordinates[Composition(compound).reduced_composition] )
 			
 			centroid = np.sum( np.asarray(phase_region_vertices), axis=0 ) / len(phase_region_vertices)
 			
@@ -252,8 +283,6 @@ class Plot_Composition_PhaseDiagram(SaveFigure):
 		self.centroids_plot = self.composition_phasediagram_plot_drawing.scatter(	*zip(*centroids),
 																					color = scatterplot_color,
 																					marker = scatterplot_marker )
-	
-	
 	
 	
 	

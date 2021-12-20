@@ -10,7 +10,7 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 
 # Import functions for calculating carrier concentration
-from vtandem.visualization.utils.carrier_concentration import Calculate_CarrierConcentration
+from vtandem.visualization.utils.carrier_concentration import Calculate_CarrierConcentration, Calculate_FreeHole_FreeElectron_Concentrations
 
 from vtandem.visualization.plots.save_plot import SaveFigure
 
@@ -23,6 +23,10 @@ class Plot_CarrierConcentration(SaveFigure):
 		# Font description for defect formation energy diagram
 		self.font = { 'family': 'sans-serif', 'color':  'black', 'weight': 'normal', 'size': 14 }
 		
+		# Plot settings
+		self.max_temperature = 1000  # Maximum temperature in Kelvins
+		self.temperature_stepsize = 50
+
 		# Store all extracted DFT data
 		self.defects_data = None
 		self.main_compound_info = None
@@ -31,7 +35,7 @@ class Plot_CarrierConcentration(SaveFigure):
 		self.EVBM = 0.0
 		self.ECBM = 0.0
 		self.fermi_energy_array = None
-		self.temperature_array = np.arange(200, 801, 50)
+		self.temperature_array = np.arange(200, self.max_temperature+1, self.temperature_stepsize)
 		self.synthesis_temperature = None
 		
 		self.energy = None
@@ -41,9 +45,6 @@ class Plot_CarrierConcentration(SaveFigure):
 		self.energies_ConductionBand	= None
 		self.gE_ConductionBand 			= None
 		
-		self.hole_concentrations_dict		= {}
-		self.electron_concentrations_dict	= {}
-		
 		self.intrinsic_equilibrium_fermi_energy = {}
 		self.total_equilibrium_fermi_energy = {}
 		for temperature in self.temperature_array:
@@ -51,9 +52,7 @@ class Plot_CarrierConcentration(SaveFigure):
 			self.total_equilibrium_fermi_energy[temperature] = 0.0
 		
 		
-		self.check_outside_bandgap = False
-		
-		self.k = 8.6173303E-5
+		#self.check_outside_bandgap = False
 		
 		# Store user-selected dopant
 		self.dopant = "None"
@@ -81,7 +80,7 @@ class Plot_CarrierConcentration(SaveFigure):
 	
 	def Activate_CarrierConcentration_Plot_Axes(self):
 		
-		self.carrier_concentration_plot_drawing.set_xlim(200, 800)
+		self.carrier_concentration_plot_drawing.set_xlim(200, self.max_temperature)
 		self.carrier_concentration_plot_drawing.set_ylim(self.ymin, self.ymax)
 		self.carrier_concentration_plot_drawing.set_xlabel("T(K)", fontdict=self.font)
 		self.carrier_concentration_plot_drawing.set_ylabel("n$_i$ (cm$^{-3}$)", fontdict=self.font, rotation=90)
@@ -137,25 +136,14 @@ class Plot_CarrierConcentration(SaveFigure):
 		gE_ConductionBand = []
 		
 		# The DOS band gap may not be the band gap for the defect formation energy
-		#	diagram, especially band gap corrections are applied. To mitigate this
-		#	problem, we use a scissor operator where the VBM and CBM in the DOSCAR
-		#	file are repositioned to the band gap of the defect formation energy
-		#	diagram.
+		#	diagram, especially when band gap corrections are applied. To mitigate
+		#	this problem, we use a scissor operator where the VBM and CBM in the
+		#	DOSCAR file are repositioned to the band gap of the defect formation
+		#	energy diagram.
 		past_dos_bandgap = False
-		
 		for energy, gE in zip(self.energy, self.gE):
-			"""
-			# Get all energies and corresponding DOSs below VBM
-			if energy <= self.EVBM:
-				energies_ValenceBand.append(energy)
-				gE_ValenceBand.append(gE)
-			# Get all energies and corresponding DOSs above CBM
-			if energy >= self.ECBM:
-				energies_ConductionBand.append(energy)
-				gE_ConductionBand.append(gE)
-			"""
-			# Get all energies and corresponding DOSs below VBM
 			if energy <= 0.0:
+				# Get all energies and corresponding DOSs below VBM
 				energies_ValenceBand.append(energy)
 				gE_ValenceBand.append(gE)
 			else:
@@ -166,15 +154,6 @@ class Plot_CarrierConcentration(SaveFigure):
 					past_dos_bandgap = True
 					energies_ConductionBand.append(energy)
 					gE_ConductionBand.append(gE)
-				"""
-				# Get all energies and corresponding DOSs above CBM
-				if (energy < band_gap) and (gE <= 0.0):
-					continue
-				else:
-					energies_ConductionBand.append(energy)
-					gE_ConductionBand.append(gE)
-				"""
-		
 		
 		# Make data into numpy arrays
 		self.energies_ValenceBand = np.asarray(energies_ValenceBand)
@@ -182,7 +161,7 @@ class Plot_CarrierConcentration(SaveFigure):
 		self.energies_ConductionBand = np.asarray(energies_ConductionBand)
 		self.gE_ConductionBand = np.asarray(gE_ConductionBand)
 		
-		# Reposition band edges to corrected values
+		# Reposition band edges to corrected values (NOT ZERO-ED)
 		self.energies_ValenceBand += self.EVBM
 		self.energies_ConductionBand += self.ECBM - np.min(self.energies_ConductionBand)
 		
@@ -191,31 +170,20 @@ class Plot_CarrierConcentration(SaveFigure):
 		self.gE_ConductionBand /= self.dos_data["Volume"]
 	
 	
+
+	# Free carrier concentrations are calculated separately from defect concentrations. This is to prevent
+	#	having to calculate them repeatedly for different thermodynamic conditions (delta mu values) since
+	#	they're the same in each condition.
 	def Calculate_Hole_Electron_Concentration_Matrices(self):
-		
-		for temperature in self.temperature_array:
-			
-			self.hole_concentrations_dict[temperature] = []
-			self.electron_concentrations_dict[temperature] = []
-			
-			for ef in self.fermi_energy_array:
-				
-				# Hole concentration
-				fE_holes = self.gE_ValenceBand * (1. - 1./( 1. + np.exp( (self.energies_ValenceBand - ef) / (self.k * temperature) ) ) )
-				hole_concentration = integrate.simps(fE_holes, self.energies_ValenceBand)
-				#self.hole_concentrations_dict[temperature].append(hole_concentration / 1E-24)	# In units of cm^-3
-				self.hole_concentrations_dict[temperature].append(hole_concentration)	# In units of cm^-3
-				
-				# Electron concentration
-				fE_electrons = self.gE_ConductionBand / (1. + np.exp( (self.energies_ConductionBand - ef) / (self.k * temperature) ) )
-				electron_concentration = integrate.simps(fE_electrons, self.energies_ConductionBand)
-				#self.electron_concentrations_dict[temperature].append(electron_concentration / 1E-24)	# In units of cm^-3
-				self.electron_concentrations_dict[temperature].append(electron_concentration)	# In units of cm^-3
-			
-			self.hole_concentrations_dict[temperature] = np.asarray(self.hole_concentrations_dict[temperature])
-			self.electron_concentrations_dict[temperature] = np.asarray(self.electron_concentrations_dict[temperature])
+		self.hole_concentrations_dict, self.electron_concentrations_dict = Calculate_FreeHole_FreeElectron_Concentrations(	self.temperature_array, \
+																															self.fermi_energy_array, \
+																															self.gE_ValenceBand, \
+																															self.energies_ValenceBand, \
+																															self.gE_ConductionBand, \
+																															self.energies_ConductionBand )
 	
 	
+	"""
 	def Initialize_HoleConcentration_Plot(self):
 		
 		intrinsic_defect_hole_concentration, intrinsic_defect_electron_concentration, total_hole_concentration, total_electron_concentration, intrinsic_equilibrium_fermi_energy_temperature, total_equilibrium_fermi_energy_temperature = Calculate_CarrierConcentration(	EVBM = self.EVBM, \
@@ -235,7 +203,6 @@ class Plot_CarrierConcentration(SaveFigure):
 																																																																			extrinsic_defect_deltamu = self.dopant_deltamu, \
 																																																																			hole_concentrations_dict = self.hole_concentrations_dict, \
 																																																																			electron_concentrations_dict = self.electron_concentrations_dict, \
-																																																																			check_outside_bandgap = self.check_outside_bandgap, \
 																																																																			synthesis_temperature = self.synthesis_temperature )
 		
 		# Update equilibrium Fermi energy
@@ -254,9 +221,11 @@ class Plot_CarrierConcentration(SaveFigure):
 		
 		self.carrier_concentration_plot_drawing.legend(loc=1)
 		self.carrier_concentration_plot_canvas.draw()
+	"""
+
 	
 	
-	
+	"""
 	def Update_HoleConcentration_Plot(self):
 		
 		intrinsic_defect_hole_concentration, intrinsic_defect_electron_concentration, total_hole_concentration, total_electron_concentration, intrinsic_equilibrium_fermi_energy_temperature, total_equilibrium_fermi_energy_temperature = Calculate_CarrierConcentration(	EVBM = self.EVBM, \
@@ -276,7 +245,6 @@ class Plot_CarrierConcentration(SaveFigure):
 																																																																			extrinsic_defect_deltamu = self.dopant_deltamu, \
 																																																																			hole_concentrations_dict = self.hole_concentrations_dict, \
 																																																																			electron_concentrations_dict = self.electron_concentrations_dict, \
-																																																																			check_outside_bandgap = self.check_outside_bandgap, \
 																																																																			synthesis_temperature = self.synthesis_temperature )
 		
 		# Update equilibrium Fermi energy
@@ -288,9 +256,13 @@ class Plot_CarrierConcentration(SaveFigure):
 			self.carrier_concentration_total_hole_plot.set_ydata(total_hole_concentration)
 		
 		self.carrier_concentration_plot_canvas.draw()
+	"""
+
+
 	
 	
 	
+	"""
 	def Initialize_ElectronConcentration_Plot(self):
 		
 		intrinsic_defect_hole_concentration, intrinsic_defect_electron_concentration, total_hole_concentration, total_electron_concentration, intrinsic_equilibrium_fermi_energy_temperature, total_equilibrium_fermi_energy_temperature = Calculate_CarrierConcentration(	EVBM = self.EVBM, \
@@ -310,7 +282,6 @@ class Plot_CarrierConcentration(SaveFigure):
 																																																																			extrinsic_defect_deltamu = self.dopant_deltamu, \
 																																																																			hole_concentrations_dict = self.hole_concentrations_dict, \
 																																																																			electron_concentrations_dict = self.electron_concentrations_dict, \
-																																																																			check_outside_bandgap = self.check_outside_bandgap, \
 																																																																			synthesis_temperature = self.synthesis_temperature )
 		
 		# Update equilibrium Fermi energy
@@ -329,9 +300,65 @@ class Plot_CarrierConcentration(SaveFigure):
 		
 		self.carrier_concentration_plot_drawing.legend(loc=1)
 		self.carrier_concentration_plot_canvas.draw()
+	"""
 	
+
+
+
+
+	def Initialize_CarrierConcentration_Plot(self):
+		
+		intrinsic_defect_hole_concentration, intrinsic_defect_electron_concentration, total_hole_concentration, total_electron_concentration, intrinsic_equilibrium_fermi_energy_temperature, total_equilibrium_fermi_energy_temperature = Calculate_CarrierConcentration(	EVBM = self.EVBM, \
+																																																																			ECBM = self.ECBM, \
+																																																																			energies_ValenceBand = self.energies_ValenceBand, \
+																																																																			gE_ValenceBand = self.gE_ValenceBand, \
+																																																																			energies_ConductionBand = self.energies_ConductionBand, \
+																																																																			gE_ConductionBand = self.gE_ConductionBand, \
+																																																																			defects_data = self.defects_data, \
+																																																																			main_compound_info = self.main_compound_info, \
+																																																																			mu_elements = self.mu_elements, \
+																																																																			temperature_array = self.temperature_array, \
+																																																																			fermi_energy_array = self.fermi_energy_array, \
+																																																																			volume = self.vol, \
+																																																																			extrinsic_defect = self.dopant, \
+																																																																			extrinsic_defect_mu0 = self.dopant_mu0, \
+																																																																			extrinsic_defect_deltamu = self.dopant_deltamu, \
+																																																																			hole_concentrations_dict = self.hole_concentrations_dict, \
+																																																																			electron_concentrations_dict = self.electron_concentrations_dict, \
+																																																																			synthesis_temperature = self.synthesis_temperature )
+		
+		# Update equilibrium Fermi energy
+		self.intrinsic_equilibrium_fermi_energy = intrinsic_equilibrium_fermi_energy_temperature
+		self.total_equilibrium_fermi_energy = total_equilibrium_fermi_energy_temperature
+		
+		try:
+			self.carrier_concentration_intrinsic_defect_hole_plot.remove()
+			self.carrier_concentration_total_hole_plot.remove()
+		except:
+			pass
+
+		try:
+			self.carrier_concentration_intrinsic_defect_electron_plot.remove()
+			self.carrier_concentration_total_electron_plot.remove()
+		except:
+			pass
+		
+		self.carrier_concentration_intrinsic_defect_hole_plot, = self.carrier_concentration_plot_drawing.semilogy(self.temperature_array, intrinsic_defect_hole_concentration, 'o-', color='red', label='Hole')
+		if self.dopant != "None":
+			self.carrier_concentration_total_hole_plot, = self.carrier_concentration_plot_drawing.semilogy(self.temperature_array, total_hole_concentration, 'o-', markerfacecolor='none', markeredgecolor='red', color='red', ls='--', label='Hole (With Dopant)')
+		
+		self.carrier_concentration_intrinsic_defect_electron_plot, = self.carrier_concentration_plot_drawing.semilogy(self.temperature_array, intrinsic_defect_electron_concentration, 'o-', color='green', label='Electron')
+		if self.dopant != "None":
+			self.carrier_concentration_total_electron_plot, = self.carrier_concentration_plot_drawing.semilogy(self.temperature_array, total_electron_concentration, 'o-', markerfacecolor='none', markeredgecolor='green', color='green', ls='--', label='Electron (With Dopant)')
+		
+		self.carrier_concentration_plot_drawing.legend(loc=1)
+		self.carrier_concentration_plot_canvas.draw()
 	
-	
+
+
+
+
+	"""
 	def Update_ElectronConcentration_Plot(self):
 		
 		intrinsic_defect_hole_concentration, intrinsic_defect_electron_concentration, total_hole_concentration, total_electron_concentration, intrinsic_equilibrium_fermi_energy_temperature, total_equilibrium_fermi_energy_temperature = Calculate_CarrierConcentration(	EVBM = self.EVBM, \
@@ -351,7 +378,6 @@ class Plot_CarrierConcentration(SaveFigure):
 																																																																			extrinsic_defect_deltamu = self.dopant_deltamu, \
 																																																																			hole_concentrations_dict = self.hole_concentrations_dict, \
 																																																																			electron_concentrations_dict = self.electron_concentrations_dict, \
-																																																																			check_outside_bandgap = self.check_outside_bandgap,
 																																																																			synthesis_temperature = self.synthesis_temperature )
 		
 		# Update equilibrium Fermi energy
@@ -363,12 +389,47 @@ class Plot_CarrierConcentration(SaveFigure):
 			self.carrier_concentration_total_electron_plot.set_ydata(total_electron_concentration)
 		
 		self.carrier_concentration_plot_canvas.draw()
+	"""
 
 
 
 
 
 
+	def Update_CarrierConcentration_Plot(self):
+		
+		intrinsic_defect_hole_concentration, intrinsic_defect_electron_concentration, total_hole_concentration, total_electron_concentration, intrinsic_equilibrium_fermi_energy_temperature, total_equilibrium_fermi_energy_temperature = Calculate_CarrierConcentration(	EVBM = self.EVBM, \
+																																																																			ECBM = self.ECBM, \
+																																																																			energies_ValenceBand = self.energies_ValenceBand, \
+																																																																			gE_ValenceBand = self.gE_ValenceBand, \
+																																																																			energies_ConductionBand = self.energies_ConductionBand, \
+																																																																			gE_ConductionBand = self.gE_ConductionBand, \
+																																																																			defects_data = self.defects_data, \
+																																																																			main_compound_info = self.main_compound_info, \
+																																																																			mu_elements = self.mu_elements, \
+																																																																			temperature_array = self.temperature_array, \
+																																																																			fermi_energy_array = self.fermi_energy_array, \
+																																																																			volume = self.vol, \
+																																																																			extrinsic_defect = self.dopant, \
+																																																																			extrinsic_defect_mu0 = self.dopant_mu0, \
+																																																																			extrinsic_defect_deltamu = self.dopant_deltamu, \
+																																																																			hole_concentrations_dict = self.hole_concentrations_dict, \
+																																																																			electron_concentrations_dict = self.electron_concentrations_dict, \
+																																																																			synthesis_temperature = self.synthesis_temperature )
+		
+		# Update equilibrium Fermi energy
+		self.intrinsic_equilibrium_fermi_energy = intrinsic_equilibrium_fermi_energy_temperature
+		self.total_equilibrium_fermi_energy = total_equilibrium_fermi_energy_temperature
+		
+		self.carrier_concentration_intrinsic_defect_hole_plot.set_ydata(intrinsic_defect_hole_concentration)
+		if self.dopant != "None":
+			self.carrier_concentration_total_hole_plot.set_ydata(total_hole_concentration)
+		
+		self.carrier_concentration_intrinsic_defect_electron_plot.set_ydata(intrinsic_defect_electron_concentration)
+		if self.dopant != "None":
+			self.carrier_concentration_total_electron_plot.set_ydata(total_electron_concentration)
+		
+		self.carrier_concentration_plot_canvas.draw()
 
 
 

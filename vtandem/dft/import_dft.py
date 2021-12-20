@@ -14,7 +14,7 @@ __author__ = 'Michael_Jiaxing_Lidia_Elif'
 
 
 
-import os
+import os, sys
 import re
 import json
 import numpy as np
@@ -51,13 +51,11 @@ class Compounds_Import:
 		
 		# Check if the directory name is legitimate
 		if not os.path.isdir(directory_name):
-			print("WARNING: Cannot find directory '"+directory_name+"'. Exiting...")
-			return False
+			sys.exit("WARNING: Cannot find directory '"+directory_name+"'. Exiting...")
 		
 		# Check to see that the element is legitimate
 		if element_name not in self.elements:
-			print(element_name+" is not recognized as a legitimate element. Exiting...")
-			return False
+			sys.exit(element_name+" is not recognized as a legitimate element. Exiting...")
 		
 		# Check if the element already exists in the database
 		if element_name in self.compounds_info["Elements"].keys():
@@ -72,8 +70,7 @@ class Compounds_Import:
 		
 		# Find stoichiometry of element in POSCAR/CONTCAR
 		if ("POSCAR" not in os.listdir(directory_name)) and ("CONTCAR" not in os.listdir(directory_name)):
-			print("WARNING: Cannot find structure file (neither POSCAR nor CONTCAR) of "+element_name+". Exiting...")
-			return False
+			sys.exit("WARNING: Cannot find structure file (neither POSCAR nor CONTCAR) of "+element_name+". Exiting...")
 		try:
 			structure_file = open(directory_name+"/POSCAR").readlines()
 		except:
@@ -86,8 +83,7 @@ class Compounds_Import:
 		
 		# Find total energy of element in OUTCAR
 		if "OUTCAR" not in os.listdir(directory_name):
-			print("WARNING: Cannot find OUTCAR file of "+element_name+". Exiting...")
-			return False
+			sys.exit("WARNING: Cannot find OUTCAR file of "+element_name+". Exiting...")
 		element_data["dft_total_energy"] = self.Get_Total_Energy(directory_name)
 		
 		# Calculate total energy per formula unit of compound
@@ -107,13 +103,11 @@ class Compounds_Import:
 		
 		# Check if the directory name is legitimate
 		if not os.path.isdir(directory_name):
-			print("WARNING: Cannot find directory '"+directory_name+"'. Exiting...")
-			return False
+			sys.exit("WARNING: Cannot find directory '"+directory_name+"'. Exiting...")
 		
 		# Check if the compound is actually an element
 		if compound_name in self.elements:
-			print("WARNING: '"+compound_name+"' is an element, not a compound. Exiting...")
-			return False
+			sys.exit("WARNING: '"+compound_name+"' is an element, not a compound. Exiting...")
 		
 		# Check if the compound already exists in the database
 		if compound_name in self.compounds_info["Compounds"].keys():
@@ -127,8 +121,7 @@ class Compounds_Import:
 		elements_list = [ ''.join( [letter for letter in element_segment if not letter.isdigit()] ) for element_segment in re.findall("[A-Z][^A-Z]*", compound_name) ]
 		for element in elements_list:
 			if element not in self.elements:
-				print("'"+element+"' is not a valid element. Exiting...")
-				return False
+				sys.exit("'"+element+"' is not a valid element. Exiting...")
 			else:
 				try:
 					number_species_in_compound = float(compound_name.split(element)[-1][:3])
@@ -164,43 +157,11 @@ class Compounds_Import:
 			compound_data["formula_units"] = compound_data["dft_"+element]/compound_data[element]
 		compound_data["number_species"] = len(number_species)
 		
-		"""
-		# Find volume of compound from lattice vectors in POSCAR/CONTCAR
-		lattice_vector_x = np.asarray([float(i) for i in structure_file[2].split()])
-		lattice_vector_y = np.asarray([float(i) for i in structure_file[3].split()])
-		lattice_vector_z = np.asarray([float(i) for i in structure_file[4].split()])
-		volume = np.dot(lattice_vector_x, np.cross(lattice_vector_y, lattice_vector_z))
-		compound_data["volume"] = volume*1E-24
-		"""
-		
 		# Find total energy of compound in OUTCAR
 		if "OUTCAR" not in os.listdir(directory_name):
 			print("WARNING: Cannot find OUTCAR file of '"+compound_name+"' in '"+directory_name+"'. Exiting...")
 			return False
-		#compound_data["total_energy"] = self.Get_Total_Energy(directory_name)
 		compound_data["dft_total_energy"] = self.Get_Total_Energy(directory_name)
-		
-		"""
-		# Calculate total energy per formula unit of compound
-		compound_data["mu0"] = compound_data["total_energy"] / compound_data["formula_units"]
-		
-		# Calculate enthalpy of formation of compound
-		enthalpy_tracker = compound_data["mu0"]
-		for element in elements_list:
-			enthalpy_tracker -= compound_data[element]*self.compounds_info["Elements"][element]["mu0"]
-		compound_data["enthalpy"] = enthalpy_tracker
-		"""
-		
-		"""
-		# Find band gap and valence band maximum of compound in vasprun.xml
-		if "vasprun.xml" not in os.listdir(directory_name):
-			print("WARNING: Cannot find band gap nor valence band maximum (vasprun.xml file). Exiting...")
-			return False
-		vasprun = Vasprun(directory_name+"/vasprun.xml")
-		(bandgap, cbm, vbm, is_direct) = vasprun.eigenvalue_band_properties
-		compound_data["band_gap"] = bandgap
-		compound_data["vbm"] = vbm
-		"""
 		
 		# Store data
 		self.compounds_info["Compounds"][compound_name] = compound_data
@@ -277,7 +238,7 @@ class Defects_Import:
 	def Add_Defects(self, compound_name, directory_name):
 		
 		# Run checks
-		self.Run_Checks(compound_name, directory_name)
+		self.Run_Defect_Checks(compound_name, directory_name)
 		
 		# Create list of possible defects in compound
 		defect_sites = [ ''.join( [letter for letter in element_segment if not letter.isdigit()] ) for element_segment in re.findall("[A-Z][^A-Z]*", compound_name) ]
@@ -403,6 +364,9 @@ class Defects_Import:
 		for type, count in zip(atom_types, atom_counts):
 			self.defects_data[compound_name]["Bulk"]["dft_"+type] = float(count)
 		
+		# Update type of compound (binary/ternary/quaternary)
+		self.defects_data[compound_name]["Bulk"]["number_species"] = int(len(atom_types))
+		
 		# Update total energy of bulk
 		total_energy = self.Get_Total_Energy(bulk_folder)
 		self.defects_data[compound_name]["Bulk"]["dft_BulkEnergy"] = total_energy
@@ -460,7 +424,7 @@ class Defects_Import:
 		# Check that POSCAR/CONTCAR contains the correct atom types
 		for atom_type in atom_types:
 			if atom_type not in self.possible_defect_site_list:
-				raise Exception("Unexpected atom found in POSCAR/CONTCAR file for '"+compound_name+"'. Exiting...")
+				sys.exit("Unexpected atom found in POSCAR/CONTCAR file for '"+compound_name+"'. Exiting...")
 		
 		# Update site multiplicities dictionary
 		for atom_type, natoms in zip(atom_types, number_atoms):
@@ -477,17 +441,17 @@ class Defects_Import:
 		
 		# Check if provided file name is an actual file
 		if not os.path.isfile(csv_filename):
-			raise Exception("The provided file '"+csv_filename+"' cannot be found/imported. Exiting...")
+			sys.exit("The provided file '"+csv_filename+"' cannot be found/imported. Exiting...")
 		
 		# Check to see if the compound is actually in the database
 		if compound_name not in self.defects_data.keys():
-			raise Exception("The compound '"+compound_name+"' has not been imported yet. Exiting...")
+			sys.exit("The compound '"+compound_name+"' has not been imported yet. Exiting...")
 		
 		# Loop through lines of CSV file
 		for line in open(csv_filename).readlines():
 			line = line.replace("\n", "")
 			data = line.split(",")
-			
+
 			# Check to see if the line indeed has 4 entries
 			if len(data) != 4:
 				print("The line '"+line+"' does not have 4 entries and therefore may not be in the correct format [Compound, Defect, Charge, ECorr]. Skipping...")
@@ -504,12 +468,16 @@ class Defects_Import:
 				continue
 			
 			# Check to see if the defect charge state has been imported
-			if data[2] not in self.defects_data[compound_name][data[1]]["charge"].keys():
-				print("The charge state in line '"+line+"' cannot be found for compound '"+compound_name+"'. Skipping...")
+			if float(data[2]) > 0:
+				charge_state = "+"+str(int(data[2])) # Positive values omit the prefix "+" in CSV files
+			else:
+				charge_state = str(int(data[2]))
+			if charge_state not in self.defects_data[compound_name][data[1]]["charge"].keys():
+				print("The charge state in line '"+line+"' cannot be found for defect '"+data[1]+"' in compound '"+compound_name+"'. Skipping...")
 				continue
 			
 			# Update energy correction
-			self.defects_data[compound_name][data[1]]["charge"][data[2]]["ECorr"] = float(data[3])
+			self.defects_data[compound_name][data[1]]["charge"][charge_state]["ECorr"] = float(data[3])
 	
 	
 	
@@ -517,39 +485,44 @@ class Defects_Import:
 	########################################## Check Legitimacy of User Input ##########################################
 	####################################################################################################################
 	
-	def Run_Checks(self, compound_name, directory_name):
+	def Run_Defect_Checks(self, compound_name, directory_name):
 		
 		# Check if the directory is indeed a directory
 		if not os.path.isdir(directory_name):
-			raise Exception("The directory '"+directory_name+"' cannot be found. Exiting...")
+			sys.exit("The directory '"+directory_name+"' cannot be found. Exiting...")
 		
 		# Check if the Compounds_Tracker.json file exists
 		if not os.path.exists("Compounds_Tracker.json"):
-			raise Exception("The Compounds_Tracker.json file does not exist. Make sure you import the compounds data first. Exiting...")
+			sys.exit("The Compounds_Tracker.json file does not exist. Make sure you import the compounds data first. Exiting...")
 		
-		"""
-		# Check if compound exists in Compounds_Tracker.json
-		if compound_name not in json.load(open("Compounds_Tracker.json"))["Compounds"].keys():
-			raise Exception("The compound '"+compound_name+"' does not exist in Compounds_Tracker.json. Exiting...")
-		"""
 		# Check if elements in compound exist in Compounds_Tracker.json
 		elements_in_compound = [ ''.join( [letter for letter in element_segment if not letter.isdigit()] ) for element_segment in re.findall("[A-Z][^A-Z]*", compound_name) ]
 		elements_in_database = json.load(open("Compounds_Tracker.json"))["Elements"].keys()
 		for element in elements_in_compound:
 			if element not in elements_in_database:
-				raise Exception("The element '"+element+"' of compound '"+compound_name+"' is not in Compounds_Tracker.json. Exiting...")
+				sys.exit("The element '"+element+"' of compound '"+compound_name+"' is not in Compounds_Tracker.json. Exiting...")
 		
 		# Check if directory contains the 'Bulk' folder
 		if "Bulk" not in os.listdir(directory_name):
-			raise Exception("A folder named 'Bulk' must exist in '"+directory_name+"'. Exiting...")
+			sys.exit("A folder named 'Bulk' must exist in '"+directory_name+"'. Exiting...")
 		
 		# Check if POSCAR/CONTCAR, OUTCAR, and vasprun.xml are in the 'Bulk' folder
 		if ("POSCAR" not in os.listdir(directory_name+"/Bulk")) and ("CONTCAR" not in os.listdir(directory_name+"/Bulk")):
-			raise Exception("POSCAR/CONTCAR missing from 'Bulk' folder. Exiting...")
+			sys.exit("POSCAR/CONTCAR missing from 'Bulk' folder. Exiting...")
 		if "OUTCAR" not in os.listdir(directory_name+"/Bulk"):
-			raise Exception("OUTCAR missing from 'Bulk' folder. Exiting...")
+			sys.exit("OUTCAR missing from 'Bulk' folder. Exiting...")
 		if "vasprun.xml" not in os.listdir(directory_name+"/Bulk"):
-			raise Exception("vasprun.xml missing from 'Bulk' folder. Exiting...")
+			sys.exit("vasprun.xml missing from 'Bulk' folder. Exiting...")
+
+		# Check if defects data for compound already exists
+		if compound_name in self.defects_data.keys():
+			continue_defects_import = input("The compound '"+compound_name+"' is already in the defects database (Defects_Tracker.json). Replace? ([y]/n): ") or "y"
+			while continue_defects_import not in ["y", "n"]:
+				continue_defects_import = input("Please type either 'y' or 'n': ") or "y"
+			if continue_defects_import == "n":
+				sys.exit("Aborting importing defects of "+compound_name+".")
+
+
 	
 	
 	
@@ -597,20 +570,24 @@ class DOS_Import:
 		
 		# Check if the directory name is legitimate
 		if not os.path.isdir(directory_name):
-			raise Exception("The directory '"+directory_name+"' cannot be found. Exiting...")
+			sys.exit("The directory '"+directory_name+"' cannot be found. Exiting...")
 		
 		# Check that both the DOSCAR file and either POSCAR and/or CONTCAR are in the folder
 		if ("DOSCAR" not in os.listdir(directory_name)) and ( ("POSCAR" not in os.listdir(directory_name)) and ("CONTCAR" not in os.listdir(directory_name)) ):
-			raise Exception("Either the DOSCAR and/or the POSCAR/CONTCAR file is missing from directory '"+directory_name+"'. Exiting...")
+			sys.exit("Either the DOSCAR and/or the POSCAR/CONTCAR file is missing from directory '"+directory_name+"'. Exiting...")
 		
-		# If compound does not exists in Compounds_Tracker.json, then don't import
-		if compound_name not in json.load(open("Compounds_Tracker.json"))["Compounds"].keys():
-			raise Exception("The compound '"+compound_name+"' does not exist in Compounds_Tracker.json. Skipping...")
+		# If compound does not exists in Defects_Tracker.json, then don't import
+		if compound_name not in json.load(open("Defects_Tracker.json")).keys():
+			sys.exit("The compound '"+compound_name+"' does not exist in Defects_Tracker.json. Skipping...")
 		
 		# Check if the compound already exists in the database
 		if compound_name in self.dos_data.keys():
-			print("The compound '"+compound_name+"' is already in the DOS database (DOS_Tracker.json). The imported data will replace the old data.")
-		
+			continue_dos_import = input("The compound '"+compound_name+"' is already in the DOS database (DOS_Tracker.json). Replace? ([y]/n): ") or "y"
+			while continue_dos_import not in ["y", "n"]:
+				continue_dos_import = input("Please type either 'y' or 'n': ") or "y"
+			if continue_dos_import == "n":
+				sys.exit("Aborting importing DOS of "+compound_name+".")
+
 		# Open files
 		if "POSCAR" in os.listdir(directory_name):
 			lattice_vectors_str = open(directory_name+"/POSCAR").readlines()[2:5]

@@ -1,6 +1,6 @@
 
-__author__ = 'Michael_Lidia_Jiaxing_Benita_Elif'
 __name__ = 'VTAnDeM_Visualization-Toolkit-for-Analyzing-Defects-in-Materials'
+__author__ = 'Michael_Lidia_Jiaxing_Elif'
 
 
 import numpy as np
@@ -17,8 +17,6 @@ class Window_CarrierConcentration(QWidget):
 	def __init__(self):
 		
 		QWidget.__init__(self)
-		
-		#self.show_dopant = show_dopant
 		
 		
 		###### Main carrier concentration window widget
@@ -42,24 +40,26 @@ class Window_CarrierConcentration(QWidget):
 		
 		# (WIDGET) Y-axis limits for carrier concentration
 		self.carrierconcentration_Ymin_label = QLabel(u"y"+"<sub>min</sub>")
-		self.carrierconcentration_Ymin_label.setAlignment(Qt.AlignRight)
+		self.carrierconcentration_Ymin_label.setAlignment(Qt.AlignCenter)
 		self.carrierconcentration_viewport_layout.addWidget(self.carrierconcentration_Ymin_label)
 		self.carrierconcentration_Ymin_box = QLineEdit("1E16")
 		self.carrierconcentration_Ymin_box.editingFinished.connect(lambda: self.CarrierConcentration.Update_WindowSize("YMin", self.carrierconcentration_Ymin_box))
 		self.carrierconcentration_viewport_layout.addWidget(self.carrierconcentration_Ymin_box)
 		self.carrierconcentration_Ymax_label = QLabel(u"y"+"<sub>max</sub>")
-		self.carrierconcentration_Ymax_label.setAlignment(Qt.AlignRight)
+		self.carrierconcentration_Ymax_label.setAlignment(Qt.AlignCenter)
 		self.carrierconcentration_viewport_layout.addWidget(self.carrierconcentration_Ymax_label)
 		self.carrierconcentration_Ymax_box = QLineEdit("1E23")
 		self.carrierconcentration_Ymax_box.editingFinished.connect(lambda: self.CarrierConcentration.Update_WindowSize("YMax", self.carrierconcentration_Ymax_box))
 		self.carrierconcentration_viewport_layout.addWidget(self.carrierconcentration_Ymax_box)
 		
+		"""
 		self.carrierconcentration_holes_checkbox = QCheckBox("Holes",self)
 		self.carrierconcentration_holes_checkbox.setChecked(True)
 		self.carrierconcentration_viewport_layout.addWidget(self.carrierconcentration_holes_checkbox)
 		self.carrierconcentration_electrons_checkbox = QCheckBox("Electrons",self)
 		self.carrierconcentration_electrons_checkbox.setChecked(True)
 		self.carrierconcentration_viewport_layout.addWidget(self.carrierconcentration_electrons_checkbox)
+		"""
 		
 		self.carrierconcentration_window_layout.addWidget(self.carrierconcentration_viewport)
 		
@@ -98,12 +98,15 @@ class Window_CarrierConcentration(QWidget):
 		self.CarrierConcentration.carrier_concentration_total_hole_plot = None
 		self.CarrierConcentration.carrier_concentration_total_electron_plot = None
 		
+		"""
 		if self.carrierconcentration_holes_checkbox.isChecked():
 			self.CarrierConcentration.Initialize_HoleConcentration_Plot()
 		
 		if self.carrierconcentration_electrons_checkbox.isChecked():
 			self.CarrierConcentration.Initialize_ElectronConcentration_Plot()
-		
+		"""
+		self.CarrierConcentration.Initialize_CarrierConcentration_Plot()
+
 		# Plot the equilibrium Fermi energy
 		if self.DefectsDiagram.intrinsic_defect_plots != {}:
 			self.Update_Equilibrium_Fermi_Energy_Temperature()
@@ -156,16 +159,7 @@ class Window_CarrierConcentration(QWidget):
 		
 		self.equilibrium_fermi_energy_widget_layout.addItem(QSpacerItem(50, 20, QSizePolicy.Expanding, QSizePolicy.Minimum))
 		
-		# Check outside band gap button
-		self.equilibrium_fermi_energy_checkbox = QCheckBox("Check Outside\nBand Gap", self)
-		self.equilibrium_fermi_energy_checkbox.setChecked(False)
-		self.equilibrium_fermi_energy_checkbox.clicked.connect(self.Equilibrium_Fermi_Energy_CheckOutsideBandgap)
-		self.equilibrium_fermi_energy_widget_layout.addWidget(self.equilibrium_fermi_energy_checkbox)
-		
-		
 		self.carrierconcentration_window_layout.addWidget(self.equilibrium_fermi_energy_widget)
-	
-	
 	
 	
 	def Update_Equilibrium_Fermi_Energy_Temperature(self):
@@ -180,21 +174,8 @@ class Window_CarrierConcentration(QWidget):
 			self.equilibrium_fermi_energy_display.setStyleSheet("""QLineEdit { background-color: white; color: red }""")
 		else:
 			self.equilibrium_fermi_energy_display.setStyleSheet("""QLineEdit { background-color: white; color: black }""")
-		
-		self.DefectsDiagram.Plot_Equilibrium_Fermi_Energy(temperature=temperature, equilibrium_fermi_energy=total_equilibrium_fermi_energy)
-	
-	
-	
-	
-	
-	def Equilibrium_Fermi_Energy_CheckOutsideBandgap(self):
-		if self.equilibrium_fermi_energy_checkbox.isChecked():
-			self.CarrierConcentration.check_outside_bandgap = True
-		else:
-			self.CarrierConcentration.check_outside_bandgap = False
 
-
-
+		self.DefectsDiagram.Plot_Equilibrium_Fermi_Energy(equilibrium_fermi_energy=total_equilibrium_fermi_energy)
 
 
 

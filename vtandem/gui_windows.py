@@ -1,6 +1,6 @@
 
-__author__ = 'Michael_Lidia_Jiaxing_Benita_Elif'
 __name__ = 'VTAnDeM_Visualization-Toolkit-for-Analyzing-Defects-in-Materials'
+__author__ = 'Michael_Lidia_Jiaxing_Elif'
 
 
 ###############################################################################################################################
@@ -592,12 +592,12 @@ class Material_Selection_Window(QMainWindow):
 			self.dos_data = json.load(DOSTracker)
 		
 		# Add compounds to tree
-		for compound in self.compounds_info["Compounds"].keys():
-			if self.compounds_info["Compounds"][compound]["number_species"] == 2:
+		for compound in self.defects_data.keys():
+			if self.defects_data[compound]["Bulk"]["number_species"] == 2:
 				self.binary_compounds_set.addChild(QTreeWidgetItem([compound]))
-			elif self.compounds_info["Compounds"][compound]["number_species"] == 3:
+			elif self.defects_data[compound]["Bulk"]["number_species"] == 3:
 				self.ternary_compounds_set.addChild(QTreeWidgetItem([compound]))
-			elif self.compounds_info["Compounds"][compound]["number_species"] == 4:
+			elif self.defects_data[compound]["Bulk"]["number_species"] == 4:
 				self.quaternary_compounds_set.addChild(QTreeWidgetItem([compound]))
 		
 		self.compounds_tree.itemClicked.connect(self.Select_Visualization)
@@ -652,7 +652,8 @@ class Material_Selection_Window(QMainWindow):
 			selected_branch_object = selected_branch[0]
 			compound_name = selected_branch_object.text(0)
 			
-			if compound_name not in self.compounds_info["Compounds"].keys():
+			#if compound_name not in self.compounds_info["Compounds"].keys():
+			if compound_name not in self.defects_data.keys():
 				self.phase_stability_checkbox.setEnabled(False)
 				self.phase_stability_checkbox.setChecked(False)
 				self.phase_stability_checkbox.setStyleSheet("color: gray")
@@ -664,7 +665,8 @@ class Material_Selection_Window(QMainWindow):
 				self.carrier_concentration_checkbox.setStyleSheet("color: gray")
 				return
 			
-			if self.compounds_info["Compounds"][compound_name]["number_species"] == 2:
+			#if self.compounds_info["Compounds"][compound_name]["number_species"] == 2:
+			if self.defects_data[compound_name]["Bulk"]["number_species"] == 2:
 				self.phase_stability_checkbox.setChecked(False)
 				self.phase_stability_checkbox.setStyleSheet("color: gray")
 			else:
@@ -707,7 +709,7 @@ class Material_Selection_Window(QMainWindow):
 			selected_branch_object = selected_branch[0]
 			compound_name = selected_branch_object.text(0)
 			
-			if compound_name not in self.compounds_info["Compounds"].keys():
+			if compound_name not in self.defects_data.keys():
 				return
 			
 			compound_type = selected_branch_object.parent().text(0)
@@ -756,7 +758,7 @@ class Quaternary_Main_VTAnDeM_Window(QMainWindow):
 		QMainWindow.__init__(self)
 		self.setWindowIcon(QIcon(vtandem_source_path+"/logo/LogoSmall.png"))
 		
-		
+
 		# Font description for phase stability diagram plot
 		self.font = {'family': 'sans-serif',
 				'color':  'black',
@@ -899,7 +901,6 @@ class Ternary_Main_VTAnDeM_Window(QMainWindow):
 		QMainWindow.__init__(self)
 		self.setWindowIcon(QIcon(vtandem_source_path+"/logo/LogoSmall.png"))
 		
-		
 		# Set up the framework of the application window (including file menu, exit function, etc.)
 		self.Setup_Window_Framework()
 		
@@ -967,7 +968,7 @@ class Ternary_Main_VTAnDeM_Window(QMainWindow):
 		self.widgets_grid.addWidget(self.plot_tabs_widget)
 		
 		
-		self.showFullScreen()
+		self.showMaximized()
 	
 	
 	
@@ -979,7 +980,7 @@ class Ternary_Main_VTAnDeM_Window(QMainWindow):
 	###############################################################################################
 	
 	def Setup_Window_Framework(self):
-		
+
 		# Create a menu bar
 		menubar = self.menuBar()	# This menu bar automatically gets added to the existing main window
 		
@@ -1142,7 +1143,6 @@ class Binary_Main_VTAnDeM_Window(QMainWindow):
 	def VTAnDeM_Description(self):
 		
 		description_window = QMainWindow(self)
-		
 		description_window.show()
 	
 	

@@ -14,7 +14,6 @@ from vtandem.visualization.windows.window_carrierconcentration import Window_Car
 
 
 
-#class Tab_PhaseDiagram_DefectsDiagram_CarrierConcentration(QWidget, Window_DefectsDiagram):
 class Tab_PhaseDiagram_DefectsDiagram_CarrierConcentration(Window_DefectsDiagram, Window_CarrierConcentration):
 	
 	def __init__(self, 	compounds_info = None, \
@@ -32,8 +31,8 @@ class Tab_PhaseDiagram_DefectsDiagram_CarrierConcentration(Window_DefectsDiagram
 		
 		
 		# Check legitimacy of 'type' argument
-		if (type != "ternary") and (type != "quaternary"):
-			raise Exception("'type' variable must be either 'ternary' or 'quaternary'. Exiting...")
+		if (type != "binary") and (type != "ternary") and (type != "quaternary"):
+			raise Exception("'type' variable must be either 'binary', 'ternary', or 'quaternary'. Exiting...")
 		self.type = type
 		
 		
@@ -67,7 +66,7 @@ class Tab_PhaseDiagram_DefectsDiagram_CarrierConcentration(Window_DefectsDiagram
 		
 		
 		
-		# Keep track of mu values of the species in the quaternary compound (will be updated as user uses mu4 slider)
+		# Keep track of mu values of the species in the compound (will be updated as user uses mu4 slider)
 		self.deltamu_values = {}
 		for index, element in enumerate(self.elements_list):
 			if index == 2:	# Give nonzero deltamu to third element only
@@ -185,7 +184,9 @@ class Tab_PhaseDiagram_DefectsDiagram_CarrierConcentration(Window_DefectsDiagram
 			
 			self.DefectsDiagram.EVBM = main_compound_info["VBM"]
 			self.DefectsDiagram.ECBM = self.DefectsDiagram.EVBM + main_compound_info["BandGap"]
-			self.DefectsDiagram.fermi_energy_array = np.linspace(self.DefectsDiagram.EVBM, self.DefectsDiagram.ECBM, 884)
+			self.DefectsDiagram.axis_lims["XMin"] = 0.0
+			self.DefectsDiagram.axis_lims["XMax"] = main_compound_info["BandGap"]
+			self.DefectsDiagram.fermi_energy_array = np.linspace(self.DefectsDiagram.EVBM, self.DefectsDiagram.ECBM, 2000)
 			self.DefectsDiagram.Activate_DefectsDiagram_Plot_Axes()
 			
 			
@@ -193,7 +194,6 @@ class Tab_PhaseDiagram_DefectsDiagram_CarrierConcentration(Window_DefectsDiagram
 			
 			
 			# Add the defects diagram widget to Tab 1
-			#self.tab1_layout.addWidget(self.defectsdiagram_window.defectsdiagram_window)
 			self.tab1_layout.addWidget(self.defectsdiagram_window)
 		
 		
@@ -216,7 +216,6 @@ class Tab_PhaseDiagram_DefectsDiagram_CarrierConcentration(Window_DefectsDiagram
 			
 			# Set up carrier concentration plot object
 			# Note: We create the CarrierConcentration object in tab_quaternary.../tab_ternary...
-			#self.defectsdiagram_window.CarrierConcentration_Plot = self.CarrierConcentration
 			
 			self.CarrierConcentration.defects_data = defects_data
 			self.CarrierConcentration.main_compound_info = main_compound_info
@@ -240,7 +239,8 @@ class Tab_PhaseDiagram_DefectsDiagram_CarrierConcentration(Window_DefectsDiagram
 			self.CarrierConcentration.vol = main_compound_info["Volume"]
 			self.CarrierConcentration.EVBM = self.DefectsDiagram.EVBM
 			self.CarrierConcentration.ECBM = self.DefectsDiagram.ECBM
-			self.CarrierConcentration.fermi_energy_array = self.DefectsDiagram.fermi_energy_array
+			# Fermi energies should sample outside band gap, in case EFeq is not in gap
+			self.CarrierConcentration.fermi_energy_array = np.linspace(self.DefectsDiagram.EVBM-1.0, self.DefectsDiagram.ECBM+1.0, 2000)
 			self.CarrierConcentration.Activate_CarrierConcentration_Plot_Axes()
 			self.CarrierConcentration.Organize_DOS_Data()
 			self.CarrierConcentration.Extract_Relevant_Energies_DOSs()
@@ -454,11 +454,13 @@ class Tab_PhaseDiagram_DefectsDiagram_CarrierConcentration(Window_DefectsDiagram
 			self.CarrierConcentration.mu_elements[self.third_element]["deltamu"] = self.deltamu_values[self.third_element]
 			
 			# Redraw carrier concentration plot
+			"""
 			if self.CarrierConcentration.carrier_concentration_intrinsic_defect_hole_plot != None:
 				self.CarrierConcentration.Update_HoleConcentration_Plot()
 			if self.CarrierConcentration.carrier_concentration_intrinsic_defect_electron_plot != None:
 				self.CarrierConcentration.Update_ElectronConcentration_Plot()
-		
+			"""
+			self.CarrierConcentration.Update_CarrierConcentration_Plot()
 		
 		
 		if self.show_defects_diagram and self.show_carrier_concentration:
@@ -514,7 +516,6 @@ class Tab_PhaseDiagram_DefectsDiagram_CarrierConcentration(Window_DefectsDiagram
 		
 		if self.show_defects_diagram:
 			
-			#self.defectsdiagram_window.dopant_selection_box.setEnabled(True)
 			self.dopant_selection_box.setEnabled(True)
 			
 			self.Update_DefectsDiagram_Plot_Elements_Function()	# Found in tab_quaternary.../tab_ternary... script
@@ -525,7 +526,6 @@ class Tab_PhaseDiagram_DefectsDiagram_CarrierConcentration(Window_DefectsDiagram
 		
 		if self.show_carrier_concentration:
 			
-			#self.defectsdiagram_window.defects_synthesis_temperature_box.setEnabled(True)
 			self.defects_synthesis_temperature_box.setEnabled(True)
 			self.Generate_CarrierConcentration_Plot_Function()
 	
@@ -606,10 +606,13 @@ class Tab_PhaseDiagram_DefectsDiagram_CarrierConcentration(Window_DefectsDiagram
 			self.CarrierConcentration.mu_elements[self.third_element]["deltamu"] = self.deltamu_values[self.third_element]
 			
 			# Update carrier concentration plot
+			"""
 			if self.CarrierConcentration.carrier_concentration_intrinsic_defect_hole_plot != None:
 				self.CarrierConcentration.Update_HoleConcentration_Plot()
 			if self.CarrierConcentration.carrier_concentration_intrinsic_defect_electron_plot != None:
 				self.CarrierConcentration.Update_ElectronConcentration_Plot()
+			"""
+			self.CarrierConcentration.Update_CarrierConcentration_Plot()
 		
 		
 		if self.show_defects_diagram and self.show_carrier_concentration:
@@ -620,7 +623,7 @@ class Tab_PhaseDiagram_DefectsDiagram_CarrierConcentration(Window_DefectsDiagram
 	
 	
 	
-	
+	"""
 	def Update_WindowSize(self, plot_type, ytype):
 		
 		# Modify defects diagram y-axis
@@ -640,7 +643,7 @@ class Tab_PhaseDiagram_DefectsDiagram_CarrierConcentration(Window_DefectsDiagram
 				self.CarrierConcentration.ymax = float(self.carrierconcentration_Ymax_box.text())
 			self.CarrierConcentration.carrier_concentration_plot_drawing.set_ylim(self.CarrierConcentration.ymin, self.CarrierConcentration.ymax)
 			self.CarrierConcentration.carrier_concentration_plot_canvas.draw()
-
+	"""
 
 
 

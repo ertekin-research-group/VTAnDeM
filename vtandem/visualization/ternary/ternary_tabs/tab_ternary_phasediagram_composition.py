@@ -4,13 +4,12 @@ __name__ = 'VTAnDeM_Visualization-Toolkit-for-Analyzing-Defects-in-Materials'
 
 
 import numpy as np
-import matplotlib.pyplot as plt
 
 from vtandem.visualization.ternary.ternary_plots.plot_composition_ternary_phase_diagram import Plot_Composition_Ternary_PhaseDiagram
 from vtandem.visualization.ternary.ternary_plots.plot_ternary_defects_diagram import Plot_Ternary_DefectsDiagram
+from vtandem.visualization.ternary.ternary_plots.plot_ternary_carrier_concentration import Plot_Ternary_Carrier_Concentration
 
 from vtandem.visualization.tabs.tab_phasediagram_composition import Tab_Compositional_PhaseDiagram
-
 
 
 class Tab_Ternary_Compositional_PhaseDiagram(Tab_Compositional_PhaseDiagram):
@@ -42,6 +41,11 @@ class Tab_Ternary_Compositional_PhaseDiagram(Tab_Compositional_PhaseDiagram):
 			self.DefectsDiagram = Plot_Ternary_DefectsDiagram(main_compound = self.main_compound, first_element = self.first_element, second_element = self.second_element, third_element = self.third_element)
 		
 		
+		# Carrier concentration
+		if show_carrier_concentration:
+			self.CarrierConcentration = Plot_Ternary_Carrier_Concentration(main_compound = self.main_compound, first_element = self.first_element, second_element = self.second_element, third_element = self.third_element)
+		
+
 		Tab_Compositional_PhaseDiagram.__init__(	self, \
 													type = "ternary", \
 													compounds_info = compounds_info, \

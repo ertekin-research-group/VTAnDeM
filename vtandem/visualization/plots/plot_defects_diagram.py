@@ -36,8 +36,11 @@ class Plot_DefectsDiagram(SaveFigure):
 		self.fermi_energy_array = None
 		
 		# Minimum and maximum y-value range
-		self.ymin = -2.0
-		self.ymax = 2.0
+		self.axis_lims = {	"XMin": 0.0,
+							"XMax": 1.0,
+							"YMin": -2.0,
+							"YMax": 2.0
+							}
 		
 		# Store defect formation energy data
 		self.intrinsic_defects_enthalpy_data = {}
@@ -70,42 +73,71 @@ class Plot_DefectsDiagram(SaveFigure):
 	
 	
 	def Activate_DefectsDiagram_Plot_Axes(self):
-		
-		self.defects_diagram_plot_drawing.set_xlim(0.0, self.ECBM-self.EVBM)
+
+		# Set plot axes limits (self.xmin and self.xmax are set in tab_phasediagram_...)
+		#self.xmin = 0.0
+		#self.xmax = self.ECBM - self.EVBM
+		"""
+		self.defects_diagram_plot_drawing.set_xlim(self.xmin, self.xmax)
 		self.defects_diagram_plot_drawing.set_ylim(self.ymin, self.ymax)
+		"""
+		self.defects_diagram_plot_drawing.set_xlim(self.axis_lims["XMin"], self.axis_lims["XMax"])
+		self.defects_diagram_plot_drawing.set_ylim(self.axis_lims["YMin"], self.axis_lims["YMax"])
+		
+		# Set plot axes labels
 		self.defects_diagram_plot_drawing.set_xlabel("Fermi Energy (eV)", fontdict=self.font)
 		self.defects_diagram_plot_drawing.set_ylabel("$\Delta$H (eV)", fontdict=self.font, rotation=90)
+
+		# Set labels for VBM and CBM
 		self.defects_diagram_plot_drawing.set_xticks([0.0, self.ECBM-self.EVBM])
 		self.defects_diagram_plot_drawing.set_xticklabels(["VBM = 0.0", "CBM = "+str(round(self.ECBM-self.EVBM, 2))])
+
+		# Set placement/direction of ticks and labels
 		self.defects_diagram_plot_drawing.xaxis.tick_bottom()
 		self.defects_diagram_plot_drawing.yaxis.tick_left()
 		self.defects_diagram_plot_drawing.tick_params(axis='both', labelsize=9)
 		self.defects_diagram_plot_drawing.xaxis.set_label_position("bottom")
 		self.defects_diagram_plot_drawing.yaxis.set_label_position("left")
 		self.defects_diagram_plot_drawing.set_aspect("auto")
+
+		# Color everything outside of band gap and below H=0
 		self.defects_diagram_plot_drawing.fill_between(self.fermi_energy_array - self.EVBM, 0, -100, facecolor='#614126', interpolate=True, alpha=.1)
-		self.equilibrium_fermi_energy_tick.set_xlim(0.0, self.ECBM-self.EVBM)
-		self.equilibrium_fermi_energy_tick.set_xticks([-1.0])
+		self.defects_diagram_plot_drawing.fill_between(np.linspace(-1, 0, 100), 100, -100, facecolor='#614126', interpolate=True, alpha=.1)
+		self.defects_diagram_plot_drawing.fill_between(np.linspace(self.ECBM-self.EVBM, self.ECBM-self.EVBM+1, 100), 100, -100, facecolor='#614126', interpolate=True, alpha=.1)
+		
+		# Settings for equilibrium Fermi energy
+		#self.equilibrium_fermi_energy_tick.set_xlim(self.xmin, self.xmax)
+		self.equilibrium_fermi_energy_tick.set_xlim(self.axis_lims["XMin"], self.axis_lims["XMax"])
+		self.equilibrium_fermi_energy_tick.set_xticks([-100])
 		self.equilibrium_fermi_energy_tick.tick_params(axis='both', labelsize=9)
 	
 	
 	
 	
-	def Update_WindowSize(self, ytype, Ylim_box_object):
+	def Update_WindowSize(self, axis_type, axislim_boxes):
 		
-		# Modify defects diagram y-axis
-		if ytype == "YMin":
-			self.ymin = float(Ylim_box_object.text())
-		if ytype == "YMax":
-			self.ymax = float(Ylim_box_object.text())
-		self.defects_diagram_plot_drawing.set_ylim(self.ymin, self.ymax)
+		# Check if input is legitimate
+		try:
+			float(axislim_boxes[axis_type].text())
+		except:
+			axislim_boxes[axis_type].setText(str(self.axis_lims[axis_type]))
+			return
+
+		# Check if axes bounds are legimitate
+		axis = axis_type[0]
+		if float(axislim_boxes[axis+"Min"].text()) > float(axislim_boxes[axis+"Max"].text()):
+			axislim_boxes[axis_type].setText(str(self.axis_lims[axis_type]))
+			return
+
+		self.axis_lims[axis_type] = float(axislim_boxes[axis_type].text())
+		self.defects_diagram_plot_drawing.set_xlim(self.axis_lims["XMin"], self.axis_lims["XMax"])
+		self.defects_diagram_plot_drawing.set_ylim(self.axis_lims["YMin"], self.axis_lims["YMax"])
+		self.equilibrium_fermi_energy_tick.set_xlim(self.axis_lims["XMin"], self.axis_lims["XMax"])
 		self.defects_diagram_plot_canvas.draw()
 	
 	
-	
-	
 	def Calculate_DefectFormations(self):
-		
+
 		intrinsic_defects_enthalpy_data = Calculate_IntrinsicDefectFormationEnthalpies(	self.defects_data, \
 																						self.main_compound_info, \
 																						self.fermi_energy_array, \
@@ -128,7 +160,10 @@ class Plot_DefectsDiagram(SaveFigure):
 		
 		# Plot defect formation energy of each intrinsic defect
 		for intrinsic_defect in self.intrinsic_defects_enthalpy_data.keys():
-			defect_label = r"$"+intrinsic_defect.split("_")[0]+"_{"+intrinsic_defect.split("_")[-1]+"}$"
+			#defect_label = r"$"+intrinsic_defect.split("_")[0]+"_{"+intrinsic_defect.split("_")[-1]+"}$"
+			atom = intrinsic_defect.split("_")[0]
+			site = intrinsic_defect.split("_")[-1]
+			defect_label = r""+atom+"$_\mathrm{"+site+"}$"
 			self.intrinsic_defect_plots[intrinsic_defect], = self.defects_diagram_plot_drawing.plot(self.fermi_energy_array - self.EVBM, self.intrinsic_defects_enthalpy_data[intrinsic_defect], label = defect_label)
 		
 		# Create label for each defect
@@ -190,7 +225,7 @@ class Plot_DefectsDiagram(SaveFigure):
 	
 	
 	
-	def Plot_Equilibrium_Fermi_Energy(self, temperature, equilibrium_fermi_energy):
+	def Plot_Equilibrium_Fermi_Energy(self, equilibrium_fermi_energy):
 		
 		# Plot equilibrium Fermi energy
 		try:
@@ -205,7 +240,7 @@ class Plot_DefectsDiagram(SaveFigure):
 			self.equilibrium_fermi_energy_tick.set_xticklabels([r"$E_{f}^{eq}$"])
 		except:
 			pass
-		
+
 		# Draw defects diagram canvas
 		self.defects_diagram_plot_canvas.draw()
 

@@ -1,6 +1,6 @@
 
-__author__ = 'Michael_Lidia_Jiaxing_Elif'
 __name__ = 'VTAnDeM_Visualization-Toolkit-for-Analyzing-Defects-in-Materials'
+__author__ = 'Michael_Lidia_Jiaxing_Elif'
 
 
 import numpy as np
@@ -23,11 +23,15 @@ class Tab_Compositional_PhaseDiagram(Window_DefectsDiagram, Window_CarrierConcen
 			raise Exception("The argument 'type' must be either 'ternary' or 'quaternary'. Exiting...")
 		self.type = type
 		
+		# Display settings
+		self.show_defects_diagram = show_defects_diagram
+		self.show_carrier_concentration = show_carrier_concentration
+
 		
-		# Compositional phase diagram is created in tab_quaternary_.../tab_ternary_...
+		# Compositional phase diagram object is created in tab_quaternary_.../tab_ternary_...
 		
 		# Defects diagram
-		if show_defects_diagram:
+		if self.show_defects_diagram:
 			
 			self.DefectsDiagram.defects_data = defects_data
 			self.DefectsDiagram.main_compound_info = main_compound_info
@@ -38,7 +42,9 @@ class Tab_Compositional_PhaseDiagram(Window_DefectsDiagram, Window_CarrierConcen
 			
 			self.DefectsDiagram.EVBM = main_compound_info["VBM"]
 			self.DefectsDiagram.ECBM = self.DefectsDiagram.EVBM + main_compound_info["BandGap"]
-			self.DefectsDiagram.fermi_energy_array = np.linspace(self.DefectsDiagram.EVBM, self.DefectsDiagram.ECBM, 884)
+			self.DefectsDiagram.axis_lims["XMin"] = 0.0
+			self.DefectsDiagram.axis_lims["XMax"] = main_compound_info["BandGap"]
+			self.DefectsDiagram.fermi_energy_array = np.linspace(self.DefectsDiagram.EVBM, self.DefectsDiagram.ECBM, 2000)
 			self.DefectsDiagram.Activate_DefectsDiagram_Plot_Axes()
 			
 			# Update defects diagram in response to clicking on phase diagram
@@ -47,7 +53,7 @@ class Tab_Compositional_PhaseDiagram(Window_DefectsDiagram, Window_CarrierConcen
 		
 		
 		# Carrier concentration
-		if show_carrier_concentration:
+		if self.show_carrier_concentration:
 			
 			self.CarrierConcentration.defects_data = defects_data
 			self.CarrierConcentration.main_compound_info = main_compound_info
@@ -60,7 +66,8 @@ class Tab_Compositional_PhaseDiagram(Window_DefectsDiagram, Window_CarrierConcen
 			self.CarrierConcentration.vol = main_compound_info["Volume"]
 			self.CarrierConcentration.EVBM = self.DefectsDiagram.EVBM
 			self.CarrierConcentration.ECBM = self.DefectsDiagram.ECBM
-			self.CarrierConcentration.fermi_energy_array = self.DefectsDiagram.fermi_energy_array
+			# Fermi energies should sample outside band gap, in case EFeq is not in gap
+			self.CarrierConcentration.fermi_energy_array = np.linspace(self.DefectsDiagram.EVBM-1.0, self.DefectsDiagram.ECBM+1.0, 2000)
 			self.CarrierConcentration.Activate_CarrierConcentration_Plot_Axes()
 			self.CarrierConcentration.Organize_DOS_Data()
 			self.CarrierConcentration.Extract_Relevant_Energies_DOSs()
@@ -92,15 +99,12 @@ class Tab_Compositional_PhaseDiagram(Window_DefectsDiagram, Window_CarrierConcen
 		
 		
 		# Add defect formation energy diagram window widget to tab3
-		if show_defects_diagram:
+		if self.show_defects_diagram:
 			Window_DefectsDiagram.__init__(self, show_dopant=False)
 			self.tab3_layout.addWidget(self.defectsdiagram_window)
 		
-		
-		
-		
-		if show_carrier_concentration:
-			
+
+		if self.show_carrier_concentration:
 			Window_CarrierConcentration.__init__(self)
 			self.tab3_layout.addWidget(self.carrierconcentration_window)
 	
@@ -116,21 +120,23 @@ class Tab_Compositional_PhaseDiagram(Window_DefectsDiagram, Window_CarrierConcen
 	###############################################################################################
 	
 	def Update_DefectsDiagram_Plot_Function(self, event):
-		
-		# Check that a centroid of one of the four-phase regions has been clicked on
-		if self.type == "quaternary":
-			contains, index = self.Compositional_PhaseDiagram.centroids_plot.contains(event)
-			if not contains:
-				return
-		
-		# Update elements and chemical potentials
-		for element in self.elements_list:
-			self.DefectsDiagram.mu_elements[element]["deltamu"] = self.Compositional_PhaseDiagram.deltamu_values[element]
-		
+		print("Defects Updating...")
+
+
 		# Reset defects diagram
 		self.DefectsDiagram.defects_diagram_plot_drawing.remove()
 		self.DefectsDiagram.defects_diagram_plot_drawing = self.DefectsDiagram.defects_diagram_plot_figure.add_subplot(111)
 		self.DefectsDiagram.Activate_DefectsDiagram_Plot_Axes()
+		self.DefectsDiagram.defects_diagram_plot_canvas.draw()
+
+
+		# Check that phase region has been selected
+		if self.Compositional_PhaseDiagram.phaseregion_selected is None:
+			return
+		
+		# Update elements and chemical potentials
+		for element in self.elements_list:
+			self.DefectsDiagram.mu_elements[element]["deltamu"] = self.Compositional_PhaseDiagram.deltamu_values[element]
 		
 		# Calculate defect formation energies
 		self.DefectsDiagram.Calculate_DefectFormations()
@@ -150,32 +156,33 @@ class Tab_Compositional_PhaseDiagram(Window_DefectsDiagram, Window_CarrierConcen
 	
 	def Update_CarrierConcentration_Plot_Function(self, event):
 		
-		# Check that a centroid of one of the four-phase regions has been clicked on
-		if self.type == "quaternary":
-			contains, index = self.Compositional_PhaseDiagram.centroids_plot.contains(event)
-			if not contains:
-				return
-		
-		# Update elements and chemical potentials
-		for element in self.elements_list:
-			self.CarrierConcentration.mu_elements[element]["deltamu"] = self.Compositional_PhaseDiagram.deltamu_values[element]
-		
 		# Reset carrier concentration
 		self.CarrierConcentration.carrier_concentration_plot_drawing.remove()
 		self.CarrierConcentration.carrier_concentration_plot_drawing = self.CarrierConcentration.carrier_concentration_plot_figure.add_subplot(111)
 		self.CarrierConcentration.Activate_CarrierConcentration_Plot_Axes()
+		self.CarrierConcentration.carrier_concentration_plot_canvas.draw()
 		
+
+		# Check that phase region has been selected
+		if self.Compositional_PhaseDiagram.phaseregion_selected is None:
+			# NOTE: These objects only exists when self.show_carrier_concentration = True
+			self.defects_synthesis_temperature_box.setEnabled(False)
+			self.temperature_selection_box.setEnabled(False)
+			return
+		else:
+			self.defects_synthesis_temperature_box.setEnabled(True)
+			self.temperature_selection_box.setEnabled(True)
+		
+		# Update elements and chemical potentials
+		for element in self.elements_list:
+			self.CarrierConcentration.mu_elements[element]["deltamu"] = self.Compositional_PhaseDiagram.deltamu_values[element]
+
 		# Plot the carrier concentration (holes and electrons)
 		self.CarrierConcentration.carrier_concentration_intrinsic_defect_hole_plot = None
 		self.CarrierConcentration.carrier_concentration_intrinsic_defect_electron_plot = None
 		self.CarrierConcentration.carrier_concentration_total_hole_plot = None
 		self.CarrierConcentration.carrier_concentration_total_electron_plot = None
-		
-		if self.carrierconcentration_holes_checkbox.isChecked():
-			self.CarrierConcentration.Initialize_HoleConcentration_Plot()
-		
-		if self.carrierconcentration_electrons_checkbox.isChecked():
-			self.CarrierConcentration.Initialize_ElectronConcentration_Plot()
+		self.CarrierConcentration.Initialize_CarrierConcentration_Plot()
 		
 		# Plot the equilibrium Fermi energy
 		if self.DefectsDiagram.intrinsic_defect_plots != {}:

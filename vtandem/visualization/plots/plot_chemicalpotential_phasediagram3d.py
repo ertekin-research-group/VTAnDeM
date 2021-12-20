@@ -207,8 +207,8 @@ class Plot_ChemicalPotential_PhaseDiagram3D(SaveFigure):
 			self.competing_compounds_colorwheel[Compound_Name_Formal(label, self.compounds_info, "unicode")] = cmap(color_counter)
 			color_counter += 1
 			
-			polygon._facecolors2d = polygon._facecolors3d
-			polygon._edgecolors2d = polygon._edgecolors3d
+			polygon._facecolors2d = polygon._facecolor3d
+			polygon._edgecolors2d = polygon._edgecolor3d
 			
 			
 			self.chemicalpotential_phasediagram_plot_axes.add_collection3d(polygon)

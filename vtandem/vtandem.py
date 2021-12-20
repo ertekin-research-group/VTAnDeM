@@ -1,5 +1,5 @@
 
-import os
+import os, sys
 import json
 import click
 
@@ -87,6 +87,7 @@ def vtandem(import_element, import_compound, import_defects, import_defect_energ
 	    |-- Bulk
 	          |-- OUTCAR
 	          |-- POSCAR
+	          |-- vasprun.xml
 	    |-- Defect1
 	          |-- q0
 	              |-- OUTCAR
@@ -126,7 +127,7 @@ def vtandem(import_element, import_compound, import_defects, import_defect_energ
 	\b
 	  /path/to/DOSCAR/folder
 	    |-- DOSCAR
-		|-- POSCAR/CONTCAR
+	    |-- POSCAR/CONTCAR
 	
 	\b
 	
@@ -156,22 +157,10 @@ __        __ ____________   ___             _______           ___      ___
 	# Import element data to Compounds_Tracker.json
 	if (import_element[0] != default_values["import_phase_stability"][0]) and (import_element[1] != default_values["import_phase_stability"][1]):
 		if not Check_VTAnDeM_Project():
-			print("Cannot find VTAnDeM project. Exiting...")
-			return
+			sys.exit("Cannot find VTAnDeM project. Exiting...")
 		from vtandem.dft.import_dft import Compounds_Import
 		element_import_object = Compounds_Import()
 		import_element_success = element_import_object.Add_Element(import_element[0], import_element[1])
-		"""
-		element_import_object.Update_Compounds_Database()
-		# Check whether the new element has been imported
-		#with open("Compounds_Tracker.json", "r") as jsonfile:
-		print("Compounds_Tracker.json")
-		with open('Compounds_Tracker.json') as jsonfile:
-			data = json.load(jsonfile)
-			print(data)
-			if import_element[0] in data.keys():
-				print("Imported element '"+import_element[0]+"' from the folder '"+import_element[1]+"' successfully!")
-		"""
 		if import_element_success:
 			element_import_object.Update_Compounds_Database()
 			print("Imported element '"+import_element[0]+"' from the folder '"+import_element[1]+"' successfully!")
@@ -179,19 +168,10 @@ __        __ ____________   ___             _______           ___      ___
 	# Import compound data to Compounds_Tracker.json
 	if (import_compound[0] != default_values["import_phase_stability"][0]) and (import_compound[1] != default_values["import_phase_stability"][1]):
 		if not Check_VTAnDeM_Project():
-			print("Cannot find VTAnDeM project. Exiting...")
-			return
+			sys.exit("Cannot find VTAnDeM project. Exiting...")
 		from vtandem.dft.import_dft import Compounds_Import
 		compound_import_object = Compounds_Import()
 		import_compound_success = compound_import_object.Add_Compound(import_compound[0], import_compound[1])
-		"""
-		compound_import_object.Update_Compounds_Database()
-		# Check whether the new compound has been imported
-		with open("Compounds_Tracker.json") as jsonfile:
-			data = json.load(jsonfile)
-			if import_compound[0] in data.keys():
-				print("Imported compound '"+import_compound[0]+"' from the folder '"+import_compound[1]+"' successfully!")
-		"""
 		if import_compound_success:
 			compound_import_object.Update_Compounds_Database()
 			print("Imported compound '"+import_compound[0]+"' from the folder '"+import_compound[1]+"' successfully!")
@@ -199,8 +179,7 @@ __        __ ____________   ___             _______           ___      ___
 	# Import defects data to Defects_Tracker.json
 	if (import_defects[0] != default_values["import_defects"][0]) and (import_defects[1] != default_values["import_defects"][1]):
 		if not Check_VTAnDeM_Project():
-			print("Cannot find VTAnDeM project. Exiting...")
-			return
+			sys.exit("Cannot find VTAnDeM project. Exiting...")
 		from vtandem.dft.import_dft import Defects_Import
 		defects_import_object = Defects_Import()
 		defects_import_object.Add_Defects(import_defects[0], import_defects[1])
@@ -210,20 +189,17 @@ __        __ ____________   ___             _______           ___      ___
 	# Import defect energy corrections (ECorr) to Defects_Tracker.json
 	if (import_defect_energy_corrections[0] != default_values["import_defect_energy_corrections"][0]) and (import_defect_energy_corrections[1] != default_values["import_defect_energy_corrections"][1]):
 		if not Check_VTAnDeM_Project():
-			print("Cannot find VTAnDeM project. Exiting...")
-			return
+			sys.exit("Cannot find VTAnDeM project. Exiting...")
 		from vtandem.dft.import_dft import Defects_Import
 		DECs_import_object = Defects_Import()
 		DECs_import_object.Add_Energy_Corrections(import_defect_energy_corrections[0], import_defect_energy_corrections[1])
 		DECs_import_object.Update_Defects_Database()
 		print("Imported defect energy corrections of compound '"+import_defect_energy_corrections[0]+"' from the file '"+import_defect_energy_corrections[1]+"' successfully!")
 	
-	
-	# Import density of stats data to DOS_Tracker.json
+	# Import density of states data to DOS_Tracker.json
 	if (import_dos[0] != default_values["import_dos"][0]) and (import_dos[1] != default_values["import_dos"][1]):
 		if not Check_VTAnDeM_Project():
-			print("Cannot find VTAnDeM project. Exiting...")
-			return
+			sys.exit("Cannot find VTAnDeM project. Exiting...")
 		from vtandem.dft.import_dft import DOS_Import
 		dos_import_object = DOS_Import()
 		dos_import_object.Add_DOS(import_dos[0], import_dos[1])
@@ -233,16 +209,14 @@ __        __ ____________   ___             _______           ___      ___
 	# Open VTAnDeM import data dialog
 	if open:
 		if not Check_VTAnDeM_Project():
-			print("Cannot find VTAnDeM project. Exiting...")
-			return
+			sys.exit("Cannot find VTAnDeM project. Exiting...")
 		print("Opening VTAnDeM welcome window...")
 		from vtandem.gui_windows import Open_Welcome_VTAnDeM_Window
 		Open_Welcome_VTAnDeM_Window()
 	
 	if visualize:
 		if not Check_VTAnDeM_Project():
-			print("Cannot find VTAnDeM project. Exiting...")
-			return
+			sys.exit("Cannot find VTAnDeM project. Exiting...")
 		print("Opening VTAnDeM material selection dialog...")
 		from vtandem.gui_windows import Open_Material_Selection_Window
 		Open_Material_Selection_Window()

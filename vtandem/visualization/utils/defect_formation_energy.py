@@ -32,6 +32,8 @@ def Calculate_IntrinsicDefectFormationEnthalpies(	defects_data, \
 				for element in mu_elements.keys():
 					defect_formation_enthalpy -= defects_data[defect]["n_"+element] * ( mu_elements[element]["mu0"] + mu_elements[element]["deltamu"] )
 				intrinsic_defects_enthalpy_data[defect][charge] = defect_formation_enthalpy
+				if (defect == "Co_i") and (charge == "+1"):
+					print(min(defect_formation_enthalpy), mu_elements["Co"])
 	
 	# Return dictionary of formation enthalpies of each defect
 	return intrinsic_defects_enthalpy_data
@@ -86,29 +88,6 @@ def Find_MinimumDefectFormationEnthalpies(defect_formation_enthalpy_data):
 	
 	# Return dictionary of minimum formation enthalpies of each defect
 	return minimum_defect_formation_enthalpy_data
-
-
-"""
-def Find_SiteMultiplicity(defect_name, number_species, element_count, volume):
-	
-	# Check that the number of species matches the number of elements
-	if number_species != len(element_count):
-		return "Number of species does not match number of elemental species!"
-	
-	# Find matching site and corresponding stoichiometry of the site
-	for species_index in range(number_species):
-		if defect_name.split("_")[-1] == "i":	### CHANGE LATER FOR INTERSTITIAL ATOMS
-			N = 0
-		else:
-			N = element_count[defect_name.split("_")[-1]] / volume
-	
-	return N
-"""
-
-
-
-
-
 
 
 
