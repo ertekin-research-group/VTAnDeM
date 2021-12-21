@@ -934,7 +934,7 @@ class Ternary_Main_VTAnDeM_Window(QMainWindow):
 				if self.defects_data[defect]["Extrinsic"] == "Yes":
 					dopants_exist = True
 			if dopants_exist:
-				self.Tab4_Ternary_Dopants = Tab_Ternary_Dopants(main_compound = main_compound, first_element = first_element, second_element = second_element, third_element = third_element, compounds_info = self.compounds_info, defects_data = self.defects_data, main_compound_info = self.main_compound_info)
+				self.Tab4_Ternary_Dopants = Tab_Ternary_Dopants(main_compound = main_compound, first_element = first_element, second_element = second_element, third_element = third_element, compounds_info = self.compounds_info, defects_data = self.defects_data, main_compound_info = self.main_compound_info, dos_data = self.dos_data, show_defects_diagram = show_defects_diagram, show_carrier_concentration = show_carrier_concentration)
 		
 		
 		
@@ -968,7 +968,7 @@ class Ternary_Main_VTAnDeM_Window(QMainWindow):
 		self.widgets_grid.addWidget(self.plot_tabs_widget)
 		
 		
-		self.showMaximized()
+		#self.showMaximized()
 	
 	
 	

@@ -267,6 +267,18 @@ class Defects_Import:
 	
 	def Add_Single_Defect(self, compound_name, defect_name, directory_name):
 		
+		# Check that elements in defect exists (e.g. for Zr_Bi, does Zr and Bi exist in Compounds_Tracker.json?)
+		defect_atom = defect_name.split("_")[0]
+		defect_site = defect_name.split("_")[1]
+		elements_in_database = json.load(open("Compounds_Tracker.json"))["Elements"].keys()
+		if (defect_atom != "V") and (defect_atom not in elements_in_database):
+			print("WARNING: Cannot import '"+defect_name+"' because '"+defect_atom+"' does not exist in Compounds_Tracker.json. Skipping...")
+			return
+		if (defect_site != "i") and (defect_site not in elements_in_database):
+			print("WARNING: Cannot import '"+defect_name+"' because '"+defect_site+"' does not exist in Compounds_Tracker.json. Skipping...")
+			return
+
+		# Loop through charge states of defect directory
 		for directory in os.listdir(directory_name):
 			
 			# Check that the folder name is in the correct format
@@ -280,7 +292,7 @@ class Defects_Import:
 			if "OUTCAR" not in os.listdir(directory_name+"/"+directory):
 				print("WARNING: Cannot find OUTCAR file for defect '"+defect_name+"' with charge state '"+charge_state+"' in '"+directory_name+"/"+directory+"'. Skipping...")
 				continue
-			
+
 			self.Add_Defect_Charge(compound_name=compound_name, defect_name=defect_name, charge_state=directory.split("q")[-1], directory_name=directory_name+"/"+directory)
 	
 	
@@ -516,9 +528,12 @@ class Defects_Import:
 
 		# Check if defects data for compound already exists
 		if compound_name in self.defects_data.keys():
-			continue_defects_import = input("The compound '"+compound_name+"' is already in the defects database (Defects_Tracker.json). Replace? ([y]/n): ") or "y"
+
+			# Ask if okay to replace data
+			continue_defects_import = input("The compound '"+compound_name+"' is already in the defects database (Defects_Tracker.json). Replace all (energies and energy corrections)? (y/[n]): ") or "n"
 			while continue_defects_import not in ["y", "n"]:
 				continue_defects_import = input("Please type either 'y' or 'n': ") or "y"
+			
 			if continue_defects_import == "n":
 				sys.exit("Aborting importing defects of "+compound_name+".")
 

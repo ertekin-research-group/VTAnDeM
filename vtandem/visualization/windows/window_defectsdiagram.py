@@ -12,11 +12,9 @@ from PyQt5.QtGui import *
 
 
 
-class Window_DefectsDiagram(QWidget):
+class Window_DefectsDiagram:
 	
 	def __init__(self, show_dopant):
-		
-		QWidget.__init__(self)
 		
 		self.show_dopant = show_dopant
 		

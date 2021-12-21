@@ -44,18 +44,20 @@ class Plot_DefectsDiagram(SaveFigure):
 		
 		# Store defect formation energy data
 		self.intrinsic_defects_enthalpy_data = {}
-		self.extrinsic_defects_enthalpy_data = {}
+		#self.extrinsic_defects_enthalpy_data = {}
+		self.dopant_enthalpy_data = None
 		
 		# Store defect formation plots and their labels
 		self.intrinsic_defect_plots = {}
-		self.extrinsic_defect_plots = {}
+		#self.extrinsic_defect_plots = {}
+		self.dopant_plot = None
 		self.defect_labels = {}
 		
 		# Store user-selected dopant
 		self.dopant = "None"
 		self.dopant_mu0 = 0.0
 		self.dopant_deltamu = 0.0
-		self.extrinsic_defects = []
+		#self.extrinsic_defects = []
 		
 		# Defects diagram
 		self.defects_diagram_plot_figure = plt.figure()
@@ -75,12 +77,6 @@ class Plot_DefectsDiagram(SaveFigure):
 	def Activate_DefectsDiagram_Plot_Axes(self):
 
 		# Set plot axes limits (self.xmin and self.xmax are set in tab_phasediagram_...)
-		#self.xmin = 0.0
-		#self.xmax = self.ECBM - self.EVBM
-		"""
-		self.defects_diagram_plot_drawing.set_xlim(self.xmin, self.xmax)
-		self.defects_diagram_plot_drawing.set_ylim(self.ymin, self.ymax)
-		"""
 		self.defects_diagram_plot_drawing.set_xlim(self.axis_lims["XMin"], self.axis_lims["XMax"])
 		self.defects_diagram_plot_drawing.set_ylim(self.axis_lims["YMin"], self.axis_lims["YMax"])
 		
@@ -135,6 +131,7 @@ class Plot_DefectsDiagram(SaveFigure):
 		self.equilibrium_fermi_energy_tick.set_xlim(self.axis_lims["XMin"], self.axis_lims["XMax"])
 		self.defects_diagram_plot_canvas.draw()
 	
+
 	
 	def Calculate_DefectFormations(self):
 
@@ -145,11 +142,13 @@ class Plot_DefectsDiagram(SaveFigure):
 		self.intrinsic_defects_enthalpy_data = Find_MinimumDefectFormationEnthalpies(intrinsic_defects_enthalpy_data)
 		
 		if self.dopant != "None":
+			
 			extrinsic_defects_enthalpy_data = Calculate_ExtrinsicDefectFormationEnthalpies(	self.defects_data, \
 																							self.main_compound_info, \
 																							self.fermi_energy_array, \
 																							self.mu_elements, \
 																							self.extrinsic_defects, \
+																							self.dopant, \
 																							self.dopant_mu0, \
 																							self.dopant_deltamu	)
 			self.extrinsic_defects_enthalpy_data = Find_MinimumDefectFormationEnthalpies(extrinsic_defects_enthalpy_data)
@@ -160,10 +159,7 @@ class Plot_DefectsDiagram(SaveFigure):
 		
 		# Plot defect formation energy of each intrinsic defect
 		for intrinsic_defect in self.intrinsic_defects_enthalpy_data.keys():
-			#defect_label = r"$"+intrinsic_defect.split("_")[0]+"_{"+intrinsic_defect.split("_")[-1]+"}$"
-			atom = intrinsic_defect.split("_")[0]
-			site = intrinsic_defect.split("_")[-1]
-			defect_label = r""+atom+"$_\mathrm{"+site+"}$"
+			defect_label = r""+intrinsic_defect.split("_")[0]+"$_\mathrm{"+intrinsic_defect.split("_")[-1]+"}$"
 			self.intrinsic_defect_plots[intrinsic_defect], = self.defects_diagram_plot_drawing.plot(self.fermi_energy_array - self.EVBM, self.intrinsic_defects_enthalpy_data[intrinsic_defect], label = defect_label)
 		
 		# Create label for each defect
@@ -193,32 +189,38 @@ class Plot_DefectsDiagram(SaveFigure):
 	
 	
 	def Initialize_Extrinsic_DefectsDiagram_Plot(self):
-		
-		print(self.extrinsic_defects)
-		
+
 		for extrinsic_defect in self.extrinsic_defects:
 			
+			# Check that extrinsic defect involves the dopant atom (e.g. Ge_Bi, Ge_Se, Ge_O if dopant = Ge)
+			if extrinsic_defect.split("_")[0] != self.dopant:
+				continue
+
 			# Plot defect formation energy of dopant
-			defect_label = r"$"+extrinsic_defect.split("_")[0]+"_{"+extrinsic_defect.split("_")[-1]+"}$"
+			defect_label = r""+extrinsic_defect.split("_")[0]+"$_\mathrm{"+extrinsic_defect.split("_")[-1]+"}$"
 			self.extrinsic_defect_plots[extrinsic_defect], = self.defects_diagram_plot_drawing.plot(self.fermi_energy_array - self.EVBM, self.extrinsic_defects_enthalpy_data[extrinsic_defect], label = defect_label)
 			
-			# Create label for each defect	
-			labelLine(self.extrinsic_defect_plots[extrinsic_defect], x=(self.ECBM-self.EVBM)/2., align=False)
+			# Create label for each defect
+			labelLine(self.extrinsic_defect_plots[extrinsic_defect], x = (self.ECBM-self.EVBM)/2., align = False, fontsize = 10, bbox = dict(facecolor = 'white', alpha = 0.8, edgecolor = 'white', pad = 0.5))
 		
 		# Draw defects diagram canvas
 		self.defects_diagram_plot_canvas.draw()
 	
-	
+
 	
 	def Update_Extrinsic_DefectsDiagram_Plot(self):
 		
 		for extrinsic_defect in self.extrinsic_defects:
 			
+			# Check that extrinsic defect involves the dopant atom (e.g. Ge_Bi, Ge_Se, Ge_O if dopant = Ge)
+			if extrinsic_defect.split("_")[0] != self.dopant:
+				continue
+
 			# Update defect formation energy of dopant
 			self.extrinsic_defect_plots[extrinsic_defect].set_ydata(self.extrinsic_defects_enthalpy_data[extrinsic_defect])
 			
 			# Remove labels before redrawing them at new positions
-			labelLine(self.extrinsic_defect_plots[extrinsic_defect], x=(self.ECBM-self.EVBM)/2., align=False)
+			labelLine(self.extrinsic_defect_plots[extrinsic_defect], x = (self.ECBM-self.EVBM)/2., align = False)
 		
 		# Draw defects diagram canvas
 		self.defects_diagram_plot_canvas.draw()

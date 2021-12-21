@@ -24,7 +24,7 @@ class Plot_Composition_Ternary_PhaseDiagram(Plot_Composition_PhaseDiagram):
 		self.elements_list  = [self.first_element, self.second_element, self.third_element]
 		
 		
-		
+		"""
 		# Calculate deltamu for third element
 		try:
 			main_compound_enthalpy = main_compound_info["dft_BulkEnergy"]
@@ -44,7 +44,13 @@ class Plot_Composition_Ternary_PhaseDiagram(Plot_Composition_PhaseDiagram):
 		self.deltamu_values[first_element] = 0.0
 		self.deltamu_values[second_element] = 0.0
 		self.deltamu_values[third_element] = deltamu_third_element
+		"""
+
 		
+		# Initialize deltamu values of all species in the ternary compound
+		self.deltamu_values = {}
+		for element in self.elements_list:
+			self.deltamu_values[element] = 0.0
 		
 		
 		

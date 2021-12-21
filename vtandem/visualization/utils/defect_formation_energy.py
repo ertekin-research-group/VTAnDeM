@@ -45,6 +45,7 @@ def Calculate_ExtrinsicDefectFormationEnthalpies(	defects_data, \
 													fermi_energy_array, \
 													mu_elements, \
 													extrinsic_defects, \
+													dopant, \
 													dopant_mu0, \
 													dopant_deltamu	):
 	
@@ -58,6 +59,10 @@ def Calculate_ExtrinsicDefectFormationEnthalpies(	defects_data, \
 	
 	for extrinsic_defect in extrinsic_defects:
 		
+		# Check that extrinsic defect involves the dopant atom (e.g. Ge_Bi, Ge_Se, Ge_O if dopant = Ge)
+		if extrinsic_defect.split("_")[0] != dopant:
+			continue
+
 		extrinsic_defects_enthalpy_data[extrinsic_defect] = {}
 		
 		# Loop through charge states of extrinsic defect
@@ -76,6 +81,8 @@ def Calculate_ExtrinsicDefectFormationEnthalpies(	defects_data, \
 
 
 
+
+
 def Find_MinimumDefectFormationEnthalpies(defect_formation_enthalpy_data):
 	
 	# Initialize storage for minimum formation enthalpies of each defect
@@ -88,7 +95,5 @@ def Find_MinimumDefectFormationEnthalpies(defect_formation_enthalpy_data):
 	
 	# Return dictionary of minimum formation enthalpies of each defect
 	return minimum_defect_formation_enthalpy_data
-
-
 
 
