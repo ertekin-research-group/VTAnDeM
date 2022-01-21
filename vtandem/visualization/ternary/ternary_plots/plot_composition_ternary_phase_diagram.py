@@ -24,29 +24,6 @@ class Plot_Composition_Ternary_PhaseDiagram(Plot_Composition_PhaseDiagram):
 		self.elements_list  = [self.first_element, self.second_element, self.third_element]
 		
 		
-		"""
-		# Calculate deltamu for third element
-		try:
-			main_compound_enthalpy = main_compound_info["dft_BulkEnergy"]
-			for element in self.elements_list:
-				main_compound_enthalpy -= main_compound_info["dft_"+element] * compounds_info[element]["mu0"]
-			deltamu_third_element = main_compound_enthalpy / main_compound_info["dft_"+self.third_element]
-		except:
-			main_compound_enthalpy = compounds_info[self.main_compound]["dft_total_energy"]
-			for element in self.elements_list:
-				main_compound_enthalpy -= compounds_info[self.main_compound]["dft_"+element] * compounds_info[element]["mu0"]
-			deltamu_third_element = main_compound_enthalpy / compounds_info[self.main_compound]["dft_"+self.third_element]
-			pass
-		
-		
-		# Keep track of mu values of the species in the ternary compound
-		self.deltamu_values = {}
-		self.deltamu_values[first_element] = 0.0
-		self.deltamu_values[second_element] = 0.0
-		self.deltamu_values[third_element] = deltamu_third_element
-		"""
-
-		
 		# Initialize deltamu values of all species in the ternary compound
 		self.deltamu_values = {}
 		for element in self.elements_list:
@@ -56,7 +33,7 @@ class Plot_Composition_Ternary_PhaseDiagram(Plot_Composition_PhaseDiagram):
 		
 		
 		# Inherit all variables (plot object, etc.) from parent object (Composition_PhaseDiagram)
-		super().__init__(type = "ternary", main_compound_info = main_compound_info, compounds_info = compounds_info)
+		Plot_Composition_PhaseDiagram.__init__(self, type = "ternary", main_compound_info = main_compound_info, compounds_info = compounds_info)
 		
 		
 		

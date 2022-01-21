@@ -54,8 +54,6 @@ class Composition_Quaternary_PhaseDiagram_Functions:
 	
 	def Shade_FourPhaseRegion(self, event):
 		
-		print("Four phase region selected...")
-		
 		# Check to see that all four-phase regions have been calculated
 		if self.phase_region_objects == []:
 			return

@@ -37,10 +37,7 @@ class ChemicalPotential_PhaseDiagramProjected2D_TripleView:
 			self.all_elements.append(str(element))
 		
 		# Font description for phase stability diagram plot
-		self.font = {'family': 'sans-serif',
-				'color':  'black',
-				'weight': 'normal',
-				'size': 12 }
+		self.font = {'family': 'sans-serif', 'color':  'black', 'weight': 'normal', 'size': 12 }
 		
 		# Store all extracted DFT data
 		self.main_compound_info = {}
@@ -80,6 +77,7 @@ class ChemicalPotential_PhaseDiagramProjected2D_TripleView:
 		self.tripleview_phase_diagram_plot_drawing12.set_ylabel("$\Delta\mu_{"+self.second_element+"}$ (eV)",fontdict=self.font,rotation=270,labelpad=20)
 		self.tripleview_phase_diagram_plot_drawing12.xaxis.tick_top()
 		self.tripleview_phase_diagram_plot_drawing12.yaxis.tick_right()
+		self.tripleview_phase_diagram_plot_drawing12.tick_params(axis='both', labelsize=self.font['size']-2)
 		self.tripleview_phase_diagram_plot_drawing12.xaxis.set_label_position("top")
 		self.tripleview_phase_diagram_plot_drawing12.yaxis.set_label_position("right")
 		self.tripleview_phase_diagram_plot_drawing12.spines['left'].set_visible(False)
@@ -92,6 +90,7 @@ class ChemicalPotential_PhaseDiagramProjected2D_TripleView:
 		self.tripleview_phase_diagram_plot_drawing13.set_ylabel("$\Delta\mu_{"+self.third_element+"}$ (eV)",fontdict=self.font,rotation=270,labelpad=20)
 		self.tripleview_phase_diagram_plot_drawing13.xaxis.tick_top()
 		self.tripleview_phase_diagram_plot_drawing13.yaxis.tick_right()
+		self.tripleview_phase_diagram_plot_drawing13.tick_params(axis='both', labelsize=self.font['size']-2)
 		self.tripleview_phase_diagram_plot_drawing13.xaxis.set_label_position("top")
 		self.tripleview_phase_diagram_plot_drawing13.yaxis.set_label_position("right")
 		self.tripleview_phase_diagram_plot_drawing13.spines['left'].set_visible(False)
@@ -104,6 +103,7 @@ class ChemicalPotential_PhaseDiagramProjected2D_TripleView:
 		self.tripleview_phase_diagram_plot_drawing23.set_ylabel("$\Delta\mu_{"+self.third_element+"}$ (eV)",fontdict=self.font,rotation=270,labelpad=20)
 		self.tripleview_phase_diagram_plot_drawing23.xaxis.tick_top()
 		self.tripleview_phase_diagram_plot_drawing23.yaxis.tick_right()
+		self.tripleview_phase_diagram_plot_drawing23.tick_params(axis='both', labelsize=self.font['size']-2)
 		self.tripleview_phase_diagram_plot_drawing23.xaxis.set_label_position("top")
 		self.tripleview_phase_diagram_plot_drawing23.yaxis.set_label_position("right")
 		self.tripleview_phase_diagram_plot_drawing23.spines['left'].set_visible(False)
@@ -166,7 +166,7 @@ class ChemicalPotential_PhaseDiagramProjected2D_TripleView:
 				self.competing_compound_plots12[competing_compound].set_data(competing_compounds_deltamu_first_element_limit12[competing_compound], competing_compounds_deltamu_second_element_limit12[competing_compound])
 			except:
 				# If the plot doesn't exist initially, then create it
-				self.competing_compound_plots12[competing_compound], = self.tripleview_phase_diagram_plot_drawing12.plot(competing_compounds_deltamu_first_element_limit12[competing_compound], competing_compounds_deltamu_second_element_limit12[competing_compound], label=Compound_Name_Formal(competing_compound, self.compounds_info, "latex"), color=self.competing_compounds_colorwheel[Compound_Name_Formal(competing_compound, self.compounds_info, "unicode")])
+				self.competing_compound_plots12[competing_compound], = self.tripleview_phase_diagram_plot_drawing12.plot(competing_compounds_deltamu_first_element_limit12[competing_compound], competing_compounds_deltamu_second_element_limit12[competing_compound], label=Compound_Name_Formal(competing_compound, "latex"), color=self.competing_compounds_colorwheel[Compound_Name_Formal(competing_compound, "unicode")])
 		
 		try:
 			self.phase_stability_region12.remove()
@@ -198,7 +198,7 @@ class ChemicalPotential_PhaseDiagramProjected2D_TripleView:
 				self.competing_compound_plots13[competing_compound].set_data(competing_compounds_deltamu_first_element_limit13[competing_compound], competing_compounds_deltamu_second_element_limit13[competing_compound])
 			except:
 				# If the plot doesn't exist initially, then create it
-				self.competing_compound_plots13[competing_compound], = self.tripleview_phase_diagram_plot_drawing13.plot(competing_compounds_deltamu_first_element_limit13[competing_compound], competing_compounds_deltamu_second_element_limit13[competing_compound], label=Compound_Name_Formal(competing_compound, self.compounds_info, "latex"), color=self.competing_compounds_colorwheel[Compound_Name_Formal(competing_compound, self.compounds_info, "unicode")])
+				self.competing_compound_plots13[competing_compound], = self.tripleview_phase_diagram_plot_drawing13.plot(competing_compounds_deltamu_first_element_limit13[competing_compound], competing_compounds_deltamu_second_element_limit13[competing_compound], label=Compound_Name_Formal(competing_compound, "latex"), color=self.competing_compounds_colorwheel[Compound_Name_Formal(competing_compound, "unicode")])
 		
 		try:
 			self.phase_stability_region13.remove()
@@ -231,7 +231,7 @@ class ChemicalPotential_PhaseDiagramProjected2D_TripleView:
 				self.competing_compound_plots23[competing_compound].set_data(competing_compounds_deltamu_first_element_limit23[competing_compound], competing_compounds_deltamu_second_element_limit23[competing_compound])
 			except:
 				# If the plot doesn't exist initially, then create it
-				self.competing_compound_plots23[competing_compound], = self.tripleview_phase_diagram_plot_drawing23.plot(competing_compounds_deltamu_first_element_limit23[competing_compound], competing_compounds_deltamu_second_element_limit23[competing_compound], label=Compound_Name_Formal(competing_compound, self.compounds_info, "latex"), color=self.competing_compounds_colorwheel[Compound_Name_Formal(competing_compound, self.compounds_info, "unicode")])
+				self.competing_compound_plots23[competing_compound], = self.tripleview_phase_diagram_plot_drawing23.plot(competing_compounds_deltamu_first_element_limit23[competing_compound], competing_compounds_deltamu_second_element_limit23[competing_compound], label=Compound_Name_Formal(competing_compound, "latex"), color=self.competing_compounds_colorwheel[Compound_Name_Formal(competing_compound, "unicode")])
 		
 		try:
 			self.phase_stability_region23.remove()

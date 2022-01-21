@@ -46,7 +46,6 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 
 from vtandem.visualization.utils.chemicalpotential_phasediagram import Calculate_PhaseDiagram_Projected2D
-from vtandem.visualization.utils.compound_name import Compound_Name_Formal
 
 from vtandem.visualization.plots.plot_chemicalpotential_phasediagram import ChemicalPotential_PhaseDiagramProjected2D
 from vtandem.visualization.plots.plot_chemicalpotential_phasediagram_projectedtripleview import ChemicalPotential_PhaseDiagramProjected2D_TripleView
@@ -67,8 +66,8 @@ class ChemicalPotential_Quaternary_PhaseDiagramProjected2D(ChemicalPotential_Pha
 		self.third_element	= third_element
 		self.fourth_element	= fourth_element
 		self.elements_list  = [self.first_element, self.second_element, self.third_element, self.fourth_element]	# List of elements that gets updated as user selects element order
-		self.elements_list_original = [self.first_element, self.second_element, self.third_element, self.fourth_element]	# Unchanged list of elements for compound naming purposes (e.g. see Compound_Name_Formal)
-		
+		self.elements_list_original = [self.first_element, self.second_element, self.third_element, self.fourth_element]	# Unchanged list of elements for compound naming purposes
+
 		# Necessary numerical variables
 		#self.main_compound_elements_count = {}
 		self.main_compound_enthalpy = 0.0			# Enthalpy of the main quaternary compound
@@ -91,7 +90,7 @@ class ChemicalPotential_Quaternary_PhaseDiagramProjected2D_TripleView(ChemicalPo
 		self.third_element	= third_element
 		self.fourth_element	= fourth_element
 		self.elements_list  = [self.first_element, self.second_element, self.third_element, self.fourth_element]	# List of elements that gets updated as user selects element order
-		self.elements_list_original = [self.first_element, self.second_element, self.third_element, self.fourth_element]	# Unchanged list of elements for compound naming purposes (e.g. see Compound_Name_Formal)
+		self.elements_list_original = [self.first_element, self.second_element, self.third_element, self.fourth_element]	# Unchanged list of elements for compound naming purposes
 		
 		self.deltamu = {1: 0.0, 2: 0.0, 3: 0.0, 4: 0.0}								# Track the fourth species mu value as the user changes it
 		

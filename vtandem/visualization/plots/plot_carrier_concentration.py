@@ -21,7 +21,7 @@ class Plot_CarrierConcentration(SaveFigure):
 	def __init__(self):
 		
 		# Font description for defect formation energy diagram
-		self.font = { 'family': 'sans-serif', 'color':  'black', 'weight': 'normal', 'size': 14 }
+		self.font = { 'family': 'sans-serif', 'color':  'black', 'weight': 'normal', 'size': 12 }
 		
 		# Plot settings
 		self.max_temperature = 1000  # Maximum temperature in Kelvins
@@ -83,11 +83,11 @@ class Plot_CarrierConcentration(SaveFigure):
 		self.carrier_concentration_plot_drawing.set_xlim(200, self.max_temperature)
 		self.carrier_concentration_plot_drawing.set_ylim(self.ymin, self.ymax)
 		self.carrier_concentration_plot_drawing.set_xlabel("T(K)", fontdict=self.font)
-		self.carrier_concentration_plot_drawing.set_ylabel("n$_i$ (cm$^{-3}$)", fontdict=self.font, rotation=90)
+		self.carrier_concentration_plot_drawing.set_ylabel("Carrier Concentration (cm$^{-3}$)", fontdict=self.font, rotation=90)
 		self.carrier_concentration_plot_drawing.set_yscale("log")
 		self.carrier_concentration_plot_drawing.xaxis.tick_bottom()
 		self.carrier_concentration_plot_drawing.yaxis.tick_left()
-		self.carrier_concentration_plot_drawing.tick_params(axis='both', labelsize=9)
+		self.carrier_concentration_plot_drawing.tick_params(axis='both', labelsize=self.font['size']-2)
 		self.carrier_concentration_plot_drawing.xaxis.set_label_position("bottom")
 		self.carrier_concentration_plot_drawing.yaxis.set_label_position("left")
 		self.carrier_concentration_plot_drawing.set_aspect("auto")

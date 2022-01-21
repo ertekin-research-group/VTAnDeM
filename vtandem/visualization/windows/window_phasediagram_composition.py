@@ -10,8 +10,8 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 
-from vtandem.visualization.utils.compound_name import Compound_Name_Formal
 
+title_font = 16
 
 class Window_Compositional_PhaseDiagram(QWidget):
 	
@@ -34,12 +34,13 @@ class Window_Compositional_PhaseDiagram(QWidget):
 		self.compound_title_font = QFont("sans-serif", 24, QFont.Bold) 		# Declare font
 		self.compound_title.setFont(self.compound_title_font)				# Set the font for the QLabel text
 		"""
+		
 		# (WIDGET) Title
 		self.composition_phase_diagram_title = QLabel("Phase \n Diagram \n (Composition)")			# QLabel is a widget that displays text
 		self.composition_phase_diagram_title.setAlignment(Qt.AlignCenter)						# Align the text to center
-		self.composition_phase_diagram_title_font = QFont("sans-serif", 24, QFont.Bold) 		# Declare font
+		self.composition_phase_diagram_title_font = QFont("sans-serif", title_font, QFont.Bold) 		# Declare font
 		self.composition_phase_diagram_title.setFont(self.composition_phase_diagram_title_font)	# Set the font for the QLabel text
-		
+
 		# (WIDGET) Compositional phase diagram plot object
 		self.composition_phase_diagram_plot = self.Compositional_PhaseDiagram.composition_phasediagram_plot_canvas
 		

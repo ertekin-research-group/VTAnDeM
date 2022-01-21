@@ -51,11 +51,11 @@ class Plot_Composition_Quaternary_PhaseDiagram(Plot_Composition_PhaseDiagram, Co
 			self.deltamu_values[element] = 0.0
 		
 		
-
+		print(main_compound_info, "quat script")
 		
 		# Inherit all variables (plot object, etc.) and functions from parent objects
-		Plot_Composition_PhaseDiagram.__init__(type = "quaternary", main_compound_info = main_compound_info, compounds_info = compounds_info)
-		Composition_Quaternary_PhaseDiagram_Functions.__init__()
+		Plot_Composition_PhaseDiagram.__init__(self, type = "quaternary", main_compound_info = main_compound_info, compounds_info = compounds_info)
+		Composition_Quaternary_PhaseDiagram_Functions.__init__(self)
 
 		# Find all four-phase regions in the quaternary composition space.
 		self.Find_All_PhaseRegions()

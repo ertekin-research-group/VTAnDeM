@@ -23,13 +23,69 @@ from periodictable import elements
 from pymatgen.io.vasp.outputs import Vasprun
 
 
+
+
+class Import_Object:
+
+	def __init__(self):
+
+		pass
+
+	####################################################################################################################
+	################################################# Get Total Energy #################################################
+	####################################################################################################################
+
+	def Get_Total_Energy(self, directory_name):
+		
+		if "OUTCAR" in os.listdir(directory_name):			
+			outcar_file = open(directory_name+"/OUTCAR").readlines()
+			for line in outcar_file:
+				if "entropy" not in line:
+					continue
+				if line.split()[4] == "energy(sigma->0)":
+					total_energy = float(line.split()[-1])
+		elif "OSZICAR" in os.listdir(directory_name):
+			oszicar_file = open(directory_name+"/OSZICAR").readlines()
+			for line in oszicar_file:
+				if "F=" in line:
+					total_energy = float(line.split()[2])
+
+		return total_energy
+	
+
+
+	####################################################################################################################
+	################################################## Update Database #################################################
+	####################################################################################################################
+
+	def Update_Database(self, json_filename, data):
+		
+		backup_json_filename = ".vtandem/"+json_filename.split(".")[0]+"_Backup.json"
+		try:
+			copyfile(json_filename, backup_json_filename)
+		except:
+			pass
+		
+		jsonfile = open(json_filename, "w")
+		json.dump(data, jsonfile, indent=4, sort_keys=True)
+		jsonfile.close()
+
+
+
+
+
+
+
+
+
+
 ########################################################################################################################
 ########################################################################################################################
 ############################################# Phase Stability Information ##############################################
 ########################################################################################################################
 ########################################################################################################################
 
-class Compounds_Import:
+class Compounds_Import(Import_Object):
 	
 	def __init__(self):
 		
@@ -49,18 +105,12 @@ class Compounds_Import:
 	
 	def Add_Element(self, element_name, directory_name):
 		
-		# Check if the directory name is legitimate
-		if not os.path.isdir(directory_name):
-			sys.exit("WARNING: Cannot find directory '"+directory_name+"'. Exiting...")
-		
+		# Run checks
+		self.Run_Compound_Checks(element_name, directory_name)
+
 		# Check to see that the element is legitimate
 		if element_name not in self.elements:
 			sys.exit(element_name+" is not recognized as a legitimate element. Exiting...")
-		
-		# Check if the element already exists in the database
-		if element_name in self.compounds_info["Elements"].keys():
-			print(element_name+" is already in the database. The imported data will replace the old data.")
-			pass
 		
 		# Initialize
 		element_data = {}
@@ -68,9 +118,7 @@ class Compounds_Import:
 		# Establish list of elements (should only be one item in list)
 		element_data["elements_list"] = [element_name]
 		
-		# Find stoichiometry of element in POSCAR/CONTCAR
-		if ("POSCAR" not in os.listdir(directory_name)) and ("CONTCAR" not in os.listdir(directory_name)):
-			sys.exit("WARNING: Cannot find structure file (neither POSCAR nor CONTCAR) of "+element_name+". Exiting...")
+		# Find stoichiometry of element in POSCAR/CONTCAR (which exists thanks to our initial checks)
 		try:
 			structure_file = open(directory_name+"/POSCAR").readlines()
 		except:
@@ -81,9 +129,7 @@ class Compounds_Import:
 		element_data["formula_units"] = element_data["dft_"+element_name]
 		element_data["number_species"] = 1
 		
-		# Find total energy of element in OUTCAR
-		if "OUTCAR" not in os.listdir(directory_name):
-			sys.exit("WARNING: Cannot find OUTCAR file of "+element_name+". Exiting...")
+		# Find total energy of element in OUTCAR (which exists thanks to our initial checks)
 		element_data["dft_total_energy"] = self.Get_Total_Energy(directory_name)
 		
 		# Calculate total energy per formula unit of compound
@@ -101,18 +147,12 @@ class Compounds_Import:
 	
 	def Add_Compound(self, compound_name, directory_name):
 		
-		# Check if the directory name is legitimate
-		if not os.path.isdir(directory_name):
-			sys.exit("WARNING: Cannot find directory '"+directory_name+"'. Exiting...")
-		
+		# Run checks
+		self.Run_Compound_Checks(compound_name, directory_name)
+
 		# Check if the compound is actually an element
 		if compound_name in self.elements:
 			sys.exit("WARNING: '"+compound_name+"' is an element, not a compound. Exiting...")
-		
-		# Check if the compound already exists in the database
-		if compound_name in self.compounds_info["Compounds"].keys():
-			print(compound_name+" is already in the database. The imported data will replace the old data.")
-			pass
 		
 		# Initialize
 		compound_data = {}
@@ -141,10 +181,7 @@ class Compounds_Import:
 		# List of elements in compound
 		compound_data["elements_list"] = elements_list
 		
-		# Find stoichiometry of compound listed in POSCAR/CONTCAR
-		if ("POSCAR" not in os.listdir(directory_name)) and ("CONTCAR" not in os.listdir(directory_name)):
-			print("WARNING: Cannot find structure file (neither POSCAR nor CONTCAR). Exiting...")
-			return False
+		# Find stoichiometry of compound listed in POSCAR/CONTCAR (which exists thanks to our initial checks)
 		try:
 			structure_file = open(directory_name+"/CONTCAR").readlines()
 		except:
@@ -157,10 +194,7 @@ class Compounds_Import:
 			compound_data["formula_units"] = compound_data["dft_"+element]/compound_data[element]
 		compound_data["number_species"] = len(number_species)
 		
-		# Find total energy of compound in OUTCAR
-		if "OUTCAR" not in os.listdir(directory_name):
-			print("WARNING: Cannot find OUTCAR file of '"+compound_name+"' in '"+directory_name+"'. Exiting...")
-			return False
+		# Find total energy of compound in OUTCAR (which exists thanks to our initial checks)
 		compound_data["dft_total_energy"] = self.Get_Total_Energy(directory_name)
 		
 		# Store data
@@ -170,33 +204,39 @@ class Compounds_Import:
 	
 	
 	
-	def Get_Total_Energy(self, directory_name):
-		
-		outcar_file = open(directory_name+"/OUTCAR").readlines()
-		for line in outcar_file:
-			if "entropy" not in line:
-				continue
-			if line.split()[4] == "energy(sigma->0)":
-				total_energy = float(line.split()[-1])
-		
-		return total_energy
-	
-	
-	
 	####################################################################################################################
-	################################################# Update Database ##################################################
+	########################################## Check Legitimacy of User Input ##########################################
+	####################################################################################################################
+	
+	def Run_Compound_Checks(self, name, directory_name):
+
+		# Check if the directory name is legitimate
+		if not os.path.isdir(directory_name):
+			sys.exit("WARNING: Cannot find directory '"+directory_name+"'. Exiting...")
+		
+		# Check if POSCAR or CONTCAR exists
+		if ("POSCAR" not in os.listdir(directory_name)) and ("CONTCAR" not in os.listdir(directory_name)):
+			sys.exit("WARNING: Cannot find structure file (neither POSCAR nor CONTCAR) of '"+name+"'. Exiting...")
+
+		# Check if OUTCAR exists
+		if ("OUTCAR" not in os.listdir(directory_name)) and ("OSZICAR" not in os.listdir(directory_name)):
+			sys.exit("WARNING: Cannot find OUTCAR/OSZICAR file of '"+name+"'. Exiting...")
+
+		# Check if the compound already exists in the database
+		if ( name in self.compounds_info["Compounds"].keys() ) or (name in self.compounds_info["Elements"].keys() ):
+			print("'"+name+"'' is already in the database. The imported data will replace the old data.")
+			pass
+
+	
+
+	####################################################################################################################
+	############################################# Update Compounds Database ############################################
 	####################################################################################################################
 	
 	def Update_Compounds_Database(self):
-		
-		try:
-			copyfile("Compounds_Tracker.json", ".vtandem/Compounds_Tracker_Backup.json")
-		except:
-			pass
-		
-		jsonfile = open("Compounds_Tracker.json", "w")
-		json.dump(self.compounds_info, jsonfile, indent=4, sort_keys=True)
-		jsonfile.close()
+
+		self.Update_Database("Compounds_Tracker.json", self.compounds_info)
+
 
 
 
@@ -210,7 +250,7 @@ class Compounds_Import:
 ########################################################################################################################
 ########################################################################################################################
 
-class Defects_Import:
+class Defects_Import(Import_Object):
 	
 	def __init__(self):
 		
@@ -289,8 +329,8 @@ class Defects_Import:
 				continue
 			
 			# Check that the data exists
-			if "OUTCAR" not in os.listdir(directory_name+"/"+directory):
-				print("WARNING: Cannot find OUTCAR file for defect '"+defect_name+"' with charge state '"+charge_state+"' in '"+directory_name+"/"+directory+"'. Skipping...")
+			if ("OUTCAR" not in os.listdir(directory_name+"/"+directory)) and ("OSZICAR" not in os.listdir(directory_name+"/"+directory)):
+				print("WARNING: Cannot find OUTCAR/OSZICAR file for defect '"+defect_name+"' with charge state '"+directory.split("q")[-1]+"' in '"+directory_name+"/"+directory+"'. Skipping...")
 				continue
 
 			self.Add_Defect_Charge(compound_name=compound_name, defect_name=defect_name, charge_state=directory.split("q")[-1], directory_name=directory_name+"/"+directory)
@@ -399,23 +439,7 @@ class Defects_Import:
 		# Update site multiplicities
 		self.Update_Site_Multiplicities(compound_name, bulk_folder)
 	
-	
-	
-	####################################################################################################################
-	################################################# Get Total Energy #################################################
-	####################################################################################################################
-	
-	def Get_Total_Energy(self, directory_name):
-		
-		outcar_file = open(directory_name+"/OUTCAR").readlines()
-		for line in outcar_file:
-			if "entropy" not in line:
-				continue
-			if line.split()[4] == "energy(sigma->0)":
-				total_energy = float(line.split()[-1])
-		
-		return total_energy
-	
+
 	
 	####################################################################################################################
 	######################################### Update Defect Site Multiplicities ########################################
@@ -547,13 +571,7 @@ class Defects_Import:
 	
 	def Update_Defects_Database(self):
 		
-		try:
-			copyfile("Defects_Tracker.json", ".vtandem/Defects_Tracker_Backup.json")
-		except:
-			pass
-		with open("Defects_Tracker.json", "w") as jsonfile:
-			json.dump(self.defects_data, jsonfile, indent=4, sort_keys=True)
-
+		self.Update_Database("Defects_Tracker.json", self.defects_data)
 
 
 
@@ -566,7 +584,7 @@ class Defects_Import:
 ########################################################################################################################
 ########################################################################################################################
 
-class DOS_Import:
+class DOS_Import(Import_Object):
 	
 	def __init__(self):
 		
@@ -581,49 +599,24 @@ class DOS_Import:
 	############################################### Add DOS to Database ################################################
 	####################################################################################################################
 	
-	def Add_DOS(self, compound_name, directory_name):
+	def Add_DOS(self, compound_name, doscar_filename):
 		
-		# Check if the directory name is legitimate
-		if not os.path.isdir(directory_name):
-			sys.exit("The directory '"+directory_name+"' cannot be found. Exiting...")
-		
-		# Check that both the DOSCAR file and either POSCAR and/or CONTCAR are in the folder
-		if ("DOSCAR" not in os.listdir(directory_name)) and ( ("POSCAR" not in os.listdir(directory_name)) and ("CONTCAR" not in os.listdir(directory_name)) ):
-			sys.exit("Either the DOSCAR and/or the POSCAR/CONTCAR file is missing from directory '"+directory_name+"'. Exiting...")
-		
-		# If compound does not exists in Defects_Tracker.json, then don't import
-		if compound_name not in json.load(open("Defects_Tracker.json")).keys():
-			sys.exit("The compound '"+compound_name+"' does not exist in Defects_Tracker.json. Skipping...")
-		
-		# Check if the compound already exists in the database
-		if compound_name in self.dos_data.keys():
-			continue_dos_import = input("The compound '"+compound_name+"' is already in the DOS database (DOS_Tracker.json). Replace? ([y]/n): ") or "y"
-			while continue_dos_import not in ["y", "n"]:
-				continue_dos_import = input("Please type either 'y' or 'n': ") or "y"
-			if continue_dos_import == "n":
-				sys.exit("Aborting importing DOS of "+compound_name+".")
+		# Run checks
+		self.Run_DOS_Checks(compound_name, doscar_filename)
 
-		# Open files
-		if "POSCAR" in os.listdir(directory_name):
-			lattice_vectors_str = open(directory_name+"/POSCAR").readlines()[2:5]
-		elif "CONTCAR" in os.listdir(directory_name):
-			lattice_vectors_str = open(directory_name+"/CONTCAR").readlines()[2:5]
-		dos_file = open(directory_name+"/DOSCAR").readlines()
-		
-		# Initialize
+		# Open files and initialize
+		dos_file = open(doscar_filename).readlines()
 		dos_info = {}
 		
-		# Volume to normalize DOS
-		lat_a = np.array([float(x) for x in lattice_vectors_str[0].split()])
-		lat_b = np.array([float(x) for x in lattice_vectors_str[1].split()])
-		lat_c = np.array([float(x) for x in lattice_vectors_str[2].split()])
-		#volume = float(open(filename).readlines()[1].split()[0])*1E-24	# CHECK LATER (VASP may be reporting the wrong volume)
-		volume = np.dot( lat_a, np.cross(lat_b, lat_c) ) * 1E-24
-		
+		# Volume
+		number_atoms = int(dos_file[0].split()[1])
+		volume_per_atom = float(dos_file[1].split()[0]) * 1E-24
+		volume = volume_per_atom * number_atoms
+
 		# Fermi energy
 		fermi_energy = float( dos_file[5].split()[-2] )
 		
-		# Extract data
+		# Extract DOS
 		for line in dos_file:
 			
 			# Skip lines that don't have the total DOS
@@ -644,6 +637,31 @@ class DOS_Import:
 		# Store data
 		self.dos_data[compound_name] = {"Volume": volume, "DOS": dos_info}
 	
+
+
+	####################################################################################################################
+	########################################## Check Legitimacy of User Input ##########################################
+	####################################################################################################################
+	
+	def Run_DOS_Checks(self, compound_name, doscar_filename):
+		
+		# Check if the directory name is legitimate
+		if not os.path.isfile(doscar_filename):
+			sys.exit("The file '"+doscar_filename+"' cannot be found. Exiting...")
+		
+		# If compound does not exists in Defects_Tracker.json, then don't import
+		if compound_name not in json.load(open("Defects_Tracker.json")).keys():
+			sys.exit("The compound '"+compound_name+"' does not exist in Defects_Tracker.json. Skipping...")
+		
+		# Check if the compound already exists in the database
+		if compound_name in self.dos_data.keys():
+			continue_dos_import = input("The compound '"+compound_name+"' is already in the DOS database (DOS_Tracker.json). Replace? ([y]/n): ") or "y"
+			while continue_dos_import not in ["y", "n"]:
+				continue_dos_import = input("Please type either 'y' or 'n': ") or "y"
+			if continue_dos_import == "n":
+				sys.exit("Aborting importing DOS of "+compound_name+".")
+
+	
 	
 	####################################################################################################################
 	############################################### Update DOS Database ################################################
@@ -651,13 +669,7 @@ class DOS_Import:
 	
 	def Update_DOS_Database(self):
 		
-		try:
-			copyfile("DOS_Tracker.json", ".vtandem/DOS_Tracker_Backup.json")
-		except:
-			pass
-		
-		with open("DOS_Tracker.json", "w") as jsonfile:
-			json.dump(self.dos_data, jsonfile, indent=4, sort_keys=True)
+		self.Update_Database("DOS_Tracker.json", self.dos_data)
 
 
 

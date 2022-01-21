@@ -10,7 +10,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 
-
+title_font = 16
 
 class Window_CarrierConcentration(QWidget):
 	
@@ -26,14 +26,13 @@ class Window_CarrierConcentration(QWidget):
 		# Title
 		self.carrierconcentration_title = QLabel("Carrier \n Concentration")				# QLabel is a widget that displays text
 		self.carrierconcentration_title.setAlignment(Qt.AlignCenter)					# Align the text to center
-		self.carrierconcentration_title_font = QFont("sans-serif", 24, QFont.Bold) 	# Declare font
+		self.carrierconcentration_title_font = QFont("sans-serif", title_font, QFont.Bold) 	# Declare font
 		self.carrierconcentration_title.setFont(self.carrierconcentration_title_font)		# Set the font for the QLabel text
 		self.carrierconcentration_window_layout.addWidget(self.carrierconcentration_title)
-		
+
 		# Carrier concentration plot
 		self.carrierconcentration_plot = self.CarrierConcentration.carrier_concentration_plot_canvas
 		self.carrierconcentration_window_layout.addWidget(self.carrierconcentration_plot)
-		
 		
 		self.carrierconcentration_viewport = QWidget()
 		self.carrierconcentration_viewport_layout = QHBoxLayout(self.carrierconcentration_viewport)

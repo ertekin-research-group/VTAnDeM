@@ -71,7 +71,6 @@ def vtandem(import_element, import_compound, import_defects, import_defect_energ
 	  /path/to/data/folder
 	    |-- OUTCAR (or OSZICAR)
 	    |-- CONTCAR (or POSCAR)
-	    |-- vasprun.xml
 	
 	\b
 	\b
@@ -86,7 +85,7 @@ def vtandem(import_element, import_compound, import_defects, import_defect_energ
 	  /path/to/defects/data/folder
 	    |-- Bulk
 	          |-- OUTCAR
-	          |-- POSCAR
+	          |-- CONTCAR
 	          |-- vasprun.xml
 	    |-- Defect1
 	          |-- q0
@@ -120,15 +119,9 @@ def vtandem(import_element, import_compound, import_defects, import_defect_energ
 	[5] Importing Density of States
 	When importing the DOS using the --import_dos option, the argument  <TEXT
 	PATH> should be in the form:
-	    'Compound_Name /path/to/DOSCAR/folder'
+	    'Compound_Name /path/to/DOSCAR'
 	'Compound_Name' is case-sensitive (e.g. Cu2HgGeTe4).
-	/path/to/DOSCAR/folder should have the file structure:
-	
-	\b
-	  /path/to/DOSCAR/folder
-	    |-- DOSCAR
-	    |-- POSCAR/CONTCAR
-	
+	/path/to/DOSCAR is the name of the DOSCAR file containing the DOS info.
 	\b
 	
 	"""
@@ -160,22 +153,32 @@ __        __ ____________   ___             _______           ___      ___
 			sys.exit("Cannot find VTAnDeM project. Exiting...")
 		from vtandem.dft.import_dft import Compounds_Import
 		element_import_object = Compounds_Import()
+		"""
 		import_element_success = element_import_object.Add_Element(import_element[0], import_element[1])
 		if import_element_success:
 			element_import_object.Update_Compounds_Database()
 			print("Imported element '"+import_element[0]+"' from the folder '"+import_element[1]+"' successfully!")
-	
+		"""
+		element_import_object.Add_Element(import_element[0], import_element[1])
+		element_import_object.Update_Compounds_Database()
+		print("Imported element '"+import_element[0]+"' from the folder '"+import_element[1]+"' successfully!")
+
 	# Import compound data to Compounds_Tracker.json
 	if (import_compound[0] != default_values["import_phase_stability"][0]) and (import_compound[1] != default_values["import_phase_stability"][1]):
 		if not Check_VTAnDeM_Project():
 			sys.exit("Cannot find VTAnDeM project. Exiting...")
 		from vtandem.dft.import_dft import Compounds_Import
 		compound_import_object = Compounds_Import()
+		"""
 		import_compound_success = compound_import_object.Add_Compound(import_compound[0], import_compound[1])
 		if import_compound_success:
 			compound_import_object.Update_Compounds_Database()
 			print("Imported compound '"+import_compound[0]+"' from the folder '"+import_compound[1]+"' successfully!")
-	
+		"""
+		compound_import_object.Add_Compound(import_compound[0], import_compound[1])
+		compound_import_object.Update_Compounds_Database()
+		print("Imported compound '"+import_compound[0]+"' from the folder '"+import_compound[1]+"' successfully!")
+
 	# Import defects data to Defects_Tracker.json
 	if (import_defects[0] != default_values["import_defects"][0]) and (import_defects[1] != default_values["import_defects"][1]):
 		if not Check_VTAnDeM_Project():

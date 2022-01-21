@@ -30,8 +30,10 @@ class Tab_Quaternary_Compositional_PhaseDiagram3D(Tab_Compositional_PhaseDiagram
 		self.fourth_element = fourth_element
 		self.elements_list = [self.first_element, self.second_element, self.third_element, self.fourth_element]					# Species list (order MAY change)
 		
+		print(main_compound_info)
+
 		# Compositional phase diagram
-		self.Compositional_PhaseDiagram = Plot_Composition_Quaternary_PhaseDiagram(main_compound = self.main_compound, first_element = self.first_element, second_element = self.second_element, third_element = self.third_element, fourth_element = self.fourth_element, compounds_info = compounds_info)
+		self.Compositional_PhaseDiagram = Plot_Composition_Quaternary_PhaseDiagram(main_compound = self.main_compound, first_element = self.first_element, second_element = self.second_element, third_element = self.third_element, fourth_element = self.fourth_element, compounds_info = compounds_info, main_compound_info = main_compound_info)
 		
 		# Defects diagram
 		if show_defects_diagram:

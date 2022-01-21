@@ -13,8 +13,6 @@ from PyQt5.QtGui import *
 from vtandem.visualization.ternary.ternary_plots.plot_ternary_phase_diagram import ChemicalPotential_Ternary_PhaseDiagramProjected2D_TripleView
 from vtandem.visualization.ternary.ternary_plots.plot3d_ternary_phase_diagram import ChemicalPotential_Ternary_PhaseDiagram3D
 
-from vtandem.visualization.utils.compound_name import Compound_Name_Formal
-
 
 
 class Tab_Ternary_PhaseDiagram3D(object):

@@ -44,7 +44,6 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 
-from vtandem.visualization.utils.compound_name import Compound_Name_Formal
 from vtandem.visualization.plots.plot_chemicalpotential_phasediagram3d import Plot_ChemicalPotential_PhaseDiagram3D
 
 class ChemicalPotential_Ternary_PhaseDiagram3D(Plot_ChemicalPotential_PhaseDiagram3D):
@@ -59,7 +58,7 @@ class ChemicalPotential_Ternary_PhaseDiagram3D(Plot_ChemicalPotential_PhaseDiagr
 		self.element_y = second_element
 		self.dependent_element = third_element
 		self.elements_list = [self.element_x, self.element_y, self.dependent_element]	# List of elements that gets updated as user selects element order
-		self.elements_list_original = [first_element, second_element, third_element]	# Unchanged list of elements for compound naming purposes (e.g. see Compound_Name_Formal)
+		self.elements_list_original = [first_element, second_element, third_element]	# Unchanged list of elements for compound naming purposes
 	
 	
 	

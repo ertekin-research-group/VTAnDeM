@@ -16,6 +16,7 @@ from PyQt5.QtGui import *
 from vtandem.visualization.plots.save_plot import SaveFigure
 
 from vtandem.visualization.utils.compositional_phasediagram import *
+from vtandem.visualization.utils.compound_name import Compound_Name_Formal
 
 
 class Plot_Composition_PhaseDiagram(SaveFigure):
@@ -28,44 +29,56 @@ class Plot_Composition_PhaseDiagram(SaveFigure):
 		self.type = type
 		
 		# Font description for phase stability diagram plot
-		self.font = {'family': 'sans-serif', 'color':  'black', 'weight': 'bold', 'size': 10 }
+		fontsize = 12
+		self.font_labels = {'family': 'sans-serif', 'color': 'black', 'weight': 'bold', 'size': fontsize }
+		self.font_legend = {'family': 'sans-serif', 'size': fontsize }
+		self.font_annotation = {'family': 'sans-serif', 'color': 'black', 'weight': 'bold', 'size': fontsize }
 		
 		# Store all extracted DFT data
 		self.main_compound_info = main_compound_info
 		self.compounds_info = compounds_info
-		
-		
+		print(main_compound_info)
 
 		# Phase diagram (in composition space) object
 		self.composition_phasediagram_plot_figure = plt.figure()
 		self.composition_phasediagram_plot_canvas = FigureCanvas(self.composition_phasediagram_plot_figure)
+
+
+		# Initialize plot drawing
 		if self.type == "ternary":
 			self.composition_phasediagram_plot_drawing = self.composition_phasediagram_plot_figure.add_subplot(111)
 		if self.type == "quaternary":
 			self.composition_phasediagram_plot_drawing = self.composition_phasediagram_plot_figure.add_subplot(111, projection='3d')
 		
-		# Save figure feature
-		SaveFigure.__init__(self, self.composition_phasediagram_plot_figure)
-		
-
-		# Store all plots of phase diagram vertices
-		self.vertices_plots = {}
-
 
 		# Generate compositional phase diagram
-		self.pmg_phasediagram, self.lines, self.labels = Create_Compositional_PhaseDiagram(self.compounds_info, self.elements_list)
-		#self.Create_Compositional_PhaseDiagram()
-		#self.Plot_Compositional_PhaseDiagram()
+		self.Generate_Compositional_PhaseDiagram(self.compounds_info, self.elements_list)
+		
+		# Save figure feature
+		SaveFigure.__init__(self, self.composition_phasediagram_plot_figure)
+	
+	
+
+	def Generate_Compositional_PhaseDiagram(self, compounds_info, elements_list):
+
+		try:
+			self.composition_phasediagram_legend.remove()
+			self.composition_phasediagram_plot_drawing.clear()  # Doesn't remove the drawing, it simply "clears" it ;)
+		except:
+			pass
+		
+		# Generate compositional phase diagram
+		#self.pmg_phasediagram, lines, self.labels = Create_Compositional_PhaseDiagram(compounds_info, elements_list)
+		self.pmg_phasediagram, lines, self.labels = Create_Compositional_PhaseDiagram(compounds_info, elements_list, self.main_compound_info, self.main_compound)
 		newlabels = Plot_Compositional_PhaseDiagram(self.composition_phasediagram_plot_drawing, 
 													self.type,
-													self.lines,
+													lines,
 													self.labels,
-													self.font
+													self.font_labels
 													)
-		self.composition_phasediagram_legend = self.composition_phasediagram_plot_figure.text(0.01, 0.01, "\n".join(newlabels))
-		self.composition_phasediagram_plot_canvas.draw()
+		self.composition_phasediagram_legend = self.composition_phasediagram_plot_figure.text(0.01, 0.01, "\n".join(newlabels), fontdict=self.font_legend)
 
-		
+		self.composition_phasediagram_plot_canvas.draw()
 
 
 		### Find all phase regions after compositional phase diagram is drawn.
@@ -82,13 +95,26 @@ class Plot_Composition_PhaseDiagram(SaveFigure):
 		# Other triggers
 		self.composition_phasediagram_plot_figure.canvas.mpl_connect('button_press_event', self.Calculate_ChemicalPotentials_Region)
 		self.composition_phasediagram_plot_figure.canvas.mpl_connect('motion_notify_event', self.Hover)
-		
+
+		"""
 		self.phaseregion_annotation = self.composition_phasediagram_plot_drawing.annotate("", xy=(0,0), xytext=(20,20), textcoords="offset points",
 																								bbox = dict(boxstyle="round", fc="w"),
-																								arrowprops = dict(arrowstyle = "->") )
-	
-	
-	
+																								arrowprops = dict(arrowstyle = "->"),
+																								fontsize = self.font_annotation['size'] )
+		"""
+		self.text_x_offset = 20
+		self.text_y_offset = 20
+		self.phaseregion_annotation = self.composition_phasediagram_plot_drawing.annotate("", xy=(0,0), xytext=(self.text_x_offset, self.text_y_offset), 
+																								textcoords="offset pixels",
+																								bbox = dict(boxstyle="round", fc="w"),
+																								arrowprops = dict(arrowstyle = "->"),
+																								fontsize = self.font_annotation['size'] )
+		self.phaseregion_annotation.get_bbox_patch().set_facecolor("w")
+		self.phaseregion_annotation.get_bbox_patch().set_alpha(1.0)
+
+
+
+
 	###############################################################################################
 	#################### Find All Phase Regions in Compositional Phase Diagram ####################
 	###############################################################################################
@@ -162,27 +188,38 @@ class Plot_Composition_PhaseDiagram(SaveFigure):
 	
 	def Update_Annotation(self, index, event):
 		
-		# Get xy position of cursor on screen
+		# Get xy position of cursor on screen (in data coordinates)
 		screen_position_xy = self.centroids_plot.get_offsets()[index]
 		self.phaseregion_annotation.xy = screen_position_xy
 		
 		# Get name of four phase region
 		for phase_region in self.phase_region_objects:
 			if phase_region.centroid_plot.contains(event)[0]:
-				text = phase_region.name
+				phase_region_compound_names = []
+				for compound_name in phase_region.name.split(","):
+					phase_region_compound_names.append( Compound_Name_Formal(compound_name, "latex") )
+				text = ", ".join(phase_region_compound_names)
 				break
 		
 		# Set annotation
 		self.phaseregion_annotation.set_text(text)
-		self.phaseregion_annotation.get_bbox_patch().set_facecolor("w")
-		self.phaseregion_annotation.get_bbox_patch().set_alpha(1.0)
-	
+
+
+		# Check if annotation spills out of axis
+		axis_bounds = self.composition_phasediagram_plot_drawing.get_window_extent().bounds # Bounds are given in (x0, y0, width, height) format
+		axis_x1, axis_y1 = axis_bounds[0]+axis_bounds[2], axis_bounds[1]+axis_bounds[3]
+		annotation_bounds = self.phaseregion_annotation.get_window_extent().bounds
+		annotation_x1, annotation_y1 = annotation_bounds[0]+annotation_bounds[2], annotation_bounds[1]+annotation_bounds[3]
+		if (annotation_x1 > axis_x1):
+			self.phaseregion_annotation.set( position=(-axis_bounds[2]/2, 20) )
 	
 	
 	def Hover(self, event):
+
 		is_visible = self.phaseregion_annotation.get_visible()
 		
 		if event.inaxes == self.composition_phasediagram_plot_drawing:
+			
 			contains, index = self.centroids_plot.contains(event)
 			if contains:
 				self.Update_Annotation(index["ind"][0], event)
@@ -215,8 +252,6 @@ class Plot_Composition_PhaseDiagram(SaveFigure):
 		if self.phaseregion_selected is None:
 			return
 		
-		print(self.phaseregion_selected.name)
-		
 		# Get the matrix encoding the stoichiometry of each compound constituting the phase region
 		composition_matrix = []
 		enthalpies_array = []
@@ -243,6 +278,7 @@ class Plot_Composition_PhaseDiagram(SaveFigure):
 		# Solve for the delta mu values
 		deltamus = np.dot( np.linalg.inv(composition_matrix), enthalpies_array )
 		print(deltamus)
+		print(self.phaseregion_selected.name)
 		
 		# Record delta mu values
 		for element, deltamu in zip(self.elements_list, deltamus):

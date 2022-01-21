@@ -51,7 +51,7 @@ class Plot_ChemicalPotential_PhaseDiagram3D(SaveFigure):
 			self.all_elements.append(str(element))
 		
 		# Font description for phase stability diagram plot
-		self.font = {'family': 'sans-serif', 'color':  'black', 'weight': 'normal', 'size': 14 }
+		self.font = {'family': 'sans-serif', 'color': 'black', 'weight': 'normal', 'size': 14 }
 		
 		# Store all extracted DFT data
 		self.main_compound_info = {}
@@ -202,9 +202,9 @@ class Plot_ChemicalPotential_PhaseDiagram3D(SaveFigure):
 			coord = [list(zip(x, y, z))]
 			
 			label = sec_phases[i]
-			polygon = Poly3DCollection(coord, alpha=0.7, label=Compound_Name_Formal(label, self.compounds_info, "latex"), closed=True)
+			polygon = Poly3DCollection(coord, alpha=0.7, label=Compound_Name_Formal(label, "latex"), closed=True)
 			polygon.set_facecolor(cmap(color_counter))
-			self.competing_compounds_colorwheel[Compound_Name_Formal(label, self.compounds_info, "unicode")] = cmap(color_counter)
+			self.competing_compounds_colorwheel[Compound_Name_Formal(label, "unicode")] = cmap(color_counter)
 			color_counter += 1
 			
 			polygon._facecolors2d = polygon._facecolor3d
@@ -212,12 +212,12 @@ class Plot_ChemicalPotential_PhaseDiagram3D(SaveFigure):
 			
 			
 			self.chemicalpotential_phasediagram_plot_axes.add_collection3d(polygon)
-			path = Line3DCollection(coord, lw=1, color=self.competing_compounds_colorwheel[Compound_Name_Formal(label, self.compounds_info, "unicode")])
+			path = Line3DCollection(coord, lw=1, color=self.competing_compounds_colorwheel[Compound_Name_Formal(label, "unicode")])
 			self.chemicalpotential_phasediagram_plot_axes.add_collection3d(path)
 		
 		# Include competing compounds not included in phase stability bound into colorwheel
 		for competing_compound in sec_phases:
-			label = Compound_Name_Formal(competing_compound, self.compounds_info, "unicode")
+			label = Compound_Name_Formal(competing_compound, "unicode")
 			if label not in self.competing_compounds_colorwheel.keys():
 				self.competing_compounds_colorwheel[label] = cmap(color_counter)
 				color_counter += 1
@@ -248,8 +248,8 @@ class Plot_ChemicalPotential_PhaseDiagram3D(SaveFigure):
 		
 		self.chemicalpotential_phasediagram_plot_axes.set_aspect("auto")
 		
-		self.chemicalpotential_phasediagram_plot_axes.legend(loc='center left')
-		self.chemicalpotential_phasediagram_plot_axes.legend(loc='upper center', ncol=5)
+		self.chemicalpotential_phasediagram_plot_axes.legend(loc='center left', fontsize=self.font['size']-2)
+		self.chemicalpotential_phasediagram_plot_axes.legend(loc='upper center', ncol=5, fontsize=self.font['size']-2)
 	
 	
 	

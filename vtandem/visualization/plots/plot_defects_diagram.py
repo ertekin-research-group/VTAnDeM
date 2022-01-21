@@ -23,10 +23,7 @@ class Plot_DefectsDiagram(SaveFigure):
 	def __init__(self):
 		
 		# Font description for defect formation energy diagram
-		self.font = {'family': 'sans-serif',
-				'color':  'black',
-				'weight': 'normal',
-				'size': 14 }
+		self.font = {'family': 'sans-serif', 'color':  'black', 'weight': 'normal', 'size': 12 }
 		
 		# Store all extracted DFT data
 		self.defects_data = {}
@@ -82,7 +79,7 @@ class Plot_DefectsDiagram(SaveFigure):
 		
 		# Set plot axes labels
 		self.defects_diagram_plot_drawing.set_xlabel("Fermi Energy (eV)", fontdict=self.font)
-		self.defects_diagram_plot_drawing.set_ylabel("$\Delta$H (eV)", fontdict=self.font, rotation=90)
+		self.defects_diagram_plot_drawing.set_ylabel("$\Delta E_{D,q}$ (eV)", fontdict=self.font, rotation=90)
 
 		# Set labels for VBM and CBM
 		self.defects_diagram_plot_drawing.set_xticks([0.0, self.ECBM-self.EVBM])
@@ -91,7 +88,7 @@ class Plot_DefectsDiagram(SaveFigure):
 		# Set placement/direction of ticks and labels
 		self.defects_diagram_plot_drawing.xaxis.tick_bottom()
 		self.defects_diagram_plot_drawing.yaxis.tick_left()
-		self.defects_diagram_plot_drawing.tick_params(axis='both', labelsize=9)
+		self.defects_diagram_plot_drawing.tick_params(axis='both', labelsize=self.font['size']-2)
 		self.defects_diagram_plot_drawing.xaxis.set_label_position("bottom")
 		self.defects_diagram_plot_drawing.yaxis.set_label_position("left")
 		self.defects_diagram_plot_drawing.set_aspect("auto")
@@ -105,7 +102,7 @@ class Plot_DefectsDiagram(SaveFigure):
 		#self.equilibrium_fermi_energy_tick.set_xlim(self.xmin, self.xmax)
 		self.equilibrium_fermi_energy_tick.set_xlim(self.axis_lims["XMin"], self.axis_lims["XMax"])
 		self.equilibrium_fermi_energy_tick.set_xticks([-100])
-		self.equilibrium_fermi_energy_tick.tick_params(axis='both', labelsize=9)
+		self.equilibrium_fermi_energy_tick.tick_params(axis='both', labelsize=self.font['size']-2)
 	
 	
 	

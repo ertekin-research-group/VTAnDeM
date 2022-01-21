@@ -13,8 +13,7 @@ from PyQt5.QtGui import *
 from vtandem.visualization.quaternary.quaternary_plots.plot_quaternary_phase_diagram import ChemicalPotential_Quaternary_PhaseDiagramProjected2D_TripleView
 from vtandem.visualization.quaternary.quaternary_plots.plot3d_quaternary_phase_diagram import ChemicalPotential_Quaternary_PhaseDiagram3D
 
-from vtandem.visualization.utils.compound_name import Compound_Name_Formal
-
+title_font = 16
 
 
 class Tab_PhaseDiagram3D(object):
@@ -84,7 +83,7 @@ class Tab_PhaseDiagram3D(object):
 		# (WIDGET) Title
 		self.chemicalpotentialPD_name = QLabel("3D Phase Diagram")							# QLabel is a widget that displays text
 		self.chemicalpotentialPD_name.setAlignment(Qt.AlignCenter)								# Align the text to center
-		self.chemicalpotentialPD_name_font = QFont("sans-serif", 24, QFont.Bold) 					# Declare font
+		self.chemicalpotentialPD_name_font = QFont("sans-serif", title_font, QFont.Bold) 					# Declare font
 		self.chemicalpotentialPD_name.setFont(self.chemicalpotentialPD_name_font)		# Set the font for the QLabel text
 		self.chemicalpotential_phasediagram3d_window_layout.addWidget(self.chemicalpotentialPD_name)	# Add the widget to the "main" widget grid layout
 		
@@ -166,7 +165,7 @@ class Tab_PhaseDiagram3D(object):
 		# (WIDGET) Title
 		self.chemicalpotentialPD_projected_name = QLabel("Projected Phase Diagram")							# QLabel is a widget that displays text
 		self.chemicalpotentialPD_projected_name.setAlignment(Qt.AlignCenter)								# Align the text to center
-		self.chemicalpotentialPD_projected_name_font = QFont("sans-serif", 24, QFont.Bold) 					# Declare font
+		self.chemicalpotentialPD_projected_name_font = QFont("sans-serif", title_font, QFont.Bold) 					# Declare font
 		self.chemicalpotentialPD_projected_name.setFont(self.chemicalpotentialPD_projected_name_font)		# Set the font for the QLabel text
 		self.chemicalpotentialPD_projected_window_layout.addWidget(self.chemicalpotentialPD_projected_name)	# Add the widget to the "main" widget grid layout
 		

@@ -38,10 +38,7 @@ class ChemicalPotential_PhaseDiagramProjected2D(QWidget, SaveFigure):
 			self.all_elements.append(str(element))
 		
 		# Font description for phase stability diagram plot
-		self.font = {'family': 'sans-serif',
-				'color':  'black',
-				'weight': 'normal',
-				'size': 16 }
+		self.font = {'family': 'sans-serif', 'color':  'black',	'weight': 'normal',	'size': 12 }
 		
 		# Establish the first, second, and third species of the quaternary compound.
 		# Note that this list is subject to change, depending on what the user chooses.
@@ -82,6 +79,7 @@ class ChemicalPotential_PhaseDiagramProjected2D(QWidget, SaveFigure):
 		self.phase_diagram_plot_drawing.set_ylabel("$\Delta\mu_{"+self.second_element+"}$ (eV)",fontdict=self.font,rotation=270,labelpad=20)
 		self.phase_diagram_plot_drawing.xaxis.tick_top()
 		self.phase_diagram_plot_drawing.yaxis.tick_right()
+		self.phase_diagram_plot_drawing.tick_params(axis='both', labelsize=self.font['size']-2)
 		self.phase_diagram_plot_drawing.xaxis.set_label_position("top")
 		self.phase_diagram_plot_drawing.yaxis.set_label_position("right")
 		self.phase_diagram_plot_drawing.spines['left'].set_visible(False)
@@ -118,7 +116,7 @@ class ChemicalPotential_PhaseDiagramProjected2D(QWidget, SaveFigure):
 				self.competing_compound_plots[competing_compound].set_data(competing_compounds_deltamu_first_element_limit[competing_compound], competing_compounds_deltamu_second_element_limit[competing_compound])
 			except:
 				# If the plot doesn't exist initially, then create it
-				self.competing_compound_plots[competing_compound], = self.phase_diagram_plot_drawing.plot(competing_compounds_deltamu_first_element_limit[competing_compound], competing_compounds_deltamu_second_element_limit[competing_compound], label=Compound_Name_Formal(competing_compound, self.compounds_info, "latex"))
+				self.competing_compound_plots[competing_compound], = self.phase_diagram_plot_drawing.plot(competing_compounds_deltamu_first_element_limit[competing_compound], competing_compounds_deltamu_second_element_limit[competing_compound], label=Compound_Name_Formal(competing_compound, "latex"))
 		
 		
 		# Phase stability region
@@ -130,7 +128,7 @@ class ChemicalPotential_PhaseDiagramProjected2D(QWidget, SaveFigure):
 		
 		
 		# Legend
-		self.phase_diagram_plot_drawing.legend(loc=3)
+		self.phase_diagram_plot_drawing.legend(loc=3, fontsize=self.font['size']-2)
 		
 		
 		

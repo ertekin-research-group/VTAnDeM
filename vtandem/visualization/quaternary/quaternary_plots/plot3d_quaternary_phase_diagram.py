@@ -44,7 +44,6 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 
-from vtandem.visualization.utils.compound_name import Compound_Name_Formal
 from vtandem.visualization.plots.plot_chemicalpotential_phasediagram3d import Plot_ChemicalPotential_PhaseDiagram3D
 
 
@@ -62,7 +61,7 @@ class ChemicalPotential_Quaternary_PhaseDiagram3D(Plot_ChemicalPotential_PhaseDi
 		self.element_z = third_element
 		self.dependent_element = fourth_element
 		self.elements_list = [self.element_x, self.element_y, self.element_z, self.dependent_element]	# List of elements that gets updated as user selects element order
-		self.elements_list_original = [first_element, second_element, third_element, fourth_element]	# Unchanged list of elements for compound naming purposes (e.g. see Compound_Name_Formal)
+		self.elements_list_original = [first_element, second_element, third_element, fourth_element]	# Unchanged list of elements for compound naming purposes
 		
 		# Track chemical potential of fourth element
 		self.mu4 = 0.0
@@ -97,7 +96,8 @@ class ChemicalPotential_Quaternary_PhaseDiagram3D(Plot_ChemicalPotential_PhaseDi
 		for competing_compound in self.compounds_info.keys():
 			
 			# Check whether compound is "competing"
-			if (not set(self.compounds_info[competing_compound]["elements_list"]).issubset(self.elements_list_original)) or (competing_compound == self.main_compound):
+			#if (not set(self.compounds_info[competing_compound]["elements_list"]).issubset(self.elements_list_original)) or (competing_compound == self.main_compound):
+			if (not set(self.compounds_info[competing_compound]["elements_list"]).issubset(self.elements_list)) or (competing_compound == self.main_compound):
 				continue
 			
 			competing_compound_element_count = {}

@@ -56,7 +56,6 @@ class Tab_Ternary_Dopants(Window_DefectsDiagram):
 		
 		# Obtain DFT compounds data
 		self.compounds_info = Obtain_Compounds_Data( [self.first_element, self.second_element, self.third_element, self.dopant] )
-		
 		self.main_compound_info = main_compound_info
 		
 		# Plot settings
@@ -149,27 +148,18 @@ class Tab_Ternary_Dopants(Window_DefectsDiagram):
 	def Update_Dopant(self, event):
 		
 		self.dopant = self.dopant_selection_box.currentText()
-		
+
 		self.Compositional_PhaseDiagram.dopant = self.dopant
 		self.Compositional_PhaseDiagram.elements_list = [self.first_element, self.second_element, self.third_element, self.dopant]
-		self.Compositional_PhaseDiagram.composition_phasediagram_legend.remove()
-		self.Compositional_PhaseDiagram.composition_phasediagram_plot_drawing.remove()
-		self.Compositional_PhaseDiagram.composition_phasediagram_plot_drawing = Axes3D(self.Compositional_PhaseDiagram.composition_phasediagram_plot_figure)
-		self.Compositional_PhaseDiagram.Create_Compositional_PhaseDiagram()
-		self.Compositional_PhaseDiagram.Plot_Compositional_PhaseDiagram()
-		
-		self.Compositional_PhaseDiagram.fourphaseregions = []
-		self.Compositional_PhaseDiagram.fourphaseregion_names = []
-		self.Compositional_PhaseDiagram.fourphaseregion_centroids = []
-		self.Compositional_PhaseDiagram.Find_All_FourPhaseRegions()
+
+		self.compounds_info = Obtain_Compounds_Data( self.Compositional_PhaseDiagram.elements_list )
+		self.Compositional_PhaseDiagram.compounds_info = self.compounds_info
+
+
+		self.Compositional_PhaseDiagram.Generate_Compositional_PhaseDiagram(self.Compositional_PhaseDiagram.compounds_info, self.Compositional_PhaseDiagram.elements_list)
+
+		self.Compositional_PhaseDiagram.Find_All_PhaseRegions()
 		self.Compositional_PhaseDiagram.Plot_Centroids()
-		
-		self.Compositional_PhaseDiagram.fourphaseregion_selected = None
-		self.Compositional_PhaseDiagram.fourphaseregion_shade = []
-		
-		self.Compositional_PhaseDiagram.fourphaseregion_annotation = self.Compositional_PhaseDiagram.composition_phasediagram_plot_drawing.annotate("", xy=(0,0), xytext=(20,20), textcoords="offset points",
-																																					bbox = dict(boxstyle="round", fc="w"),
-																																					arrowprops = dict(arrowstyle = "->") )
 		
 		self.DefectsDiagram.dopant = self.dopant
 		self.DefectsDiagram.dopant_mu0 = self.compounds_info[self.dopant]["mu0"]

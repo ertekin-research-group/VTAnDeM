@@ -10,7 +10,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 
-
+title_font = 16
 
 class Window_DefectsDiagram:
 	
@@ -26,10 +26,10 @@ class Window_DefectsDiagram:
 		# Title
 		self.defectsdiagram_title = QLabel("Defect \n Energies")				# QLabel is a widget that displays text
 		self.defectsdiagram_title.setAlignment(Qt.AlignCenter)					# Align the text to center
-		self.defectsdiagram_title_font = QFont("sans-serif", 24, QFont.Bold) 	# Declare font
+		self.defectsdiagram_title_font = QFont("sans-serif", title_font, QFont.Bold) 	# Declare font
 		self.defectsdiagram_title.setFont(self.defectsdiagram_title_font)		# Set the font for the QLabel text
 		self.defectsdiagram_window_layout.addWidget(self.defectsdiagram_title)
-		
+
 		# Defects diagram plot
 		self.defects_diagram_plot = self.DefectsDiagram.defects_diagram_plot_canvas
 		self.defectsdiagram_window_layout.addWidget(self.defects_diagram_plot)

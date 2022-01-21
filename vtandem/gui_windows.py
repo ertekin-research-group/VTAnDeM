@@ -98,6 +98,12 @@ class Welcome_VTAnDeM_Window(QMainWindow):
 		self.import_defects_data_button.clicked[bool].connect(self.Import_Defects_Data_Function)
 		self.import_data_widget_layout.addWidget(self.import_defects_data_button)
 		
+		# Import defect energy corrections data button
+		self.import_defect_corrections_button = QPushButton("Import Defect Energy Corrections")
+		self.import_defect_corrections_button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+		self.import_defect_corrections_button.clicked[bool].connect(self.Import_DefectCorrections_Function)
+		self.import_data_widget_layout.addWidget(self.import_defect_corrections_button)
+
 		# Import DOS data button
 		self.import_dos_data_button = QPushButton("Import DOS Data")
 		self.import_dos_data_button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
@@ -132,7 +138,13 @@ class Welcome_VTAnDeM_Window(QMainWindow):
 		self.import_defects_window.setWindowIcon(QIcon(vtandem_source_path+"/logo/LogoSmall.png"))
 		self.import_defects_window.show()
 	
+
+	def Import_DefectCorrections_Function(self):
+		self.import_defect_corrections_window = Import_Data_Window("Defect_Corrections")
+		self.import_defect_corrections_window.setWindowIcon(QIcon(vtandem_source_path+"/logo/LogoSmall.png"))
+		self.import_defect_corrections_window.show()
 	
+
 	def Import_DOS_Data_Function(self):
 		
 		self.import_dos_window = Import_Data_Window("DOS")
@@ -174,6 +186,9 @@ class Import_Data_Window(QMainWindow):
 		elif import_type == "Defects":
 			self.Import_Defects_Window()
 		
+		elif import_type == "Defect_Corrections":
+			self.Import_DefectEnergyCorrections_Window()
+
 		elif import_type == "DOS":
 			self.Import_DOS_Window()
 	
@@ -315,32 +330,6 @@ Example data structure: \n\n \
 		self.data_directory_name_widget_layout.addWidget(self.browser_button)
 		self.import_window_layout.addWidget(self.data_directory_name_widget)
 		
-		# Supercell size
-		self.supercell_size_widget = QWidget()
-		self.supercell_size_widget_layout = QVBoxLayout(self.supercell_size_widget)
-		self.supercell_size_x_widget = QWidget()
-		self.supercell_size_x_widget_layout = QHBoxLayout(self.supercell_size_x_widget)
-		self.supercell_size_x_label = QLabel("Supercell Size, x: ")
-		self.supercell_size_x_widget_layout.addWidget(self.supercell_size_x_label)
-		self.supercell_size_x_prompt = QLineEdit()
-		self.supercell_size_x_widget_layout.addWidget(self.supercell_size_x_prompt)
-		self.supercell_size_widget_layout.addWidget(self.supercell_size_x_widget)
-		self.supercell_size_y_widget = QWidget()
-		self.supercell_size_y_widget_layout = QHBoxLayout(self.supercell_size_y_widget)
-		self.supercell_size_y_label = QLabel("Supercell Size, y: ")
-		self.supercell_size_y_widget_layout.addWidget(self.supercell_size_y_label)
-		self.supercell_size_y_prompt = QLineEdit()
-		self.supercell_size_y_widget_layout.addWidget(self.supercell_size_y_prompt)
-		self.supercell_size_widget_layout.addWidget(self.supercell_size_y_widget)
-		self.supercell_size_z_widget = QWidget()
-		self.supercell_size_z_widget_layout = QHBoxLayout(self.supercell_size_z_widget)
-		self.supercell_size_z_label = QLabel("Supercell Size, z: ")
-		self.supercell_size_z_widget_layout.addWidget(self.supercell_size_z_label)
-		self.supercell_size_z_prompt = QLineEdit()
-		self.supercell_size_z_widget_layout.addWidget(self.supercell_size_z_prompt)
-		self.supercell_size_widget_layout.addWidget(self.supercell_size_z_widget)
-		self.import_window_layout.addWidget(self.supercell_size_widget)
-		
 		# Submit import request
 		self.submit_data_button = QPushButton("Submit")
 		self.submit_data_button.clicked[bool].connect(self.Import_Defects_Function)
@@ -372,6 +361,10 @@ Example data structure: \n\n \
                         |---- OUTCAR \n \
                 |---- q-1 \n \
                         |---- OUTCAR \n \
+        |---- Bulk \n \
+                |---- CONTCAR \n \
+                |---- OUTCAR \n \
+                |---- vasprun.xml \n \
         |---- V_Cu \n \
                 |---- q0 \n \
                         |---- OUTCAR \n \
@@ -403,25 +396,116 @@ Example data structure: \n\n \
 		# Check to see if inputs are given
 		self.Check_Inputs()
 		
-		# Check to see that supercell sizes are given
-		try: 
-			supercell_size = float(self.supercell_size_x_prompt.text()) * float(self.supercell_size_y_prompt.text()) * float(self.supercell_size_z_prompt.text())
-		except:
-			print("Supercell sizes are not properly defined.")
-			self.close()
-		
 		# Extract relevant compounds information from directory
 		self.defects_data = Defects_Import()
 		compound_name = self.compound_name_prompt.text()
 		data_directory_name = self.data_directory_name_prompt.text()
-		self.defects_data.Add_Defects(compound_name, data_directory_name, supercell_size)
+		#self.defects_data.Add_Defects(compound_name, data_directory_name, supercell_size)
+		self.defects_data.Add_Defects(compound_name, data_directory_name)
 		self.defects_data.Update_Defects_Database()
 		self.close()
 	
 	
+
+
+
+
+
+
+
+
+
+
+
+	def Import_DefectEnergyCorrections_Window(self):
+		
+		# Compound name
+		self.compound_name_widget = QWidget()
+		self.compound_name_widget_layout = QHBoxLayout(self.compound_name_widget)
+		self.compound_name_label = QLabel("Compound Name: ")
+		self.compound_name_widget_layout.addWidget(self.compound_name_label)
+		self.compound_name_prompt = QLineEdit()
+		self.compound_name_widget_layout.addWidget(self.compound_name_prompt)
+		self.question_button = QPushButton()
+		self.question_button.setIcon(QIcon(vtandem_source_path+"/icon/QuestionIcon.png"))
+		self.question_button.clicked[bool].connect(self.Import_DefectEnergyCorrections_Help_Function)
+		self.compound_name_widget_layout.addWidget(self.question_button)
+		self.import_window_layout.addWidget(self.compound_name_widget)
+		
+		# Data directory
+		self.data_filename_widget = QWidget()
+		self.data_filename_widget_layout = QHBoxLayout(self.data_filename_widget)
+		self.data_filename_label = QLabel("Data Directory: ")
+		self.data_filename_widget_layout.addWidget(self.data_filename_label)
+		self.data_filename_prompt = QLineEdit()
+		self.data_filename_widget_layout.addWidget(self.data_filename_prompt)
+		self.browser_button = QPushButton()
+		self.browser_button.setIcon(QIcon(vtandem_source_path+"/icon/FolderBrowserIcon.png"))
+		self.browser_button.clicked[bool].connect(self.Data_FileBrowser_Function)
+		self.data_filename_widget_layout.addWidget(self.browser_button)
+		self.import_window_layout.addWidget(self.data_filename_widget)
+
+		
+		# Submit import request
+		self.submit_data_button = QPushButton("Submit")
+		self.submit_data_button.clicked[bool].connect(self.Import_DefectEnergyCorrections_Function)
+		self.import_window_layout.addWidget(self.submit_data_button)
+		
+		# Set the title of the window
+		defects_import_window_title = "Import Defect Energy Corrections"
+		self.setWindowTitle(defects_import_window_title)
 	
 	
+	def Import_DefectEnergyCorrections_Help_Function(self):
+		dialog_instructions = 	"""
+Adding your defect energy corrections to the VTAnDeM database: \n \
+	- Enter the name of the compound in 'Compound Name' (e.g. Cu2HgGeTe4, case-sensitive). \n \
+	- Browse for the CSV file which contains the corrections. \n \
+	- Click on the file and hit the 'Choose' button. \n\n \
+Necessary data structure: \n \
+	- Each line in the CSV file should have the following form:
+								"""
+		example_file_structure = 	"""
+Example data structure: \n\n \
+        Cu2HgGeTe4, Cu_Hg, -3, 0.4704 \n \
+        Cu2HgGeTe4, Cu_Hg, -2, 0.7823 \n \
+        Cu2HgGeTe4, Cu_Hg, -1, 1.0333 \n \
+									"""
+		self.message_window = QMainWindow()
+		self.message_window.setWindowTitle("Help")
+		self.message_window.setWindowIcon(QIcon(vtandem_source_path+"/logo/LogoSmall.png"))
+		self.message_widget = QWidget()
+		self.message_widget_layout = QVBoxLayout(self.message_widget)
+		self.dialog_instructions = QLabel(dialog_instructions)
+		self.message_widget_layout.addWidget(self.dialog_instructions)
+		self.example_file_structure = QLabel(example_file_structure)
+		self.message_widget_layout.addWidget(self.example_file_structure)
+		self.message_window.setCentralWidget(self.message_widget)
+		self.message_window.show()
 	
+	
+	def Import_DefectEnergyCorrections_Function(self):
+		
+		# Check to see if inputs are given
+		self.Check_Inputs()
+		
+		# Extract relevant compounds information from directory
+		self.defects_data = Defects_Import()
+		compound_name = self.compound_name_prompt.text()
+		data_filename = self.data_filename_prompt.text()
+		self.defects_data.Add_Energy_Corrections(compound_name, data_filename)
+		self.defects_data.Update_Defects_Database()
+		self.close()
+	
+
+
+
+
+
+
+
+
+
 	def Import_DOS_Window(self):
 		
 		# Compound name
@@ -517,7 +601,6 @@ Adding your VASP Density of States data to the VTAnDeM database: \n \
 	
 	def Data_DirectoryBrowser_Function(self):
 		filename = QFileDialog.getExistingDirectory(self, "Browse Data Directory")
-		#filename = QFileDialog.getOpenFileNames(self, "Browse Data Directory")
 		self.data_directory_name_prompt.setText(filename)
 	
 	
