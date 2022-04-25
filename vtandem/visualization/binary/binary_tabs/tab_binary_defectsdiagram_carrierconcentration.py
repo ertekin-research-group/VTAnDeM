@@ -92,7 +92,7 @@ class Tab_Binary_DefectsDiagram_CarrierConcentration(Window_DefectsDiagram_Binar
 			self.tab1_defectsdiagram_widget_layout = QVBoxLayout(self.tab1_defectsdiagram_widget)	# Again, the above mentioned widgets will be stacked vertically.
 			
 			# Set up defects diagram object
-			self.DefectsDiagram = Plot_Binary_DefectsDiagram(self, main_compound = main_compound, first_element = first_element, second_element = second_element)
+			self.DefectsDiagram = Plot_Binary_DefectsDiagram(main_compound = main_compound, first_element = first_element, second_element = second_element)
 			self.DefectsDiagram.defects_data = defects_data
 			self.DefectsDiagram.main_compound_info = main_compound_info
 			"""
@@ -130,7 +130,7 @@ class Tab_Binary_DefectsDiagram_CarrierConcentration(Window_DefectsDiagram_Binar
 			self.tab1_carrierconcentration_widget_layout = QVBoxLayout(self.tab1_carrierconcentration_widget)	# The above mentioned widgets will be stacked vertically.
 			
 			# Set up carrier concentration plot object
-			self.CarrierConcentration = Plot_Binary_Carrier_Concentration(self, main_compound = main_compound, first_element = first_element, second_element = second_element)
+			self.CarrierConcentration = Plot_Binary_Carrier_Concentration(main_compound = main_compound, first_element = first_element, second_element = second_element)
 			self.CarrierConcentration.defects_data = defects_data
 			self.CarrierConcentration.main_compound_info = main_compound_info
 			self.CarrierConcentration.dos_data = dos_data[self.main_compound]

@@ -198,7 +198,6 @@ class Window_DefectsDiagram:
 			self.DefectsDiagram.Update_Extrinsic_DefectsDiagram_Plot()
 		
 		
-		
 		if self.show_carrier_concentration:
 			
 			# Recalculate carrier concentrations
@@ -215,28 +214,44 @@ class Window_DefectsDiagram:
 	
 	def Update_ExtrinsicDefect(self):
 		
-		# Obtain selected dopant
+		# Check selected dopant
 		if self.dopant_selection_box.currentText() == "None":
 			self.DefectsDiagram.dopant = "None"
 			self.dopant_chemical_potential_deltamu.setEnabled(False)
+			# Reset mu0 of dopant
+			self.dopant_chemical_potential_label.setText(u"\u0394"+"\u03BC"+"<sub>x</sub>")
+			self.DefectsDiagram.dopant_mu0 = 0.0
 		else:
 			dopant_qcombobox_text = self.dopant_selection_box.currentText()
 			self.DefectsDiagram.dopant = dopant_qcombobox_text
 			self.dopant_chemical_potential_deltamu.setEnabled(True)
-		
-		# Set intrinsic chemical potential mu0 of dopant
-		if self.DefectsDiagram.dopant == "None":
-			self.dopant_chemical_potential_label.setText(u"\u0394"+"\u03BC"+"<sub>x</sub>")
-			self.DefectsDiagram.dopant_mu0 = 0.0
-		else:
+			# Update mu0 of dopant
 			self.dopant_chemical_potential_label.setText(u"\u0394"+"\u03BC"+"<sub>"+self.DefectsDiagram.dopant+"</sub>")
 			self.DefectsDiagram.dopant_mu0 = self.compounds_info[self.DefectsDiagram.dopant]["mu0"]
+		
+		
+		# Set intrinsic chemical potential mu0 of dopant
+		#if self.DefectsDiagram.dopant == "None":
+		#	self.dopant_chemical_potential_label.setText(u"\u0394"+"\u03BC"+"<sub>x</sub>")
+		#	self.DefectsDiagram.dopant_mu0 = 0.0
+		#else:
+		#	self.dopant_chemical_potential_label.setText(u"\u0394"+"\u03BC"+"<sub>"+self.DefectsDiagram.dopant+"</sub>")
+		#	self.DefectsDiagram.dopant_mu0 = self.compounds_info[self.DefectsDiagram.dopant]["mu0"]
 		
 		# Reset deltamu of dopant
 		self.dopant_chemical_potential_deltamu.setText("-0.0000")
 		self.DefectsDiagram.dopant_deltamu = 0.0
 		
 		
+		# Once dopant atom is selected, find extrinsic defects (e.g. Ge_Se, Ge_O, and Ge_Bi for Ge)
+		print(self.DefectsDiagram.defects_data)
+		for defect in self.DefectsDiagram.defects_data.keys():
+			atom = defect.split("_")[0]
+			if atom == self.DefectsDiagram.dopant:
+				self.DefectsDiagram.extrinsic_defects.append(defect)
+		print(self.DefectsDiagram.extrinsic_defects)
+
+
 		# Recalculate defect formation energies
 		self.DefectsDiagram.Calculate_DefectFormations()
 		
@@ -256,6 +271,8 @@ class Window_DefectsDiagram:
 			self.CarrierConcentration.dopant = self.DefectsDiagram.dopant
 			self.CarrierConcentration.dopant_mu0 = self.DefectsDiagram.dopant_mu0
 			self.CarrierConcentration.dopant_deltamu = self.DefectsDiagram.dopant_deltamu
+
+			self.CarrierConcentration.extrinsic_defects = self.DefectsDiagram.extrinsic_defects
 			
 			
 			# Redraw carrier concentration

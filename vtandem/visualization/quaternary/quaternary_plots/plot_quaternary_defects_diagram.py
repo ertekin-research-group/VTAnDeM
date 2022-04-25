@@ -7,10 +7,7 @@ from vtandem.visualization.plots.plot_defects_diagram import Plot_DefectsDiagram
 
 class Plot_Quaternary_DefectsDiagram(Plot_DefectsDiagram):
 	
-	def __init__(self, parent = None, main_compound = None, first_element = None, second_element = None, third_element = None, fourth_element = None):
-		
-		# Inherit all variables (plot object, etc.) from parent object (DefectsDiagram_Plot)
-		super().__init__()
+	def __init__(self, main_compound = None, first_element = None, second_element = None, third_element = None, fourth_element = None):
 		
 		# Establish the first, second, third, and fourth species of the quaternary compound.
 		# Note that this list is subject to change, depending on what the user chooses.
@@ -21,18 +18,8 @@ class Plot_Quaternary_DefectsDiagram(Plot_DefectsDiagram):
 		self.fourth_element	= fourth_element
 		self.elements_list   = [self.first_element, self.second_element, self.third_element, self.fourth_element]
 		
-		# Keep track of chemical potential values
-		self.mu_elements = {self.first_element: {"mu0": 0.0, "deltamu": 0.0},
-							self.second_element: {"mu0": 0.0, "deltamu": 0.0},
-							self.third_element: {"mu0": 0.0, "deltamu": 0.0},
-							self.fourth_element: {"mu0": 0.0, "deltamu": 0.0} }
-		
-		# Store all extracted DFT data
-		self.first_element_mu0 = 0.0
-		self.second_element_mu0 = 0.0
-		self.third_element_mu0 = 0.0
-		self.fourth_element_mu0 = 0.0
-
+		# Inherit all variables (plot object, etc.) from parent object (DefectsDiagram_Plot)
+		super().__init__(elements_list = self.elements_list)
 
 
 

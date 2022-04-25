@@ -20,7 +20,7 @@ from vtandem.visualization.plots.save_plot import SaveFigure
 
 class Plot_DefectsDiagram(SaveFigure):
 	
-	def __init__(self):
+	def __init__(self, elements_list):
 		
 		# Font description for defect formation energy diagram
 		self.font = {'family': 'sans-serif', 'color':  'black', 'weight': 'normal', 'size': 12 }
@@ -31,7 +31,12 @@ class Plot_DefectsDiagram(SaveFigure):
 		self.EVBM = 0.0
 		self.ECBM = 0.0
 		self.fermi_energy_array = None
-		
+
+		# Initialize all mu values
+		self.mu_elements = {}
+		for element in elements_list:
+			self.mu_elements[element] = {"mu0": 0.0, "deltamu": 0.0}
+
 		# Minimum and maximum y-value range
 		self.axis_lims = {	"XMin": 0.0,
 							"XMax": 1.0,
@@ -41,12 +46,12 @@ class Plot_DefectsDiagram(SaveFigure):
 		
 		# Store defect formation energy data
 		self.intrinsic_defects_enthalpy_data = {}
-		#self.extrinsic_defects_enthalpy_data = {}
+		self.extrinsic_defects_enthalpy_data = {}
 		self.dopant_enthalpy_data = None
 		
 		# Store defect formation plots and their labels
 		self.intrinsic_defect_plots = {}
-		#self.extrinsic_defect_plots = {}
+		self.extrinsic_defect_plots = {}
 		self.dopant_plot = None
 		self.defect_labels = {}
 		
@@ -54,7 +59,7 @@ class Plot_DefectsDiagram(SaveFigure):
 		self.dopant = "None"
 		self.dopant_mu0 = 0.0
 		self.dopant_deltamu = 0.0
-		#self.extrinsic_defects = []
+		self.extrinsic_defects = []  # List of extrinsic defects of dopant (e.g. Ge_Bi, Ge_Se, and Ge_O for Ge dopant in Bi2O2Se)
 		
 		# Defects diagram
 		self.defects_diagram_plot_figure = plt.figure()
@@ -130,6 +135,14 @@ class Plot_DefectsDiagram(SaveFigure):
 	
 
 	
+	def Update_Deltamus(self, deltamu_values):
+
+		# Args:	
+		# 	deltamu_values: Dictionary of deltamu values, in element:value pairs
+		for element in self.mu_elements.keys():
+			self.mu_elements[element]["deltamu"] = deltamu_values[element]
+
+
 	def Calculate_DefectFormations(self):
 
 		intrinsic_defects_enthalpy_data = Calculate_IntrinsicDefectFormationEnthalpies(	self.defects_data, \

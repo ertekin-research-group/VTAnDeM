@@ -35,7 +35,8 @@ class Tab_Ternary_PhaseDiagram_DefectsDiagram_CarrierConcentration(Tab_PhaseDiag
 		self.elements_list = [self.first_element, self.second_element, self.third_element]
 		
 		
-		self.PhaseDiagram = ChemicalPotential_Ternary_PhaseDiagramProjected2D(self, main_compound = main_compound, first_element = first_element, second_element = second_element, third_element = third_element)
+		#self.PhaseDiagram = ChemicalPotential_Ternary_PhaseDiagramProjected2D(self, main_compound = main_compound, first_element = first_element, second_element = second_element, third_element = third_element)
+		self.PhaseDiagram = ChemicalPotential_Ternary_PhaseDiagramProjected2D(main_compound = main_compound, first_element = first_element, second_element = second_element, third_element = third_element)
 		
 		
 		if show_defects_diagram:
@@ -43,7 +44,7 @@ class Tab_Ternary_PhaseDiagram_DefectsDiagram_CarrierConcentration(Tab_PhaseDiag
 		
 		
 		if show_carrier_concentration:
-			self.CarrierConcentration = Plot_Ternary_Carrier_Concentration(self, main_compound = main_compound, first_element = first_element, second_element = second_element, third_element = third_element)
+			self.CarrierConcentration = Plot_Ternary_Carrier_Concentration(main_compound = main_compound, first_element = first_element, second_element = second_element, third_element = third_element)
 		
 		
 		super().__init__(	compounds_info = compounds_info, \
@@ -93,19 +94,6 @@ class Tab_Ternary_PhaseDiagram_DefectsDiagram_CarrierConcentration(Tab_PhaseDiag
 		self.PhaseDiagram.second_element = self.second_element
 		self.PhaseDiagram.third_element = self.third_element
 		self.PhaseDiagram.elements_list = self.elements_list
-		
-		"""
-		# Set enthalpy of main compound
-		self.PhaseDiagram.main_compound_enthalpy = self.main_compound_enthalpy
-		
-		# Set endpoints of phase diagram
-		self.PhaseDiagram.phasediagram_endpoints = min(	self.main_compound_enthalpy/self.main_compound_info["dft_"+self.first_element], \
-														self.main_compound_enthalpy/self.main_compound_info["dft_"+self.second_element], \
-														self.main_compound_enthalpy/self.main_compound_info["dft_"+self.third_element]	)
-		
-		#self.PhaseDiagram.Update_PhaseDiagram_Object()
-		"""
-	
 	
 	
 	
@@ -120,10 +108,12 @@ class Tab_Ternary_PhaseDiagram_DefectsDiagram_CarrierConcentration(Tab_PhaseDiag
 		self.DefectsDiagram.mu_elements[self.second_element]["mu0"] = self.compounds_info[self.second_element]["mu0"]
 		self.DefectsDiagram.mu_elements[self.third_element]["mu0"] = self.compounds_info[self.third_element]["mu0"]
 		
+		self.DefectsDiagram.Update_Deltamus(self.deltamu_values)
+		"""
 		self.DefectsDiagram.mu_elements[self.first_element]["deltamu"] = self.deltamu_values[self.first_element]
 		self.DefectsDiagram.mu_elements[self.second_element]["deltamu"] = self.deltamu_values[self.second_element]
 		self.DefectsDiagram.mu_elements[self.third_element]["deltamu"] = self.deltamu_values[self.third_element]
-	
+		"""
 	
 	
 	

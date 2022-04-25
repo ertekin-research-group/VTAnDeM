@@ -23,7 +23,8 @@ from vtandem.visualization.plots.plot_chemicalpotential_phasediagram_projectedtr
 
 class ChemicalPotential_Ternary_PhaseDiagramProjected2D(ChemicalPotential_PhaseDiagramProjected2D):
 	
-	def __init__(self, parent = None, main_compound = None, first_element = None, second_element = None, third_element = None):
+	#def __init__(self, parent = None, main_compound = None, first_element = None, second_element = None, third_element = None):
+	def __init__(self, main_compound = None, first_element = None, second_element = None, third_element = None):
 		
 		super().__init__(main_compound, "ternary")
 		

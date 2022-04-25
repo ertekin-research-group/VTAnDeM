@@ -14,6 +14,7 @@ class Composition_Quaternary_PhaseDiagram_Functions:
 		pass
 	
 
+	"""
 	###############################################################################################
 	########################## Plot Centroids of All Four-Phase Regions ###########################
 	###############################################################################################
@@ -46,7 +47,7 @@ class Composition_Quaternary_PhaseDiagram_Functions:
 																					centroids[:,2],
 																					color = scatterplot_color,
 																					marker = scatterplot_marker )
-	
+	"""
 	
 	###############################################################################################
 	############# Shade Four-Phase Region in Compositional Phase Diagram when Clicked #############

@@ -2,7 +2,6 @@
 __name__ = 'VTAnDeM_Visualization-Toolkit-for-Analyzing-Defects-in-Materials'
 __author__ = 'Michael_Lidia_Jiaxing_Elif'
 
-
 import numpy as np
 
 import PyQt5
@@ -16,7 +15,13 @@ from vtandem.visualization.windows.window_carrierconcentration import Window_Car
 
 class Tab_Compositional_PhaseDiagram(Window_DefectsDiagram, Window_CarrierConcentration):
 	
-	def __init__(self, type: str, compounds_info = None, defects_data = None, main_compound_info = None, dos_data = None, show_defects_diagram = True, show_carrier_concentration = True):	# User specifies the main compound and its constituents
+	def __init__(self, 	type: str, \
+						compounds_info = None, \
+						defects_data = None, \
+						main_compound_info = None, \
+						dos_data = None, \
+						show_defects_diagram = True, \
+						show_carrier_concentration = True ):	# User specifies the main compound and its constituents
 		
 		# Check that the 'type' argument is legitimate
 		if (type != "ternary") and (type != "quaternary"):
@@ -51,7 +56,6 @@ class Tab_Compositional_PhaseDiagram(Window_DefectsDiagram, Window_CarrierConcen
 			self.Compositional_PhaseDiagram.composition_phasediagram_plot_figure.canvas.mpl_connect('button_press_event', self.Update_DefectsDiagram_Plot_Function)
 		
 		
-		
 		# Carrier concentration
 		if self.show_carrier_concentration:
 			
@@ -77,10 +81,6 @@ class Tab_Compositional_PhaseDiagram(Window_DefectsDiagram, Window_CarrierConcen
 			self.Compositional_PhaseDiagram.composition_phasediagram_plot_figure.canvas.mpl_connect('button_press_event', self.Update_CarrierConcentration_Plot_Function)
 		
 		
-		
-		
-		
-		
 		###############################################################################################
 		###############################################################################################
 		#################################### Initialize third tab #####################################
@@ -97,7 +97,6 @@ class Tab_Compositional_PhaseDiagram(Window_DefectsDiagram, Window_CarrierConcen
 		self.Compositional_PhaseDiagram_Window.compositional_phasediagram_window_layout.addWidget(self.Compositional_PhaseDiagram_Window.phasediagram_savefigure_button)
 		self.tab3_layout.addWidget(self.Compositional_PhaseDiagram_Window.compositional_phasediagram_window)
 		
-		
 		# Add defect formation energy diagram window widget to tab3
 		if self.show_defects_diagram:
 			Window_DefectsDiagram.__init__(self, show_dopant=False)
@@ -110,11 +109,6 @@ class Tab_Compositional_PhaseDiagram(Window_DefectsDiagram, Window_CarrierConcen
 	
 	
 	
-	
-	
-	
-	
-	
 	###############################################################################################
 	################################# Generate Defects Diagram ####################################
 	###############################################################################################
@@ -122,13 +116,11 @@ class Tab_Compositional_PhaseDiagram(Window_DefectsDiagram, Window_CarrierConcen
 	def Update_DefectsDiagram_Plot_Function(self, event):
 		print("Defects Updating...")
 
-
 		# Reset defects diagram
 		self.DefectsDiagram.defects_diagram_plot_drawing.remove()
 		self.DefectsDiagram.defects_diagram_plot_drawing = self.DefectsDiagram.defects_diagram_plot_figure.add_subplot(111)
 		self.DefectsDiagram.Activate_DefectsDiagram_Plot_Axes()
 		self.DefectsDiagram.defects_diagram_plot_canvas.draw()
-
 
 		# Check that phase region has been selected
 		if self.Compositional_PhaseDiagram.phaseregion_selected is None:
@@ -148,8 +140,6 @@ class Tab_Compositional_PhaseDiagram(Window_DefectsDiagram, Window_CarrierConcen
 	
 	
 	
-	
-	
 	###############################################################################################
 	############################### Generate Carrier Concentration ################################
 	###############################################################################################
@@ -162,7 +152,6 @@ class Tab_Compositional_PhaseDiagram(Window_DefectsDiagram, Window_CarrierConcen
 		self.CarrierConcentration.Activate_CarrierConcentration_Plot_Axes()
 		self.CarrierConcentration.carrier_concentration_plot_canvas.draw()
 		
-
 		# Check that phase region has been selected
 		if self.Compositional_PhaseDiagram.phaseregion_selected is None:
 			# NOTE: These objects only exists when self.show_carrier_concentration = True
@@ -188,7 +177,7 @@ class Tab_Compositional_PhaseDiagram(Window_DefectsDiagram, Window_CarrierConcen
 		if self.DefectsDiagram.intrinsic_defect_plots != {}:
 			self.Update_Equilibrium_Fermi_Energy_Temperature()
 
-	
+
 
 
 

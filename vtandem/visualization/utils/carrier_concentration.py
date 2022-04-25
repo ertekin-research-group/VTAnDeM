@@ -53,9 +53,10 @@ def Calculate_Defect_Carrier_Concentration(	defects_data, \
 											temperature_array, \
 											fermi_energy_array, \
 											volume, \
-											extrinsic_defect, \
-											extrinsic_defect_mu0, \
-											extrinsic_defect_deltamu, \
+											extrinsic_defects, \
+											dopant, \
+											dopant_mu0, \
+											dopant_deltamu, \
 											synthesis_temperature = None ):
 	
 	k = 8.6173303E-5
@@ -97,34 +98,40 @@ def Calculate_Defect_Carrier_Concentration(	defects_data, \
 				
 				intrinsic_defect_carrier_concentration_temperature[temperature] += defect_carrier_concentration
 	
-	# Check if the user-selected extrinsic defect is "None"
-	if extrinsic_defect == "None":
+	# Check if the user-selected dopant is "None"
+	if dopant == "None":
 		return intrinsic_defect_carrier_concentration_temperature, extrinsic_defect_carrier_concentration_temperature
 	
-	# Obtain the formation enthalpy of extrinsic defect
+	# Obtain the formation enthalpy of dopant on different sites (i.e. extrinsic defects)
 	extrinsic_defects_enthalpy_data = Calculate_ExtrinsicDefectFormationEnthalpies(	defects_data, \
 																					main_compound_info, \
 																					fermi_energy_array, \
 																					mu_elements, \
-																					extrinsic_defect, \
-																					extrinsic_defect_mu0, \
-																					extrinsic_defect_deltamu )
+																					extrinsic_defects, \
+																					dopant, \
+																					dopant_mu0, \
+																					dopant_deltamu )
 	
-	# Carrier concentration prefactor
-	N_extrinsic = defects_data[extrinsic_defect]["site_multiplicity"] / volume
-	
-	# Calculate extrinsic defect carrier concentration
-	# Loop through charge states
-	for charge in extrinsic_defects_enthalpy_data[extrinsic_defect].keys():
+	print(dopant, extrinsic_defects)
+
+	# Loop through extrinsic defects
+	for extrinsic_defect in extrinsic_defects:
+
+		# Carrier concentration prefactor
+		N_extrinsic = defects_data[extrinsic_defect]["site_multiplicity"] / volume
 		
-		# Defect concentration
-		for temperature in temperature_array:
-			if synthesis_temperature is None:
-				extrinsic_defect_carrier_concentration = float(charge) * N_extrinsic * np.exp( -extrinsic_defects_enthalpy_data[extrinsic_defect][charge] / (k * temperature) )
-			elif synthesis_temperature is not None:
-				extrinsic_defect_carrier_concentration = float(charge) * N_extrinsic * np.exp( -extrinsic_defects_enthalpy_data[extrinsic_defect][charge] / (k * synthesis_temperature) )
-			extrinsic_defect_carrier_concentration_temperature[temperature] += extrinsic_defect_carrier_concentration
-	
+		# Calculate extrinsic defect carrier concentration
+		# Loop through charge states
+		for charge in extrinsic_defects_enthalpy_data[extrinsic_defect].keys():
+			
+			# Defect concentration
+			for temperature in temperature_array:
+				if synthesis_temperature is None:
+					extrinsic_defect_carrier_concentration = float(charge) * N_extrinsic * np.exp( -extrinsic_defects_enthalpy_data[extrinsic_defect][charge] / (k * temperature) )
+				elif synthesis_temperature is not None:
+					extrinsic_defect_carrier_concentration = float(charge) * N_extrinsic * np.exp( -extrinsic_defects_enthalpy_data[extrinsic_defect][charge] / (k * synthesis_temperature) )
+				extrinsic_defect_carrier_concentration_temperature[temperature] += extrinsic_defect_carrier_concentration
+		
 	# Returns a dictionary with temperature as keys and array of defect-induced carrier concentrations (not defect concentrations) as values
 	return intrinsic_defect_carrier_concentration_temperature, extrinsic_defect_carrier_concentration_temperature
 
@@ -142,25 +149,27 @@ def Calculate_CarrierConcentration(	EVBM, \
 									temperature_array, \
 									fermi_energy_array, \
 									volume, \
-									extrinsic_defect, \
-									extrinsic_defect_mu0, \
-									extrinsic_defect_deltamu, \
+									extrinsic_defects, \
+									dopant, \
+									dopant_mu0, \
+									dopant_deltamu, \
 									hole_concentrations_dict, \
 									electron_concentrations_dict, \
 									synthesis_temperature = None ):
 	
 	# Calculate defect carrier concentration (for intrinsic defects and extrinsic defects)
-	intrinsic_defect_carrier_concentration_temperature, extrinsic_defect_carrier_concentration_temperature = Calculate_Defect_Carrier_Concentration(	defects_data, \
-																																						main_compound_info, \
-																																						mu_elements, \
-																																						temperature_array, \
-																																						fermi_energy_array, \
-																																						volume, \
-																																						extrinsic_defect, \
-																																						extrinsic_defect_mu0, \
-																																						extrinsic_defect_deltamu, \
-																																						synthesis_temperature )
-
+	intrinsic_defect_carrier_concentration_temperature, extrinsic_defect_carrier_concentration_temperature = Calculate_Defect_Carrier_Concentration(	defects_data = defects_data, \
+																																						main_compound_info = main_compound_info, \
+																																						mu_elements = mu_elements, \
+																																						temperature_array = temperature_array, \
+																																						fermi_energy_array = fermi_energy_array, \
+																																						volume = volume, \
+																																						extrinsic_defects = extrinsic_defects, \
+																																						dopant = dopant, \
+																																						dopant_mu0 = dopant_mu0, \
+																																						dopant_deltamu = dopant_deltamu, \
+																																						synthesis_temperature = synthesis_temperature )
+	
 	# Carrier concentrations from intrinsic defects only
 	intrinsic_defect_hole_concentration = []
 	intrinsic_defect_electron_concentration = []

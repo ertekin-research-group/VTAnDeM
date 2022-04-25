@@ -6,10 +6,10 @@ import numpy as np
 import matplotlib.path as mpltPath
 import matplotlib.pyplot as plt
 
-# Import compositional phase diagram object
-from vtandem.visualization.plots.plot_composition_phasediagram import Plot_Composition_PhaseDiagram, PhaseRegion
+#from pymatgen.core.composition import Composition
 
-from pymatgen.core.composition import Composition
+# Import compositional phase diagram object
+from vtandem.visualization.plots.plot_composition_phasediagram import Plot_Composition_PhaseDiagram  #, PhaseRegion
 
 
 class Plot_Composition_Ternary_PhaseDiagram(Plot_Composition_PhaseDiagram):
@@ -23,56 +23,24 @@ class Plot_Composition_Ternary_PhaseDiagram(Plot_Composition_PhaseDiagram):
 		self.third_element	= third_element
 		self.elements_list  = [self.first_element, self.second_element, self.third_element]
 		
-		
 		# Initialize deltamu values of all species in the ternary compound
 		self.deltamu_values = {}
 		for element in self.elements_list:
 			self.deltamu_values[element] = 0.0
 		
-		
-		
-		
 		# Inherit all variables (plot object, etc.) from parent object (Composition_PhaseDiagram)
 		Plot_Composition_PhaseDiagram.__init__(self, type = "ternary", main_compound_info = main_compound_info, compounds_info = compounds_info)
 		
-		
-		
-		# Find all three-phase regions in the quaternary composition space.
+		# Find all three-phase regions in the ternary composition space.
 		self.Find_All_PhaseRegions()
 		
 		# Plot all the centroids as a scatter plot (MUST come after generating three-phase regions).
 		self.Plot_Centroids()
 		
-		
-		
 		self.composition_phasediagram_plot_figure.canvas.mpl_connect('button_press_event', self.Shade_ThreePhaseRegion)
-	
-	
-	
-	
-	###############################################################################################
-	########################## Plot Centroids of All Three-Phase Regions ###########################
-	###############################################################################################
-	
-	def Plot_Centroids_Ternary(self):
-		
-		# Check that all three-phase regions have been found
-		if self.phase_region_objects == []:
-			return
-		
-		# Set color of scatter plot points
-		scatterplot_color = 'k'
-		scatterplot_marker = '*'
-		
-		# Plot all centroids as scatter plot
-		self.threephaseregion_centroids = np.asarray(self.threephaseregion_centroids)
-		self.centroids_plot = self.composition_phasediagram_plot_drawing.scatter(	self.threephaseregion_centroids[:,0],
-																					self.threephaseregion_centroids[:,1],
-																					color = scatterplot_color,
-																					marker = scatterplot_marker	)
-	
-	
-	
+
+
+
 	###############################################################################################
 	############ Shade Three-Phase Region in Compositional Phase Diagram when Clicked #############
 	###############################################################################################

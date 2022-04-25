@@ -39,6 +39,7 @@ from vtandem.visualization.quaternary.quaternary_tabs.tab_quaternary_phasediagra
 
 # Binary scripts
 from vtandem.visualization.binary.binary_tabs.tab_binary_defectsdiagram_carrierconcentration import Tab_Binary_DefectsDiagram_CarrierConcentration
+from vtandem.visualization.binary.binary_tabs.tab_binary_dopants import Tab_Binary_Dopants
 
 script_path = os.path.dirname(__file__)
 vtandem_source_path = "/".join(script_path.split("/")[:-1])
@@ -835,7 +836,7 @@ class Material_Selection_Window(QMainWindow):
 
 class Quaternary_Main_VTAnDeM_Window(QMainWindow):
 	
-	def __init__(self, parent = None, main_compound = None, first_element = None, second_element = None, third_element = None, fourth_element = None, show_defects_diagram = True, show_carrier_concentration = True):	# User specifies the main compound and its constituents
+	def __init__(self, parent = None, main_compound = None, first_element = None, second_element = None, third_element = None, fourth_element = None, show_defects_diagram = True, show_carrier_concentration = True, filepath = "."):	# User specifies the main compound and its constituents
 		
 		# Inherit all initial variables from the QMainWindow class
 		QMainWindow.__init__(self)
@@ -857,11 +858,11 @@ class Quaternary_Main_VTAnDeM_Window(QMainWindow):
 		
 		
 		# Obtain compounds data
-		self.compounds_info = Obtain_Compounds_Data(self.elements_list)		# Total energies/enthalpies for phase diagram
+		self.compounds_info = Obtain_Compounds_Data(self.elements_list, filepath = filepath)		# Total energies/enthalpies for phase diagram
 		
 		# Obtain defects data
 		if show_defects_diagram:
-			self.defects_data = Obtain_Defects_Data()[main_compound]	# Defect energies for defects diagram
+			self.defects_data = Obtain_Defects_Data(filepath = filepath)[main_compound]	# Defect energies for defects diagram
 			self.main_compound_info = self.defects_data["Bulk"]
 			del self.defects_data["Bulk"]	# Remove bulk information from defects_data
 		else:
@@ -871,7 +872,7 @@ class Quaternary_Main_VTAnDeM_Window(QMainWindow):
 				self.main_compound_info["dft_"+element] = self.compounds_info[main_compound]["dft_"+element]
 		
 		# Obtain DOS data
-		self.dos_data = Obtain_DOS_Data()
+		self.dos_data = Obtain_DOS_Data(filepath = filepath)
 		
 		
 		
@@ -978,7 +979,7 @@ class Quaternary_Main_VTAnDeM_Window(QMainWindow):
 
 class Ternary_Main_VTAnDeM_Window(QMainWindow):
 	
-	def __init__(self, parent = None, main_compound = None, first_element = None, second_element = None, third_element = None, show_defects_diagram = True, show_carrier_concentration = True):
+	def __init__(self, parent = None, main_compound = None, first_element = None, second_element = None, third_element = None, show_defects_diagram = True, show_carrier_concentration = True, filepath = "."):
 		
 		# Inherit all initial variables from the QMainWindow class
 		QMainWindow.__init__(self)
@@ -991,11 +992,11 @@ class Ternary_Main_VTAnDeM_Window(QMainWindow):
 		self.elements_list = [first_element, second_element, third_element]					# Species list (order MAY change)
 		
 		# Obtain compounds data
-		self.compounds_info = Obtain_Compounds_Data(self.elements_list)	# Total energies/enthalpies for phase diagram
+		self.compounds_info = Obtain_Compounds_Data(self.elements_list, filepath = filepath)	# Total energies/enthalpies for phase diagram
 		
 		# Obtain defects data
 		if show_defects_diagram:
-			self.defects_data = Obtain_Defects_Data()[main_compound]	# Defect energies for defects diagram
+			self.defects_data = Obtain_Defects_Data(filepath = filepath)[main_compound]	# Defect energies for defects diagram
 			self.main_compound_info = self.defects_data["Bulk"]
 			del self.defects_data["Bulk"]	# Remove bulk information from defects_data
 		else:
@@ -1003,7 +1004,7 @@ class Ternary_Main_VTAnDeM_Window(QMainWindow):
 			self.main_compound_info = {}
 		
 		# Obtain DOS data
-		self.dos_data = Obtain_DOS_Data()
+		self.dos_data = Obtain_DOS_Data(filepath = filepath)
 		
 		
 		self.Tab1_PhasesDefectsCarriers_Object = Tab_Ternary_PhaseDiagram_DefectsDiagram_CarrierConcentration(main_compound = main_compound, first_element = first_element, second_element = second_element, third_element = third_element, compounds_info = self.compounds_info, defects_data = self.defects_data, main_compound_info = self.main_compound_info, dos_data = self.dos_data, show_defects_diagram = show_defects_diagram, show_carrier_concentration = show_carrier_concentration)
@@ -1016,6 +1017,7 @@ class Ternary_Main_VTAnDeM_Window(QMainWindow):
 			for defect in self.defects_data.keys():
 				if self.defects_data[defect]["Extrinsic"] == "Yes":
 					dopants_exist = True
+					break
 			if dopants_exist:
 				self.Tab4_Ternary_Dopants = Tab_Ternary_Dopants(main_compound = main_compound, first_element = first_element, second_element = second_element, third_element = third_element, compounds_info = self.compounds_info, defects_data = self.defects_data, main_compound_info = self.main_compound_info, dos_data = self.dos_data, show_defects_diagram = show_defects_diagram, show_carrier_concentration = show_carrier_concentration)
 		
@@ -1123,7 +1125,7 @@ class Ternary_Main_VTAnDeM_Window(QMainWindow):
 
 class Binary_Main_VTAnDeM_Window(QMainWindow):
 	
-	def __init__(self, parent = None, main_compound = None, first_element = None, second_element = None, show_defects_diagram = True, show_carrier_concentration = True):
+	def __init__(self, parent = None, main_compound = None, first_element = None, second_element = None, show_defects_diagram = True, show_carrier_concentration = True, filepath = "."):
 		
 		# Inherit all initial variables from the QMainWindow class
 		QMainWindow.__init__(self)
@@ -1137,11 +1139,11 @@ class Binary_Main_VTAnDeM_Window(QMainWindow):
 		self.elements_list = [first_element, second_element]					# Species list (order MAY change)
 		
 		# Obtain compounds data
-		self.compounds_info = Obtain_Compounds_Data(self.elements_list)	# Total energies/enthalpies for phase diagram
+		self.compounds_info = Obtain_Compounds_Data(self.elements_list, filepath = filepath)	# Total energies/enthalpies for phase diagram
 		
 		# Obtain defects data
 		if show_defects_diagram:
-			self.defects_data = Obtain_Defects_Data()[main_compound]	# Defect energies for defects diagram
+			self.defects_data = Obtain_Defects_Data(filepath = filepath)[main_compound]	# Defect energies for defects diagram
 			self.main_compound_info = self.defects_data["Bulk"]
 			del self.defects_data["Bulk"]	# Remove bulk information from defects_data
 		else:
@@ -1149,12 +1151,22 @@ class Binary_Main_VTAnDeM_Window(QMainWindow):
 			self.main_compound_info = {}
 		
 		# Obtain DOS data
-		self.dos_data = Obtain_DOS_Data()
+		self.dos_data = Obtain_DOS_Data(filepath = filepath)
 		
 		
 		
 		self.Tab1_PhasesDefectsCarriers_Object = Tab_Binary_DefectsDiagram_CarrierConcentration(self, main_compound = main_compound, first_element = first_element, second_element = second_element, compounds_info = self.compounds_info, defects_data = self.defects_data, main_compound_info = self.main_compound_info, dos_data = self.dos_data, show_defects_diagram = show_defects_diagram, show_carrier_concentration = show_carrier_concentration)
-		
+
+		# Check for dopants in defects database
+		if show_defects_diagram:
+			dopants_exist = False
+			for defect in self.defects_data.keys():
+				if self.defects_data[defect]["Extrinsic"] == "Yes":
+					dopants_exist = True
+					break
+			if dopants_exist:
+				self.Tab4_Binary_Dopants = Tab_Binary_Dopants(main_compound = main_compound, first_element = first_element, second_element = second_element, compounds_info = self.compounds_info, defects_data = self.defects_data, main_compound_info = self.main_compound_info, dos_data = self.dos_data, show_defects_diagram = show_defects_diagram, show_carrier_concentration = show_carrier_concentration)
+
 		
 		
 		#######################################
@@ -1171,22 +1183,16 @@ class Binary_Main_VTAnDeM_Window(QMainWindow):
 		self.widgets_grid = QHBoxLayout(self.widgets)	# The layout of the main widget should be such that all widgets placed inside the main
 														#	widget (i.e. buttons, plots, etc.) are placed horizontally.
 		
-		
 		self.plot_tabs_widget = QTabWidget()
-		
-		
 		self.plot_tabs_widget.addTab(self.Tab1_PhasesDefectsCarriers_Object.tab1, "Phases and Defects")
-		#self.plot_tabs_widget.addTab(self.Tab2_PhaseDiagram3D_Object.tab2, "Phase Diagram, Chemical Potential Space")
-		#self.plot_tabs_widget.addTab(self.Tab3_PhaseDiagram_Object.tab3, "Phase Diagram, Composition Space")
 		
-		
-		
+		if show_defects_diagram:
+			if dopants_exist:
+				self.plot_tabs_widget.addTab(self.Tab4_Binary_Dopants.tab4, "Dopants")
+
 		self.widgets_grid.addWidget(self.plot_tabs_widget)
 		
-		
 		self.showFullScreen()
-	
-	
 	
 	
 	

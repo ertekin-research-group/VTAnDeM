@@ -28,7 +28,6 @@ def Calculate_PhaseDiagram_Projected2D(main_compound, elements_dict: dict, compo
 	# Number of elements in main_compound
 	main_compound_elements_count = {}
 	for element_index in sorted(elements_dict.keys()):
-		#main_compound_elements_count[element_index] = compounds_info[main_compound][elements_dict[element_index]]
 		main_compound_elements_count[element_index] = main_compound_info["dft_"+elements_dict[element_index]]
 	
 	
@@ -43,7 +42,6 @@ def Calculate_PhaseDiagram_Projected2D(main_compound, elements_dict: dict, compo
 		if element_index in [1, 2, 3]:
 			continue
 		main_compound_enthalpy_adjusted -= main_compound_elements_count[element_index]*deltamu[element_index]
-	#main_compound_enthalpy_adjusted = self.main_compound_enthalpy - self.main_compound_number_fourth_specie*self.mu4	# Enthalpy adjusted for mu4 value (main compound)
 	
 	main_compound_deltamu_first_element = np.linspace(main_compound_enthalpy/main_compound_elements_count[1], 0, 1000)	# Array of possible mu1 values in the plot
 	main_compound_deltamu_second_element = (main_compound_enthalpy_adjusted - main_compound_elements_count[1]*main_compound_deltamu_first_element) / main_compound_elements_count[2]	# Array that represents the (diagonal) stability limit of the main compound

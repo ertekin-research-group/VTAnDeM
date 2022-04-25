@@ -13,12 +13,12 @@ for element in periodictable.elements:
 ############################# Obtain DFT Data of Compounds ####################################
 ###############################################################################################
 
-def Obtain_Compounds_Data(elements_list = None):		# For the phase stability diagram
+def Obtain_Compounds_Data(elements_list = None, filepath = "."):		# For the phase stability diagram
 	
 	# Keep track of DFT data of all compounds in the analysis
 	compounds_info = {}
 	
-	with open("Compounds_Tracker.json") as CompoundsTracker:
+	with open(filepath+"/Compounds_Tracker.json") as CompoundsTracker:
 		compounds_data = json.load(CompoundsTracker)
 	
 	# Loop through elements in database
@@ -35,17 +35,17 @@ def Obtain_Compounds_Data(elements_list = None):		# For the phase stability diag
 	return compounds_info
 
 
-def Obtain_Defects_Data():	# For the defects diagram
+def Obtain_Defects_Data(filepath = "."):	# For the defects diagram
 	
-	with open("Defects_Tracker.json") as DefectsTracker:
+	with open(filepath+"/Defects_Tracker.json") as DefectsTracker:
 		defects_info = json.load(DefectsTracker)
 	
 	return defects_info
 
 
-def Obtain_DOS_Data():	# For the carrier concentration and equilibrium Fermi energy
+def Obtain_DOS_Data(filepath = "."):	# For the carrier concentration and equilibrium Fermi energy
 	
-	with open("DOS_Tracker.json") as DOSTracker:
+	with open(filepath+"/DOS_Tracker.json") as DOSTracker:
 		dos_data = json.load(DOSTracker)
 	
 	return dos_data

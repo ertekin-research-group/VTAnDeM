@@ -96,12 +96,6 @@ class Plot_Composition_PhaseDiagram(SaveFigure):
 		self.composition_phasediagram_plot_figure.canvas.mpl_connect('button_press_event', self.Calculate_ChemicalPotentials_Region)
 		self.composition_phasediagram_plot_figure.canvas.mpl_connect('motion_notify_event', self.Hover)
 
-		"""
-		self.phaseregion_annotation = self.composition_phasediagram_plot_drawing.annotate("", xy=(0,0), xytext=(20,20), textcoords="offset points",
-																								bbox = dict(boxstyle="round", fc="w"),
-																								arrowprops = dict(arrowstyle = "->"),
-																								fontsize = self.font_annotation['size'] )
-		"""
 		self.text_x_offset = 20
 		self.text_y_offset = 20
 		self.phaseregion_annotation = self.composition_phasediagram_plot_drawing.annotate("", xy=(0,0), xytext=(self.text_x_offset, self.text_y_offset), 

@@ -80,8 +80,6 @@ def Calculate_ExtrinsicDefectFormationEnthalpies(	defects_data, \
 
 
 
-
-
 def Find_MinimumDefectFormationEnthalpies(defect_formation_enthalpy_data):
 	
 	# Initialize storage for minimum formation enthalpies of each defect

@@ -151,13 +151,6 @@ class ChemicalPotential_PhaseDiagramProjected2D(QWidget, SaveFigure):
 
 
 
-
-
-
-
-
-
-
 def Find_PhaseStabilityRegion_Vertices(phase_stability_region):
 	
 	# This function finds the vertices bounding the phase stability region. It takes
@@ -191,16 +184,6 @@ def Find_PhaseStabilityRegion_Vertices(phase_stability_region):
 		PSR_Vertices_Unrepeated = [x for x in PSR_Vertices if (not any((x is y for y in PSR_Vertices_Omit)))]
 	
 	return PSR_Vertices_Unrepeated
-
-
-
-
-
-
-
-
-
-
 
 
 

@@ -13,29 +13,23 @@ from vtandem.visualization.windows.window_defectsdiagram import Window_DefectsDi
 from vtandem.visualization.windows.window_carrierconcentration import Window_CarrierConcentration
 
 
-
 class Tab_PhaseDiagram_DefectsDiagram_CarrierConcentration(Window_DefectsDiagram, Window_CarrierConcentration):
 	
-	def __init__(self, 	compounds_info = None, \
+	def __init__(self, 	type: str, \
+						compounds_info = None, \
 						defects_data = None, \
 						main_compound_info = None, \
 						dos_data = None, \
 						show_defects_diagram = None, \
-						show_carrier_concentration = None, \
-						type = None	):
-		
+						show_carrier_concentration = None ):
 		
 		# Make this tab object into widget so all button connections work!!
 		QWidget.__init__(self)
-		
-		
 		
 		# Check legitimacy of 'type' argument
 		if (type != "binary") and (type != "ternary") and (type != "quaternary"):
 			raise Exception("'type' variable must be either 'binary', 'ternary', or 'quaternary'. Exiting...")
 		self.type = type
-		
-		
 		
 		# Data
 		self.compounds_info = compounds_info
@@ -43,13 +37,9 @@ class Tab_PhaseDiagram_DefectsDiagram_CarrierConcentration(Window_DefectsDiagram
 		self.main_compound_info = main_compound_info
 		self.dos_data = dos_data
 		
-		
 		# Display settings
 		self.show_defects_diagram = show_defects_diagram
 		self.show_carrier_concentration = show_carrier_concentration
-		
-		
-		
 		
 		# Get enthalpy of main compound
 		enthalpy_tracker = main_compound_info["dft_BulkEnergy"]
@@ -57,14 +47,11 @@ class Tab_PhaseDiagram_DefectsDiagram_CarrierConcentration(Window_DefectsDiagram
 			enthalpy_tracker -= self.main_compound_info["dft_"+element] * self.compounds_info[element]["mu0"]
 		self.main_compound_enthalpy = enthalpy_tracker
 		
-		
 		# Find endpoints of phase diagram
 		endpoint_candidates = []
 		for element in self.elements_list:
 			endpoint_candidates.append( self.main_compound_enthalpy/self.main_compound_info["dft_"+element] )
 		self.phasediagram_endpoints = min( endpoint_candidates )
-		
-		
 		
 		# Keep track of mu values of the species in the compound (will be updated as user uses mu4 slider)
 		self.deltamu_values = {}
@@ -74,18 +61,6 @@ class Tab_PhaseDiagram_DefectsDiagram_CarrierConcentration(Window_DefectsDiagram
 				self.deltamu_values[element] = self.main_compound_enthalpy / self.main_compound_info["dft_"+self.third_element]
 			else:
 				self.deltamu_values[element] = 0.0
-		
-		
-		
-		
-		
-		"""
-		# Extrinsic dopant
-		self.dopant = "None"
-		self.dopant_mu0 = 0.0
-		self.dopant_deltamu = 0.0
-		self.extrinsic_defects = []
-		"""
 		
 		
 		
@@ -246,48 +221,6 @@ class Tab_PhaseDiagram_DefectsDiagram_CarrierConcentration(Window_DefectsDiagram
 			self.CarrierConcentration.Extract_Relevant_Energies_DOSs()
 			self.CarrierConcentration.Calculate_Hole_Electron_Concentration_Matrices()
 			
-			
-			"""
-			# Carrier concentration plot
-			self.carrier_concentration_plot = self.CarrierConcentration.carrier_concentration_plot_canvas
-			
-			# (WIDGET) Carrier concentration plot
-			self.tab1_carrierconcentration_widget_layout.addWidget(self.carrier_concentration_plot)
-			
-			self.carrierconcentration_viewport = QWidget()
-			self.carrierconcentration_viewport_layout = QHBoxLayout(self.carrierconcentration_viewport)
-			
-			# (WIDGET) Y-axis limits for carrier concentration
-			self.carrierconcentration_Ymin_label = QLabel(u"y"+"<sub>min</sub>")
-			self.carrierconcentration_Ymin_label.setAlignment(Qt.AlignRight)
-			self.carrierconcentration_viewport_layout.addWidget(self.carrierconcentration_Ymin_label)
-			self.carrierconcentration_Ymin_box = QLineEdit("1E16")
-			self.carrierconcentration_Ymin_box.editingFinished.connect(lambda: self.Update_WindowSize("CarrierConcentration", "YMin"))
-			self.carrierconcentration_viewport_layout.addWidget(self.carrierconcentration_Ymin_box)
-			self.carrierconcentration_Ymax_label = QLabel(u"y"+"<sub>max</sub>")
-			self.carrierconcentration_Ymax_label.setAlignment(Qt.AlignRight)
-			self.carrierconcentration_viewport_layout.addWidget(self.carrierconcentration_Ymax_label)
-			self.carrierconcentration_Ymax_box = QLineEdit("1E23")
-			self.carrierconcentration_Ymax_box.editingFinished.connect(lambda: self.Update_WindowSize("CarrierConcentration", "YMax"))
-			self.carrierconcentration_viewport_layout.addWidget(self.carrierconcentration_Ymax_box)
-			
-			self.carrierconcentration_holes_checkbox = QCheckBox("Holes",self)
-			self.carrierconcentration_holes_checkbox.setChecked(True)
-			self.carrierconcentration_viewport_layout.addWidget(self.carrierconcentration_holes_checkbox)
-			self.carrierconcentration_electrons_checkbox = QCheckBox("Electrons",self)
-			self.carrierconcentration_electrons_checkbox.setChecked(True)
-			self.carrierconcentration_viewport_layout.addWidget(self.carrierconcentration_electrons_checkbox)
-			
-			self.tab1_carrierconcentration_widget_layout.addWidget(self.carrierconcentration_viewport)
-			
-			self.Activate_Equilibrium_Fermi_Energy_Settings()
-			
-			
-			# (WIDGET) Save carrier concentration plot as figure
-			self.carrier_concentration_savefigure_button = QPushButton("Save Carrier Concentration Plot")
-			self.carrier_concentration_savefigure_button.clicked[bool].connect(lambda: self.CarrierConcentration.SaveFigure())
-			self.tab1_carrierconcentration_widget_layout.addWidget(self.carrier_concentration_savefigure_button)
-			"""
 			Window_CarrierConcentration.__init__(self)
 			
 			
@@ -431,10 +364,13 @@ class Tab_PhaseDiagram_DefectsDiagram_CarrierConcentration(Window_DefectsDiagram
 		if self.show_defects_diagram:
 			
 			# Update chemical potentials in defects diagram object
+			self.DefectsDiagram.Update_Deltamus(self.deltamu_values)
+			"""
 			self.DefectsDiagram.mu_elements[self.first_element]["deltamu"] = self.deltamu_values[self.first_element]
 			self.DefectsDiagram.mu_elements[self.second_element]["deltamu"] = self.deltamu_values[self.second_element]
 			self.DefectsDiagram.mu_elements[self.third_element]["deltamu"] = self.deltamu_values[self.third_element]
-			
+			"""
+
 			# Recalculate defect formation energies
 			self.DefectsDiagram.Calculate_DefectFormations()
 			
@@ -449,10 +385,14 @@ class Tab_PhaseDiagram_DefectsDiagram_CarrierConcentration(Window_DefectsDiagram
 		if self.show_carrier_concentration:
 			
 			# Update chemical potentials in carrier concentration object
+			"""
 			self.CarrierConcentration.mu_elements[self.first_element]["deltamu"] = self.deltamu_values[self.first_element]
 			self.CarrierConcentration.mu_elements[self.second_element]["deltamu"] = self.deltamu_values[self.second_element]
 			self.CarrierConcentration.mu_elements[self.third_element]["deltamu"] = self.deltamu_values[self.third_element]
-			
+			"""
+			self.CarrierConcentration.Update_Deltamus(self.deltamu_values)
+
+
 			# Redraw carrier concentration plot
 			"""
 			if self.CarrierConcentration.carrier_concentration_intrinsic_defect_hole_plot != None:
@@ -584,9 +524,13 @@ class Tab_PhaseDiagram_DefectsDiagram_CarrierConcentration(Window_DefectsDiagram
 		if self.show_defects_diagram:
 			
 			# Update chemical potentials in defects diagram
+			"""
 			self.DefectsDiagram.mu_elements[self.first_element]["deltamu"] = self.deltamu_values[self.first_element]
 			self.DefectsDiagram.mu_elements[self.second_element]["deltamu"] = self.deltamu_values[self.second_element]
 			self.DefectsDiagram.mu_elements[self.third_element]["deltamu"] = self.deltamu_values[self.third_element]
+			"""
+			self.DefectsDiagram.Update_Deltamus(self.deltamu_values)
+
 			
 			# Recalculate defect formation energies
 			self.DefectsDiagram.Calculate_DefectFormations()
