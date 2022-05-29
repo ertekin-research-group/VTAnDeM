@@ -333,7 +333,12 @@ class Defects_Import(Import_Object):
 				print("WARNING: Cannot find OUTCAR/OSZICAR file for defect '"+defect_name+"' with charge state '"+directory.split("q")[-1]+"' in '"+directory_name+"/"+directory+"'. Skipping...")
 				continue
 
-			self.Add_Defect_Charge(compound_name=compound_name, defect_name=defect_name, charge_state=directory.split("q")[-1], directory_name=directory_name+"/"+directory)
+			# Name of charge state (add "+" if positive)
+			charge_state = directory.split("q")[-1]
+			if float(charge_state) > 0.0:
+				charge_state = "+"+charge_state
+
+			self.Add_Defect_Charge(compound_name=compound_name, defect_name=defect_name, charge_state=charge_state, directory_name=directory_name+"/"+directory)
 	
 	
 	####################################################################################################################
