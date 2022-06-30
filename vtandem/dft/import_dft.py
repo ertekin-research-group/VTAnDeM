@@ -335,7 +335,7 @@ class Defects_Import(Import_Object):
 
 			# Name of charge state (add "+" if positive)
 			charge_state = directory.split("q")[-1]
-			if float(charge_state) > 0.0:
+			if (float(charge_state) > 0.0) and ("+" not in charge_state):
 				charge_state = "+"+charge_state
 
 			self.Add_Defect_Charge(compound_name=compound_name, defect_name=defect_name, charge_state=charge_state, directory_name=directory_name+"/"+directory)
