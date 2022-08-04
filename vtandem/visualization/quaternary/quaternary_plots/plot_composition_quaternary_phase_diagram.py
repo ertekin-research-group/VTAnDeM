@@ -3,6 +3,7 @@ __author__ = 'Michael_Lidia_Jiaxing_Elif'
 __name__ = 'VTAnDeM_Visualization-Toolkit-for-Analyzing-Defects-in-Materials'
 
 
+import numpy as np
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
 
@@ -75,10 +76,10 @@ class Plot_Composition_Quaternary_PhaseDiagram(Plot_Composition_PhaseDiagram):
 				self.phaseregion_selected = four_phase_region
 				break
 		
-		triangle1 = [self.phaseregion_selected.vertices[0], self.phaseregion_selected.vertices[1], self.phaseregion_selected.vertices[2]]
-		triangle2 = [self.phaseregion_selected.vertices[0], self.phaseregion_selected.vertices[1], self.phaseregion_selected.vertices[3]]
-		triangle3 = [self.phaseregion_selected.vertices[0], self.phaseregion_selected.vertices[2], self.phaseregion_selected.vertices[3]]
-		triangle4 = [self.phaseregion_selected.vertices[1], self.phaseregion_selected.vertices[2], self.phaseregion_selected.vertices[3]]
+		triangle1 = [[self.phaseregion_selected.vertices[0], self.phaseregion_selected.vertices[1], self.phaseregion_selected.vertices[2]]]
+		triangle2 = [[self.phaseregion_selected.vertices[0], self.phaseregion_selected.vertices[1], self.phaseregion_selected.vertices[3]]]
+		triangle3 = [[self.phaseregion_selected.vertices[0], self.phaseregion_selected.vertices[2], self.phaseregion_selected.vertices[3]]]
+		triangle4 = [[self.phaseregion_selected.vertices[1], self.phaseregion_selected.vertices[2], self.phaseregion_selected.vertices[3]]]
 		
 		alpha = 0.75
 		triangle_plot1 = Poly3DCollection(triangle1, fc='gray', ec='k', alpha=alpha)
