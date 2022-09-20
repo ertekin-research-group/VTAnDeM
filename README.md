@@ -40,8 +40,8 @@ Installation
 
 VTAnDeM Data Input:
 -------------------
-All necessary data for phase stability is provided in the folder Ertekin_Research_Group/IndividualFolders/Elif-Michael-Jiaxing-Benita-Lidia/VTAnDeM/Materials_Data.tar.gz file on Box.
-The data for defects is provided in the same folder under the name Defects_Data.tar.gz.
+All necessary data for phase stability is provided in the Example_Data/Materials_Data.tar.gz file on Box.
+The data for defects is provided as Example_Data/Defects_Data.tar.gz.
 
 
 Usage:
