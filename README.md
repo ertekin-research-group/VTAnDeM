@@ -114,7 +114,7 @@ VTAnDeM must be called from the command terminal. The steps are as follows:
 Help:
 -----
 Help with the necessary data structure can be found readily on the command terminal.
-	```
-	vtandem --help
-	```
+		```
+		vtandem --help
+		```
 
