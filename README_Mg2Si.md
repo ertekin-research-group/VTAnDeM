@@ -1,13 +1,13 @@
-Example: Defects in Mg<sub>2</sub>Si
-====================================
+# Example: Defects in Mg<sub>2</sub>Si
 
 The defect calculations for Mg<sub>2</sub>Si in this tutorial have been used in the following publication:
 
 >> M.Y. Toriyama, M.K. Brod, and G.J. Snyder,
    [ChemNanoMat **8** e202200222 (2022)](https://doi.org/10.1002/cnma.202200222)
 
-Steps
------
+
+## Steps
+
 1. Create new VTAnDeM project
 
 	vtandem -n
@@ -35,8 +35,8 @@ Steps
 	"vtandem -v"
 
 
-Optional
---------
+## Optional
+
 7. Import DOS
 
 	"vtandem --import_dos Mg2Si DensityOfStates/DOSCAR"
