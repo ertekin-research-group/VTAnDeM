@@ -50,7 +50,7 @@ The defect calculations for Mg<sub>2</sub>Si in this tutorial have been used in 
 	vtandem --import_dos Mg2Si DensityOfStates/DOSCAR
 	```
 
-NOTE 1: Change the "site_multiplicity" field in Defects_Tracker.json for interstitials to 8, otherwise the carrier concentrations will be incorrect.
+**NOTE 1**: Change the "site_multiplicity" field in Defects_Tracker.json for interstitials to **8**, otherwise the carrier concentrations will be incorrect.
 
-NOTE 2: Check "VTAnDeM_Project_Reference" folder for reference.
+**NOTE 2**: Check "VTAnDeM_Project_Reference" folder for reference.
 
