@@ -49,6 +49,10 @@ Example VTAnDeM projects can be found in the `Examples` folder for the following
 Usage:
 ------
 VTAnDeM must be called from the command terminal. The steps are as follows:
+0. Help can be found readily on the command terminal.
+	```
+	vtandem --help
+	```
 1. Create a **VTAnDeM project** in a directory of your choice.
 	```
 	mkdir vtandem_project
@@ -78,7 +82,6 @@ VTAnDeM must be called from the command terminal. The steps are as follows:
 			```
 			vtandem --import_dos Cu2HgGeTe4 ~/Materials_Data/Cu2HgGeTe4/DOSCAR
 			```
-		- Help can be found with the `vtandem --help` command.
 	3. Import data from Python interface.
 		- Phase Stability Data:
 			```python
@@ -109,5 +112,5 @@ VTAnDeM must be called from the command terminal. The steps are as follows:
 	```
 	vtandem --visualize
 	```
-	(Note that this step is not necessary if you opened the VTAnDeM UI in step 2.1)
+	(Note that this step is not necessary if you opened the VTAnDeM UI in step 2.i)
 
