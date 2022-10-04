@@ -49,10 +49,6 @@ Example VTAnDeM projects can be found in the `Examples` folder for the following
 Usage:
 ------
 VTAnDeM must be called from the command terminal. The steps are as follows:
-0. Help can be found readily on the command terminal.
-	```
-	vtandem --help
-	```
 1. Create a **VTAnDeM project** in a directory of your choice.
 	```
 	mkdir vtandem_project
@@ -113,4 +109,12 @@ VTAnDeM must be called from the command terminal. The steps are as follows:
 	vtandem --visualize
 	```
 	(Note that this step is not necessary if you opened the VTAnDeM UI in step 2.i)
+
+
+Help:
+-----
+Help with the necessary data structure can be found readily on the command terminal.
+	```
+	vtandem --help
+	```
 
