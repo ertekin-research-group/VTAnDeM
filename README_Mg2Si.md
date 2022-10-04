@@ -12,9 +12,9 @@ The defect calculations for Mg<sub>2</sub>Si in this tutorial have been used in 
 ## Steps
 
 1. Create new VTAnDeM project
-		```
-		vtandem -n
-		```
+	```
+	vtandem -n
+	```
 
 2. Import chemical potentials
 		```
