@@ -10,7 +10,7 @@ Steps
 -----
 1. Create new VTAnDeM project
 
-	"vtandem -n"
+	vtandem -n
 
 2. Import chemical potentials
 
