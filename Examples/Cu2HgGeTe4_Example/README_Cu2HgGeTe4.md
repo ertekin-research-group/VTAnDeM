@@ -50,4 +50,6 @@ The defect calculations for Cu<sub>2</sub>HgGeTe<sub>4</sub> in this tutorial ha
 
 **NOTE 2**: Check "VTAnDeM_Project_Reference" folder for reference.
 
-
+**NOTE 3**: The results in Figures 4a and 4b in [Qu et al.](https://doi.org/10.1039/D1TA07410E) can be reproduced using the data available in this tutorial.
+- For Figure 4a, Cu<sub>2</sub>HgGeTe<sub>4</sub> is in equilibrium with elemental Te, Cu<sub>2</sub>GeTe<sub>3</sub>, and CuTe.
+- For Figure 4b, Cu<sub>2</sub>HgGeTe<sub>4</sub> is in equilibrium with elemental Ge, HgTe, and Hg<sub>2</sub>GeTe<sub>4</sub>.
