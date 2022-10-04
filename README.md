@@ -38,10 +38,12 @@ Installation
 - Run `python3 setup.py install` in the downloaded VTAnDeM folder.
 
 
-VTAnDeM Data Input:
--------------------
-All necessary data for phase stability is provided in the Example_Data/Materials_Data.tar.gz file on Box.
-The data for defects is provided as Example_Data/Defects_Data.tar.gz.
+Examples:
+---------
+Example VTAnDeM projects can be found in the `Examples` folder for the following materials:
+1. Mg<sub>2</sub>Si
+2. Hg<sub>2</sub>GeTe<sub>4</sub>
+3. Cu<sub>2</sub>HgGeTe<sub>4</sub>
 
 
 Usage:
