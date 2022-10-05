@@ -2,27 +2,15 @@
 __author__ = 'Michael_Lidia_Jiaxing_Elif'
 __name__ = 'VTAnDeM_Visualization-Toolkit-for-Analyzing-Defects-in-Materials'
 
-
-###############################################################################################################################
-###############################################################################################################################
-##################################################### Introduction ############################################################
-###############################################################################################################################
-###############################################################################################################################
-
-# 	
-
-
-###############################################################################################################################
 ###############################################################################################################################
 ################################################### Import Libraries ##########################################################
-###############################################################################################################################
 ###############################################################################################################################
 
 import numpy as np
 import periodictable
 import matplotlib.pyplot as plt
 from matplotlib import animation
-from mpl_toolkits.mplot3d import Axes3D
+#from mpl_toolkits.mplot3d import Axes3D
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection, Path3DCollection, Line3DCollection
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from polyhedron import Hrep
@@ -64,7 +52,8 @@ class Plot_ChemicalPotential_PhaseDiagram3D(SaveFigure):
 		# 3D phase diagram plot objects
 		self.chemicalpotential_phasediagram_plot_figure = plt.figure()
 		self.chemicalpotential_phasediagram_plot_canvas = FigureCanvas(self.chemicalpotential_phasediagram_plot_figure)
-		self.chemicalpotential_phasediagram_plot_axes = Axes3D(self.chemicalpotential_phasediagram_plot_figure)		# NOTE: Axes3D MUST be called AFTER calling FigureCanvas
+		#self.chemicalpotential_phasediagram_plot_axes = Axes3D(self.chemicalpotential_phasediagram_plot_figure)		# NOTE: Axes3D MUST be called AFTER calling FigureCanvas
+		self.chemicalpotential_phasediagram_plot_axes = self.chemicalpotential_phasediagram_plot_figure.add_subplot(111, projection='3d')
 		
 		self.path = None
 		
@@ -86,12 +75,10 @@ class Plot_ChemicalPotential_PhaseDiagram3D(SaveFigure):
 		b_vector = []
 		compounds_list = []
 		
-		
 		main_compound_element_count_reduced = {}
 		for element in self.elements_list[:-1]:	# Exclude dependent element
 			main_compound_element_count_reduced[element] = float(self.main_compound_info["dft_"+element]) / float(self.main_compound_info["dft_"+self.dependent_element])
 		main_compound_enthalpy_reduced = float(self.main_compound_enthalpy) / float(self.main_compound_info["dft_"+self.dependent_element])
-		
 		
 		for competing_compound in self.compounds_info.keys():
 			
@@ -105,7 +92,6 @@ class Plot_ChemicalPotential_PhaseDiagram3D(SaveFigure):
 					competing_compound_element_count[element] = float(self.compounds_info[competing_compound]["dft_"+element])
 				except:
 					competing_compound_element_count[element] = 0.0
-			
 			
 			# Get enthalpy of competing compound
 			competing_compound_enthalpy_tracker = self.compounds_info[competing_compound]["dft_total_energy"]
@@ -148,7 +134,6 @@ class Plot_ChemicalPotential_PhaseDiagram3D(SaveFigure):
 			cmap = plt.get_cmap("tab10_r")
 		else:
 			cmap = plt.get_cmap("Set1")
-		
 		
 		# draw plane
 		color_counter = 0
@@ -200,20 +185,19 @@ class Plot_ChemicalPotential_PhaseDiagram3D(SaveFigure):
 				self.competing_compounds_colorwheel[label] = cmap(color_counter)
 				color_counter += 1
 	
-	
-	
-	
+
 	
 	def Activate_PhaseDiagram3D_Plot_Axes(self):
-		# calc elemental chemical potential and set them 0
-		buffer = 0.2 # eV
 		
 		# Endpoints of phase diagram
 		endpoint_candidates = []
 		for element in self.elements_list:
 			endpoint_candidates.append( self.main_compound_enthalpy/self.main_compound_info["dft_"+element] )
 		phasediagram_endpoints = min(endpoint_candidates)
+
+		print("Hello")
 		
+		buffer = 0.2 # eV
 		self.chemicalpotential_phasediagram_plot_axes.set_xlim([phasediagram_endpoints - buffer, 0 + buffer])
 		self.chemicalpotential_phasediagram_plot_axes.set_ylim([phasediagram_endpoints - buffer, 0 + buffer])
 		self.chemicalpotential_phasediagram_plot_axes.set_zlim([phasediagram_endpoints - buffer, 0 + buffer])
@@ -229,10 +213,6 @@ class Plot_ChemicalPotential_PhaseDiagram3D(SaveFigure):
 	
 	
 	
-	
-	
-	
-	
 	def Draw_PhaseDiagram3D(self):
 		
 		A_matrix, b_vector, compounds_list = self.Obtain_PhaseDiagram3D_Inequalities()
@@ -241,9 +221,6 @@ class Plot_ChemicalPotential_PhaseDiagram3D(SaveFigure):
 		
 		self.Activate_PhaseDiagram3D_Plot_Axes()
 		self.chemicalpotential_phasediagram_plot_canvas.draw()
-	
-	
-	
 	
 	
 	
@@ -280,10 +257,5 @@ class Plot_ChemicalPotential_PhaseDiagram3D(SaveFigure):
 		print("Done animating!")
 		
 		self.spacepotato_animation_generator_window.close()
-
-
-
-
-
 
 

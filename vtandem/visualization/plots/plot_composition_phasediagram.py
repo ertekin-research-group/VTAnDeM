@@ -4,7 +4,6 @@ __name__ = 'VTAnDeM_Visualization-Toolkit-for-Analyzing-Defects-in-Materials'
 
 import numpy as np
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from pymatgen.core.composition import Composition
 
@@ -30,11 +29,6 @@ class Plot_Composition_PhaseDiagram(SaveFigure):
 		
 		# Font description for phase stability diagram plot
 		fontsize = 12
-		"""
-		self.font_labels = {'family': 'sans-serif', 'color': 'black', 'weight': 'bold', 'size': fontsize }
-		self.font_legend = {'family': 'sans-serif', 'size': fontsize }
-		self.font_annotation = {'family': 'sans-serif', 'color': 'black', 'weight': 'bold', 'size': fontsize }
-		"""
 		self.font_labels = {'color': 'black', 'weight': 'bold', 'size': fontsize }
 		self.font_legend = {'size': fontsize }
 		self.font_annotation = {'color': 'black', 'weight': 'bold', 'size': fontsize }
@@ -42,12 +36,10 @@ class Plot_Composition_PhaseDiagram(SaveFigure):
 		# Store all extracted DFT data
 		self.main_compound_info = main_compound_info
 		self.compounds_info = compounds_info
-		print(main_compound_info)
-
+		
 		# Phase diagram (in composition space) object
 		self.composition_phasediagram_plot_figure = plt.figure()
 		self.composition_phasediagram_plot_canvas = FigureCanvas(self.composition_phasediagram_plot_figure)
-
 
 		# Initialize plot drawing
 		if self.type == "ternary":
@@ -55,7 +47,6 @@ class Plot_Composition_PhaseDiagram(SaveFigure):
 		if self.type == "quaternary":
 			self.composition_phasediagram_plot_drawing = self.composition_phasediagram_plot_figure.add_subplot(111, projection='3d')
 		
-
 		# Generate compositional phase diagram
 		self.Generate_Compositional_PhaseDiagram(self.compounds_info, self.elements_list)
 		
@@ -151,9 +142,6 @@ class Plot_Composition_PhaseDiagram(SaveFigure):
 	
 	
 	
-	
-	
-	
 	###############################################################################################
 	########################## Plot Centroids of All Four-Phase Regions ###########################
 	###############################################################################################
@@ -203,7 +191,6 @@ class Plot_Composition_PhaseDiagram(SaveFigure):
 		# Set annotation
 		self.phaseregion_annotation.set_text(text)
 
-
 		# Check if annotation spills out of axis
 		axis_bounds = self.composition_phasediagram_plot_drawing.get_window_extent().bounds # Bounds are given in (x0, y0, width, height) format
 		axis_x1, axis_y1 = axis_bounds[0]+axis_bounds[2], axis_bounds[1]+axis_bounds[3]
@@ -213,6 +200,7 @@ class Plot_Composition_PhaseDiagram(SaveFigure):
 			self.phaseregion_annotation.set( position=(-axis_bounds[2]/2, 20) )
 	
 	
+
 	def Hover(self, event):
 
 		is_visible = self.phaseregion_annotation.get_visible()
@@ -228,14 +216,6 @@ class Plot_Composition_PhaseDiagram(SaveFigure):
 				if is_visible:
 					self.phaseregion_annotation.set_visible(False)
 					self.composition_phasediagram_plot_canvas.draw()
-	
-	
-	
-	
-	
-	
-	
-	
 	
 	
 	
@@ -286,17 +266,10 @@ class Plot_Composition_PhaseDiagram(SaveFigure):
 
 
 
-
-
 class PhaseRegion(object):
 	def __init__(self):
 		self.name = None
 		self.vertices = None
 		self.centroid = None
 		self.centroid_plot = None
-
-
-
-
-
 
