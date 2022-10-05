@@ -64,44 +64,57 @@ VTAnDeM must be called from the command terminal. The steps are as follows:
 	2. Import data from the command line.
 		- Phase Stability Data:
 			```
-			vtandem --import_element Cu ~/Materials_Data/Cu
-			vtandem --import_element Hg ~/Materials_Data/Hg
-			vtandem --import_element Ge ~/Materials_Data/Ge
-			vtandem --import_element Te ~/Materials_Data/Te
-			vtandem --import_compound Cu2HgGeTe4 ~/Materials_Data/Cu2HgGeTe4
+			vtandem --import_element Cu PhaseStability/Cu
+			vtandem --import_element Hg PhaseStability/Hg
+			vtandem --import_element Ge PhaseStability/Ge
+			vtandem --import_element Te PhaseStability/Te
+			vtandem --import_compound CuTe PhaseStability/CuTe
+			vtandem --import_compound GeTe PhaseStability/GeTe
+			vtandem --import_compound HgTe PhaseStability/HgTe
+			vtandem --import_compound Hg2GeTe4 PhaseStability/Hg2GeTe4
+			vtandem --import_compound Cu2GeTe3 PhaseStability/Cu2GeTe3
 			```
 		- Defects Data:
 			```
-			vtandem --import_defects Cu2HgGeTe4 ~/Defects_Data/Cu2HgGeTe4 2 2 2
+			vtandem --import_defects Cu2HgGeTe4 Cu2HgGeTe4_Defects
+			```
+		- Defect Energy Corrections:
+			```
+			vtandem --import_defect_energy_corrections Cu2HgGeTe4 CHGT_EnergyCorrections.csv
 			```
 		- DOS Data:
 			```
-			vtandem --import_dos Cu2HgGeTe4 ~/Materials_Data/Cu2HgGeTe4/DOSCAR
+			vtandem --import_dos Cu2HgGeTe4 DOSCAR
 			```
 	3. Import data from Python interface.
 		- Phase Stability Data:
 			```python
 			from vtandem.dft import import_dft
 			x = import_dft.Compounds_Import()
-			x.Add_Element("Cu", "~/Materials_Data/Cu")
-			x.Add_Element("Hg", "~/Materials_Data/Hg")
-			x.Add_Element("Ge", "~/Materials_Data/Ge")
-			x.Add_Element("Te", "~/Materials_Data/Te")
-			x.Add_Compound("Cu2HgGeTe4", "~/Materials_Data/Cu2HgGeTe4")
+			x.Add_Element("Cu", "PhaseStability/Cu")
+			x.Add_Element("Hg", "PhaseStability/Hg")
+			x.Add_Element("Ge", "PhaseStability/Ge")
+			x.Add_Element("Te", "PhaseStability/Te")
+			x.Add_Compound("CuTe", "PhaseStability/CuTe")
+			x.Add_Compound("GeTe", "PhaseStability/GeTe")
+			x.Add_Compound("HgTe", "PhaseStability/HgTe")
+			x.Add_Compound("Hg2GeTe4", "PhaseStability/Hg2GeTe4")
+			x.Add_Compound("Cu2GeTe3", "PhaseStability/Cu2GeTe3")
 			x.Update_Compounds_Database()
 			```
 		- Defects Data:
 			```python
 			from vtandem.dft import import_dft
 			x = import_dft.Defects_Import()
-			x.Add_Defects("Cu2HgGeTe4", "~/Defects_Data/Cu2HgGeTe4")
+			x.Add_Defects("Cu2HgGeTe4", "Cu2HgGeTe4_Defects")
+			x.Add_Energy_Corrections("Cu2HgGeTe4", "CHGT_EnergyCorrections.csv")
 			x.Update_Defects_Database()
 			```
 		- DOS Data:
 			```python
 			from vtandem.dft import import_dft
 			x = import_dft.DOS_Import()
-			x.Add_DOS("Cu2HgGeTe4", "~/Materials_Data/Cu2HgGeTe4/DOSCAR")
+			x.Add_DOS("Cu2HgGeTe4", "DOSCAR")
 			x.Update_DOS_Database()
 			```
 3. Open the VTAnDeM interface.
