@@ -128,5 +128,5 @@ Help:
 -----
 Help with the necessary data structure can be found readily on the command terminal.
 
-> vtandem --help
+	vtandem --help
 
