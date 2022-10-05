@@ -20,10 +20,10 @@ Required Packages
 	- `pip3 install matplotlib-label-lines`
 - PeriodicTable
 	- `pip3 install periodictable`
-- Pymatgen == 2019.5.8
-	- `pip3 install pymatgen==2019.5.8`
-- PyQt5 == 5.11.3
-	- `pip3 install PyQt5==5.11.3`
+- Pymatgen >= 2019.5.8
+	- `pip3 install pymatgen`
+- PyQt5 >= 5.11.3
+	- `pip3 install PyQt5`
 - PyPolyhedron (Courtesy of Dr. Pearu Peterson and Dr. Sunghyun Kim, https://github.com/frssp/PyPolyhedron)
 	- Steps:
 		1. `git clone https://github.com/frssp/PyPolyhedron`
