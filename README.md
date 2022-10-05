@@ -94,7 +94,7 @@ VTAnDeM must be called from the command terminal. The steps are as follows:
 			```python
 			from vtandem.dft import import_dft
 			x = import_dft.Defects_Import()
-			x.Add_Defects("Cu2HgGeTe4", "~/Defects_Data/Cu2HgGeTe4", 2, 2, 2)
+			x.Add_Defects("Cu2HgGeTe4", "~/Defects_Data/Cu2HgGeTe4")
 			x.Update_Defects_Database()
 			```
 		- DOS Data:
@@ -114,5 +114,6 @@ VTAnDeM must be called from the command terminal. The steps are as follows:
 Help:
 -----
 Help with the necessary data structure can be found readily on the command terminal.
+
 > vtandem --help
 
