@@ -51,7 +51,7 @@ class Plot_ChemicalPotential_PhaseDiagram3D(SaveFigure):
 			self.all_elements.append(str(element))
 		
 		# Font description for phase stability diagram plot
-		self.font = {'family': 'sans-serif', 'color': 'black', 'weight': 'normal', 'size': 14 }
+		self.font = {'color': 'black', 'weight': 'normal', 'size': 14 }
 		
 		# Store all extracted DFT data
 		self.main_compound_info = {}
@@ -70,14 +70,10 @@ class Plot_ChemicalPotential_PhaseDiagram3D(SaveFigure):
 		
 		self.chemicalpotential_phasediagram_plot_axes.view_init(elev=15, azim=145)
 		
-		
 		print("Chemical potential 3d set up!")
 		
 		# Save figure feature
 		SaveFigure.__init__(self, self.chemicalpotential_phasediagram_plot_figure)
-	
-	
-	
 	
 	
 	###############################################################################################
@@ -128,12 +124,6 @@ class Plot_ChemicalPotential_PhaseDiagram3D(SaveFigure):
 		return A_matrix, b_vector, compounds_list
 	
 	
-	
-	
-	
-	
-	
-	
 	def Sort_Plane_Vertices(self, ininc_i, adj):
 		
 		ininc_sorted = []
@@ -149,18 +139,6 @@ class Plot_ChemicalPotential_PhaseDiagram3D(SaveFigure):
 			ininc_i = sorted(ininc_i, reverse = True, key = lambda x: np.where(np.concatenate([adj_i, np.arange(1000)]) == x)[0][0])
 		
 		return ininc_sorted
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 	
 	
 	def Draw_PhaseDiagram_Planes(self, verts, ininc, adj, sec_phases=[]):
@@ -242,9 +220,7 @@ class Plot_ChemicalPotential_PhaseDiagram3D(SaveFigure):
 		
 		self.chemicalpotential_phasediagram_plot_axes.set_xlabel(r"$\Delta\mu_{"+self.element_x+"}$ (eV)", fontdict=self.font)
 		self.chemicalpotential_phasediagram_plot_axes.set_ylabel(r"$\Delta\mu_{"+self.element_y+"}$ (eV)", fontdict=self.font)
-		#self.chemicalpotential_phasediagram_plot_axes.set_zlabel(r"$\Delta\mu_{"+self.dependent_element+"}$ (eV)", fontdict=self.font)
 		self.chemicalpotential_phasediagram_plot_axes.set_zlabel(r"$\Delta\mu_{"+self.element_z+"}$ (eV)", fontdict=self.font)
-		
 		
 		self.chemicalpotential_phasediagram_plot_axes.set_aspect("auto")
 		

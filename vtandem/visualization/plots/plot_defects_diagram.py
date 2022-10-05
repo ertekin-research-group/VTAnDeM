@@ -23,7 +23,7 @@ class Plot_DefectsDiagram(SaveFigure):
 	def __init__(self, elements_list):
 		
 		# Font description for defect formation energy diagram
-		self.font = {'family': 'sans-serif', 'color':  'black', 'weight': 'normal', 'size': 12 }
+		self.font = {'color':  'black', 'weight': 'normal', 'size': 12 }
 		
 		# Store all extracted DFT data
 		self.defects_data = {}
@@ -104,7 +104,6 @@ class Plot_DefectsDiagram(SaveFigure):
 		self.defects_diagram_plot_drawing.fill_between(np.linspace(self.ECBM-self.EVBM, self.ECBM-self.EVBM+1, 100), 100, -100, facecolor='#614126', interpolate=True, alpha=.1)
 		
 		# Settings for equilibrium Fermi energy
-		#self.equilibrium_fermi_energy_tick.set_xlim(self.xmin, self.xmax)
 		self.equilibrium_fermi_energy_tick.set_xlim(self.axis_lims["XMin"], self.axis_lims["XMax"])
 		self.equilibrium_fermi_energy_tick.set_xticks([-100])
 		self.equilibrium_fermi_energy_tick.tick_params(axis='both', labelsize=self.font['size']-2)

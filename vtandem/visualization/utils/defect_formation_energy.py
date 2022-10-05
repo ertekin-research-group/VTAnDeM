@@ -5,7 +5,6 @@ __author__ = 'Michael_Lidia_Jiaxing_Elif'
 import numpy as np
 
 
-
 def Calculate_IntrinsicDefectFormationEnthalpies(	defects_data, \
 													main_compound_info, \
 													fermi_energy_array, \

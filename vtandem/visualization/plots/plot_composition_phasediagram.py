@@ -30,9 +30,14 @@ class Plot_Composition_PhaseDiagram(SaveFigure):
 		
 		# Font description for phase stability diagram plot
 		fontsize = 12
+		"""
 		self.font_labels = {'family': 'sans-serif', 'color': 'black', 'weight': 'bold', 'size': fontsize }
 		self.font_legend = {'family': 'sans-serif', 'size': fontsize }
 		self.font_annotation = {'family': 'sans-serif', 'color': 'black', 'weight': 'bold', 'size': fontsize }
+		"""
+		self.font_labels = {'color': 'black', 'weight': 'bold', 'size': fontsize }
+		self.font_legend = {'size': fontsize }
+		self.font_annotation = {'color': 'black', 'weight': 'bold', 'size': fontsize }
 		
 		# Store all extracted DFT data
 		self.main_compound_info = main_compound_info
@@ -271,6 +276,7 @@ class Plot_Composition_PhaseDiagram(SaveFigure):
 		
 		# Solve for the delta mu values
 		deltamus = np.dot( np.linalg.inv(composition_matrix), enthalpies_array )
+		print(self.elements_list)
 		print(deltamus)
 		print(self.phaseregion_selected.name)
 		

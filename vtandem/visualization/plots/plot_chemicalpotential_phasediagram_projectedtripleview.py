@@ -37,7 +37,8 @@ class ChemicalPotential_PhaseDiagramProjected2D_TripleView:
 			self.all_elements.append(str(element))
 		
 		# Font description for phase stability diagram plot
-		self.font = {'family': 'sans-serif', 'color':  'black', 'weight': 'normal', 'size': 12 }
+		#self.font = {'family': 'sans-serif', 'color':  'black', 'weight': 'normal', 'size': 12 }
+		self.font = {'color': 'black', 'weight': 'normal', 'size': 12 }
 		
 		# Store all extracted DFT data
 		self.main_compound_info = {}

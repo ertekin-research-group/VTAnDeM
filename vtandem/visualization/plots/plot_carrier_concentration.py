@@ -21,7 +21,7 @@ class Plot_CarrierConcentration(SaveFigure):
 	def __init__(self, elements_list):
 		
 		# Font description for defect formation energy diagram
-		self.font = { 'family': 'sans-serif', 'color':  'black', 'weight': 'normal', 'size': 12 }
+		self.font = { 'color': 'black', 'weight': 'normal', 'size': 12 }
 		
 		# Plot settings
 		self.max_temperature = 1000  # Maximum temperature in Kelvins
@@ -98,9 +98,6 @@ class Plot_CarrierConcentration(SaveFigure):
 		self.carrier_concentration_plot_drawing.set_aspect("auto")
 	
 	
-	
-	
-	
 	def Update_WindowSize(self, ytype, Ylim_box_object):
 		
 		# Modify defects diagram y-axis
@@ -110,8 +107,7 @@ class Plot_CarrierConcentration(SaveFigure):
 			self.ymax = float(Ylim_box_object.text())
 		self.carrier_concentration_plot_drawing.set_ylim(self.ymin, self.ymax)
 		self.carrier_concentration_plot_canvas.draw()
-	
-	
+
 	
 	def Organize_DOS_Data(self):
 		
@@ -171,7 +167,6 @@ class Plot_CarrierConcentration(SaveFigure):
 		# Normalize DOS to be per volume
 		self.gE_ValenceBand /= self.dos_data["Volume"]
 		self.gE_ConductionBand /= self.dos_data["Volume"]
-	
 	
 
 	
@@ -244,7 +239,7 @@ class Plot_CarrierConcentration(SaveFigure):
 		if self.dopant != "None":
 			self.carrier_concentration_total_electron_plot, = self.carrier_concentration_plot_drawing.semilogy(self.temperature_array, total_electron_concentration, 'o-', markerfacecolor='none', markeredgecolor='green', color='green', ls='--', label='Electron (With Dopant)')
 		
-		self.carrier_concentration_plot_drawing.legend(loc=1)
+		self.carrier_concentration_plot_drawing.legend(loc=1, fontsize=self.font['size'])
 		self.carrier_concentration_plot_canvas.draw()
 	
 

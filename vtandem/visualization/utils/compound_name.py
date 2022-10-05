@@ -1,5 +1,5 @@
 
-__author__ = 'Michael_Lidia_Jiaxing_Benita_Elif'
+__author__ = 'Michael_Lidia_Jiaxing_Elif'
 __name__ = 'VTAnDeM_Visualization-Toolkit-for-Analyzing-Defects-in-Materials'
 
 import re

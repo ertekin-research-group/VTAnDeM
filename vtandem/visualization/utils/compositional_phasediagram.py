@@ -67,6 +67,8 @@ def Create_Compositional_PhaseDiagram(compounds_info, elements_list, main_compou
 	pmg_phasediagram_plot_object = PDPlotter(pmg_phasediagram)
 	(lines, labels, unstable) = pmg_phasediagram_plot_object.pd_plot_data
 
+	print("Unstable: ", pmg_phasediagram.unstable_entries)
+
 	return pmg_phasediagram, lines, labels
 
 

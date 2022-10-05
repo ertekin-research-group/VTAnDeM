@@ -38,7 +38,8 @@ class ChemicalPotential_PhaseDiagramProjected2D(QWidget, SaveFigure):
 			self.all_elements.append(str(element))
 		
 		# Font description for phase stability diagram plot
-		self.font = {'family': 'sans-serif', 'color':  'black',	'weight': 'normal',	'size': 12 }
+		#self.font = {'family': 'sans-serif', 'color':  'black',	'weight': 'normal',	'size': 12 }
+		self.font = {'color':  'black',	'weight': 'normal',	'size': 12 }
 		
 		# Establish the first, second, and third species of the quaternary compound.
 		# Note that this list is subject to change, depending on what the user chooses.
