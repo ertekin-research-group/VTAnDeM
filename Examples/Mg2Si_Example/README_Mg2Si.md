@@ -58,5 +58,6 @@ The defect calculations for Mg<sub>2</sub>Si in this tutorial have been used in 
 ## Importing with a Python script
 
 Alternatively, one could import the DFT data using the provided Python script `Import_Mg2Si_Data.py`. Simply run:
-> python Import_Mg2Si_Data.py
+
+	python Import_Mg2Si_Data.py
 
