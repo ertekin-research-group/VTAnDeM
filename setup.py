@@ -37,6 +37,16 @@ setup(
 			"vtandem = vtandem.vtandem:vtandem"
 		]
 	},
+	install_requires=[
+		"numpy>=1.16",
+		"matplotlib>=3.0",
+		"matplotlib-label-lines",
+		"pymatgen",
+		"periodictable",
+		"PyQt5",
+		"click>8.0",
+	],
+	dependency_links=['https://github.com/frssp/PyPolyhedron/master#egg=polyhedron-0.2.1'],
 )
 
 
