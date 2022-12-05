@@ -45,8 +45,8 @@ setup(
 		"periodictable",
 		"PyQt5",
 		"click>8.0",
+		"polyhedron @ https://github.com/frssp/PyPolyhedron/archive/master.zip#egg=polyhedron-0.2.1",
 	],
-	dependency_links=['https://github.com/frssp/PyPolyhedron/master#egg=polyhedron-0.2.1'],
 )
 
 
