@@ -127,23 +127,16 @@ class Window_DefectsDiagram:
 			self.dopant_selection_box.activated.connect(self.Update_ExtrinsicDefect)
 			self.dopant_properties_widget_layout.addWidget(self.dopant_selection_box)
 			
-			
 			if self.show_carrier_concentration:
 				# Add synthesis temperature button
 				self.dopant_properties_widget_layout.addWidget(self.defects_synthesis_temperature)
-			
-			
+				
 			self.defectsdiagram_window_layout.addWidget(self.dopant_properties_widget)
 		
-
 		else:
 			if self.show_carrier_concentration:
 				# Add synthesis temperature button
 				self.defectsdiagram_window_layout.addWidget(self.defects_synthesis_temperature)
-		
-		
-
-
 		
 		# (WIDGET) Save defects diagram as figure
 		self.defects_diagram_savefigure_button = QPushButton("Save Defects Diagram Figure")
@@ -151,10 +144,7 @@ class Window_DefectsDiagram:
 		self.defectsdiagram_window_layout.addWidget(self.defects_diagram_savefigure_button)
 	
 	
-	
-	
-	
-	
+		
 	###############################################################################################
 	################################# Generate Defects Diagram ####################################
 	###############################################################################################
@@ -177,8 +167,6 @@ class Window_DefectsDiagram:
 		self.DefectsDiagram.Initialize_Intrinsic_DefectsDiagram_Plot()
 		if self.DefectsDiagram.dopant != "None":
 			self.DefectsDiagram.Initialize_Extrinsic_DefectsDiagram_Plot()
-	
-	
 	
 	
 	
@@ -229,15 +217,6 @@ class Window_DefectsDiagram:
 			self.dopant_chemical_potential_label.setText(u"\u0394"+"\u03BC"+"<sub>"+self.DefectsDiagram.dopant+"</sub>")
 			self.DefectsDiagram.dopant_mu0 = self.compounds_info[self.DefectsDiagram.dopant]["mu0"]
 		
-		
-		# Set intrinsic chemical potential mu0 of dopant
-		#if self.DefectsDiagram.dopant == "None":
-		#	self.dopant_chemical_potential_label.setText(u"\u0394"+"\u03BC"+"<sub>x</sub>")
-		#	self.DefectsDiagram.dopant_mu0 = 0.0
-		#else:
-		#	self.dopant_chemical_potential_label.setText(u"\u0394"+"\u03BC"+"<sub>"+self.DefectsDiagram.dopant+"</sub>")
-		#	self.DefectsDiagram.dopant_mu0 = self.compounds_info[self.DefectsDiagram.dopant]["mu0"]
-		
 		# Reset deltamu of dopant
 		self.dopant_chemical_potential_deltamu.setText("-0.0000")
 		self.DefectsDiagram.dopant_deltamu = 0.0
@@ -264,7 +243,6 @@ class Window_DefectsDiagram:
 		if self.DefectsDiagram.dopant != "None":
 			self.DefectsDiagram.Initialize_Extrinsic_DefectsDiagram_Plot()
 		
-		
 		if self.show_carrier_concentration:
 			
 			# Recalculate carrier concentrations
@@ -273,7 +251,6 @@ class Window_DefectsDiagram:
 			self.CarrierConcentration.dopant_deltamu = self.DefectsDiagram.dopant_deltamu
 
 			self.CarrierConcentration.extrinsic_defects = self.DefectsDiagram.extrinsic_defects
-			
 			
 			# Redraw carrier concentration
 			self.CarrierConcentration.Initialize_CarrierConcentration_Plot()
@@ -306,7 +283,4 @@ class Window_DefectsDiagram:
 		#		objects, which also inherit the carrier concentration window object.
 		if self.DefectsDiagram.intrinsic_defect_plots != {}:
 			self.Update_Equilibrium_Fermi_Energy_Temperature()
-
-
-
 

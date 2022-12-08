@@ -10,7 +10,6 @@ from scipy import integrate
 from vtandem.visualization.utils.defect_formation_energy import *
 
 
-
 def Calculate_FreeHole_FreeElectron_Concentrations(	temperature_array, \
 													fermi_energy_array, \
 													gE_ValenceBand, \
@@ -214,6 +213,4 @@ def Calculate_CarrierConcentration(	EVBM, \
 		total_electron_concentration.append(electron_concentrations_dict[temperature][total_equilibrium_fermi_energy_index])
 
 	return intrinsic_defect_hole_concentration, intrinsic_defect_electron_concentration, total_hole_concentration, total_electron_concentration, intrinsic_equilibrium_fermi_energy_temperature, total_equilibrium_fermi_energy_temperature
-
-
 

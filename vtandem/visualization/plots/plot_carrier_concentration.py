@@ -280,7 +280,3 @@ class Plot_CarrierConcentration(SaveFigure):
 		
 		self.carrier_concentration_plot_canvas.draw()
 
-
-
-
-

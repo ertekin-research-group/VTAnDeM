@@ -23,5 +23,3 @@ class Plot_Quaternary_Carrier_Concentration(Plot_CarrierConcentration):
 		super().__init__(elements_list = self.elements_list)
 
 
-
-

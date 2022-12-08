@@ -25,16 +25,7 @@ class Window_Compositional_PhaseDiagram(QWidget):
 		###### Main compositional phase diagram window widget
 		self.compositional_phasediagram_window = QWidget()									# One of the main sub-widgets is where the user defines the settings of the plots.
 		self.compositional_phasediagram_window_layout = QVBoxLayout(self.compositional_phasediagram_window)		# The settings should be placed on top of one another, i.e. vertically.
-		
-		"""
-		# (WIDGET) Title of compound
-		compound_title_formal = Compound_Name_Formal(main_compound, self.Compositional_PhaseDiagram.compounds_info, "unicode")	# Generate Latex-readable version of compound name
-		self.compound_title = QLabel(compound_title_formal)					# QLabel is a widget that displays text
-		self.compound_title.setAlignment(Qt.AlignCenter)					# Align the text to center
-		self.compound_title_font = QFont("sans-serif", 24, QFont.Bold) 		# Declare font
-		self.compound_title.setFont(self.compound_title_font)				# Set the font for the QLabel text
-		"""
-		
+				
 		# (WIDGET) Title
 		self.composition_phase_diagram_title = QLabel("Phase \n Diagram \n (Composition)")			# QLabel is a widget that displays text
 		self.composition_phase_diagram_title.setAlignment(Qt.AlignCenter)						# Align the text to center
@@ -47,8 +38,4 @@ class Window_Compositional_PhaseDiagram(QWidget):
 		# (WIDGET) Save phase diagram as figure
 		self.phasediagram_savefigure_button = QPushButton("Save Phase Diagram Figure")
 		self.phasediagram_savefigure_button.clicked[bool].connect(lambda: self.Compositional_PhaseDiagram.SaveFigure())
-
-
-
-
 

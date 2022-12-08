@@ -16,8 +16,6 @@ from vtandem.visualization.windows.window_defectsdiagram_binary import Window_De
 from vtandem.visualization.windows.window_carrierconcentration import Window_CarrierConcentration
 
 
-
-
 class Tab_Binary_DefectsDiagram_CarrierConcentration(Window_DefectsDiagram_Binary, Window_CarrierConcentration):
 	
 	def __init__(self, parent=None, main_compound=None, first_element=None, second_element=None, compounds_info=None, defects_data=None, main_compound_info=None, dos_data=None, show_defects_diagram=True, show_carrier_concentration=True):
@@ -95,10 +93,6 @@ class Tab_Binary_DefectsDiagram_CarrierConcentration(Window_DefectsDiagram_Binar
 			self.DefectsDiagram = Plot_Binary_DefectsDiagram(main_compound = main_compound, first_element = first_element, second_element = second_element)
 			self.DefectsDiagram.defects_data = defects_data
 			self.DefectsDiagram.main_compound_info = main_compound_info
-			"""
-			self.DefectsDiagram.main_compound_number_first_specie = self.main_compound_number_first_specie
-			self.DefectsDiagram.main_compound_number_second_specie = self.main_compound_number_second_specie
-			"""
 			self.DefectsDiagram.mu_elements[self.first_element]["mu0"] = self.compounds_info[self.first_element]["mu0"]
 			self.DefectsDiagram.mu_elements[self.second_element]["mu0"] = self.compounds_info[self.second_element]["mu0"]
 			self.DefectsDiagram.mu_elements[self.first_element]["deltamu"] = self.deltamu_values[self.first_element]
@@ -237,94 +231,7 @@ class Tab_Binary_DefectsDiagram_CarrierConcentration(Window_DefectsDiagram_Binar
 
 			# Plot the equilibrium Fermi energy
 			self.Update_Equilibrium_Fermi_Energy_Temperature()
-	
-	
-	
-	"""
-	def Update_ExtrinsicDefect_DeltaMu(self):
-		
-		# Obtain deltamu of dopant
-		self.dopant_deltamu = float(self.extrinsic_defect_chemical_potential_deltamu.text())
-		
-		# Recalculate defect formation energies
-		self.DefectsDiagram.dopant_deltamu = self.dopant_deltamu
-		self.DefectsDiagram.Calculate_DefectFormations()
-		
-		# Redraw defects diagram
-		if self.DefectsDiagram.intrinsic_defect_plots != {}:
-			self.DefectsDiagram.Update_Intrinsic_DefectsDiagram_Plot()
-		if self.DefectsDiagram.extrinsic_defect_plots != {}:
-			self.DefectsDiagram.Update_Extrinsic_DefectsDiagram_Plot()
-		
-		
-		
-		if self.show_carrier_concentration:
-			
-			# Recalculate carrier concentrations
-			self.CarrierConcentration.dopant_deltamu = self.dopant_deltamu
-			
-			# Redraw carrier concentration
-			if (self.CarrierConcentration.carrier_concentration_intrinsic_defect_hole_plot != None) and (self.CarrierConcentration.carrier_concentration_intrinsic_defect_electron_plot != None):
-				self.CarrierConcentration.Update_CarrierConcentration_Plot()
 
-			# Plot the equilibrium Fermi energy
-			if (self.DefectsDiagram.intrinsic_defect_plots != {}) and (self.DefectsDiagram.extrinsic_defect_plots != {}):
-				self.Update_Equilibrium_Fermi_Energy_Temperature()
-	"""
-	
-
-
-	"""
-	def Update_ExtrinsicDefect(self):
-		
-		# Obtain selected dopant
-		self.dopant = self.extrinsic_defect_selection_box.currentText()
-		
-		# Set intrinsic chemical potential mu0 of dopant
-		if self.dopant == "None":
-			self.extrinsic_defect_chemical_potential_label.setText(u"\u0394"+"\u03BC"+"<sub>x</sub>")
-			self.dopant_mu0 = 0.0
-		else:
-			self.extrinsic_defect_chemical_potential_label.setText(u"\u0394"+"\u03BC"+"<sub>"+self.dopant.split("_")[0]+"</sub>")
-			self.dopant_mu0 = self.compounds_info[self.dopant.split("_")[0]]["mu0"]
-		
-		# Reset deltamu of dopant
-		self.extrinsic_defect_chemical_potential_deltamu.setText("-0.0000")
-		self.dopant_deltamu = 0.0
-		
-		# Recalculate defect formation energies
-		self.DefectsDiagram.dopant = self.dopant
-		self.DefectsDiagram.dopant_mu0 = self.dopant_mu0
-		self.DefectsDiagram.dopant_deltamu = self.dopant_deltamu
-		self.DefectsDiagram.Calculate_DefectFormations()
-		
-		# Draw fresh defects diagram
-		self.DefectsDiagram.extrinsic_defect_plots = {}
-		self.DefectsDiagram.defects_diagram_plot_drawing.remove()
-		self.DefectsDiagram.defects_diagram_plot_drawing = self.DefectsDiagram.defects_diagram_plot_figure.add_subplot(111)
-		self.DefectsDiagram.Activate_DefectsDiagram_Plot_Axes()
-		self.DefectsDiagram.Initialize_Intrinsic_DefectsDiagram_Plot()
-		if self.dopant != "None":
-			self.DefectsDiagram.Initialize_Extrinsic_DefectsDiagram_Plot()
-		
-		
-		
-		if self.show_carrier_concentration:
-			
-			# Recalculate carrier concentrations
-			self.CarrierConcentration.dopant = self.dopant
-			self.CarrierConcentration.dopant_mu0 = self.dopant_mu0
-			self.CarrierConcentration.dopant_deltamu = self.dopant_deltamu
-			
-			# Redraw carrier concentration
-			self.CarrierConcentration.Initialize_CarrierConcentration_Plot()
-
-			# Plot the equilibrium Fermi energy
-			if self.DefectsDiagram.intrinsic_defect_plots != {}:
-				self.Update_Equilibrium_Fermi_Energy_Temperature()
-	"""
-
-
-
-
+			# Allow synthesis temperature to be set
+			self.defects_synthesis_temperature_box.setEnabled(True)
 

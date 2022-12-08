@@ -19,7 +19,6 @@ class Window_DefectsDiagram_Binary(Window_DefectsDiagram):
 		
 		Window_DefectsDiagram.__init__(self, show_dopant=show_dopant)
 
-
 		# Chemical potential tuners
 		self.chemical_potential_displays = QWidget()
 		self.chemical_potential_displays_layout = QVBoxLayout(self.chemical_potential_displays)
@@ -67,13 +66,8 @@ class Window_DefectsDiagram_Binary(Window_DefectsDiagram):
 		self.chemical_potentials_section_layout.addWidget(self.chemical_potential_sliders)
 		self.defectsdiagram_window_layout.insertWidget(3, self.chemical_potentials_section)
 		
-
-		
 		# (WIDGET) Button to generate defects diagram
 		self.generate_defects_diagram_plot_button_widget = QPushButton("Generate Defects Diagram")
 		self.generate_defects_diagram_plot_button_widget.clicked[bool].connect(self.Generate_DefectsDiagram_Plot_Function_Binary)
 		self.defectsdiagram_window_layout.insertWidget(5, self.generate_defects_diagram_plot_button_widget)
-		
-		
-
 

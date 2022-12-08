@@ -182,13 +182,3 @@ def Calculate_PhaseDiagram_Projected2D(main_compound, elements_dict: dict, compo
 
 
 
-
-
-
-
-
-
-
-
-
-

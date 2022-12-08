@@ -195,8 +195,6 @@ class Plot_ChemicalPotential_PhaseDiagram3D(SaveFigure):
 			endpoint_candidates.append( self.main_compound_enthalpy/self.main_compound_info["dft_"+element] )
 		phasediagram_endpoints = min(endpoint_candidates)
 
-		print("Hello")
-		
 		buffer = 0.2 # eV
 		self.chemicalpotential_phasediagram_plot_axes.set_xlim([phasediagram_endpoints - buffer, 0 + buffer])
 		self.chemicalpotential_phasediagram_plot_axes.set_ylim([phasediagram_endpoints - buffer, 0 + buffer])

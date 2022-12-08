@@ -205,8 +205,6 @@ class Tab_PhaseDiagram_DefectsDiagram_CarrierConcentration(Window_DefectsDiagram
 			self.CarrierConcentration.mu_elements[self.third_element]["deltamu"] = self.deltamu_values[self.third_element]
 			
 			if self.type == "quaternary":
-				#self.CarrierConcentration.main_compound_number_fourth_specie = self.main_compound_number_fourth_specie
-				#self.CarrierConcentration.number_species[self.fourth_element] = self.main_compound_number_fourth_specie
 				self.CarrierConcentration.mu_elements[self.fourth_element]["mu0"] = self.compounds_info[self.fourth_element]["mu0"]
 				self.CarrierConcentration.mu_elements[self.fourth_element]["deltamu"] = self.deltamu_values[self.fourth_element]
 			
@@ -223,8 +221,6 @@ class Tab_PhaseDiagram_DefectsDiagram_CarrierConcentration(Window_DefectsDiagram
 			
 			Window_CarrierConcentration.__init__(self)
 			
-			
-			#self.tab1_layout.addWidget(self.tab1_carrierconcentration_widget)
 			self.tab1_layout.addWidget(self.carrierconcentration_window)
 	
 	
@@ -337,13 +333,11 @@ class Tab_PhaseDiagram_DefectsDiagram_CarrierConcentration(Window_DefectsDiagram
 		
 		# Update mu value of third element
 		if self.type == "ternary":
-			#self.deltamu_values[self.third_element] = (self.main_compound_enthalpy - self.main_compound_number_first_specie*self.deltamu_values[self.first_element] - self.main_compound_number_second_specie*self.deltamu_values[self.second_element]) / self.main_compound_number_third_specie
 			self.deltamu_values[self.third_element] = (	self.main_compound_enthalpy \
 														- self.main_compound_info["dft_"+self.first_element]*self.deltamu_values[self.first_element] \
 														- self.main_compound_info["dft_"+self.second_element]*self.deltamu_values[self.second_element] \
 														) / self.main_compound_info["dft_"+self.third_element]
 		elif self.type == "quaternary":
-			#self.deltamu_values[self.third_element] = (self.main_compound_enthalpy - self.main_compound_number_first_specie*self.deltamu_values[self.first_element] - self.main_compound_number_second_specie*self.deltamu_values[self.second_element] - self.main_compound_number_fourth_specie*self.deltamu_values[self.fourth_element]) / self.main_compound_number_third_specie
 			self.deltamu_values[self.third_element] = (	self.main_compound_enthalpy \
 														- self.main_compound_info["dft_"+self.first_element]*self.deltamu_values[self.first_element] \
 														- self.main_compound_info["dft_"+self.second_element]*self.deltamu_values[self.second_element] \
@@ -365,12 +359,7 @@ class Tab_PhaseDiagram_DefectsDiagram_CarrierConcentration(Window_DefectsDiagram
 			
 			# Update chemical potentials in defects diagram object
 			self.DefectsDiagram.Update_Deltamus(self.deltamu_values)
-			"""
-			self.DefectsDiagram.mu_elements[self.first_element]["deltamu"] = self.deltamu_values[self.first_element]
-			self.DefectsDiagram.mu_elements[self.second_element]["deltamu"] = self.deltamu_values[self.second_element]
-			self.DefectsDiagram.mu_elements[self.third_element]["deltamu"] = self.deltamu_values[self.third_element]
-			"""
-
+			
 			# Recalculate defect formation energies
 			self.DefectsDiagram.Calculate_DefectFormations()
 			
@@ -385,21 +374,10 @@ class Tab_PhaseDiagram_DefectsDiagram_CarrierConcentration(Window_DefectsDiagram
 		if self.show_carrier_concentration:
 			
 			# Update chemical potentials in carrier concentration object
-			"""
-			self.CarrierConcentration.mu_elements[self.first_element]["deltamu"] = self.deltamu_values[self.first_element]
-			self.CarrierConcentration.mu_elements[self.second_element]["deltamu"] = self.deltamu_values[self.second_element]
-			self.CarrierConcentration.mu_elements[self.third_element]["deltamu"] = self.deltamu_values[self.third_element]
-			"""
 			self.CarrierConcentration.Update_Deltamus(self.deltamu_values)
 
 
 			# Redraw carrier concentration plot
-			"""
-			if self.CarrierConcentration.carrier_concentration_intrinsic_defect_hole_plot != None:
-				self.CarrierConcentration.Update_HoleConcentration_Plot()
-			if self.CarrierConcentration.carrier_concentration_intrinsic_defect_electron_plot != None:
-				self.CarrierConcentration.Update_ElectronConcentration_Plot()
-			"""
 			self.CarrierConcentration.Update_CarrierConcentration_Plot()
 		
 		

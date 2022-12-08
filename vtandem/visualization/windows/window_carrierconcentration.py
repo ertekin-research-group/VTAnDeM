@@ -50,31 +50,15 @@ class Window_CarrierConcentration(QWidget):
 		self.carrierconcentration_Ymax_box = QLineEdit("1E23")
 		self.carrierconcentration_Ymax_box.editingFinished.connect(lambda: self.CarrierConcentration.Update_WindowSize("YMax", self.carrierconcentration_Ymax_box))
 		self.carrierconcentration_viewport_layout.addWidget(self.carrierconcentration_Ymax_box)
-		
-		"""
-		self.carrierconcentration_holes_checkbox = QCheckBox("Holes",self)
-		self.carrierconcentration_holes_checkbox.setChecked(True)
-		self.carrierconcentration_viewport_layout.addWidget(self.carrierconcentration_holes_checkbox)
-		self.carrierconcentration_electrons_checkbox = QCheckBox("Electrons",self)
-		self.carrierconcentration_electrons_checkbox.setChecked(True)
-		self.carrierconcentration_viewport_layout.addWidget(self.carrierconcentration_electrons_checkbox)
-		"""
-		
+				
 		self.carrierconcentration_window_layout.addWidget(self.carrierconcentration_viewport)
 		
 		self.Activate_Equilibrium_Fermi_Energy_Settings()
-		
-		
 		
 		# (WIDGET) Save carrier concentration plot as figure
 		self.carrier_concentration_savefigure_button = QPushButton("Save Carrier Concentration Plot")
 		self.carrier_concentration_savefigure_button.clicked[bool].connect(lambda: self.CarrierConcentration.SaveFigure())
 		self.carrierconcentration_window_layout.addWidget(self.carrier_concentration_savefigure_button)
-	
-	
-	
-	
-	
 	
 	
 	
@@ -97,23 +81,13 @@ class Window_CarrierConcentration(QWidget):
 		self.CarrierConcentration.carrier_concentration_total_hole_plot = None
 		self.CarrierConcentration.carrier_concentration_total_electron_plot = None
 		
-		"""
-		if self.carrierconcentration_holes_checkbox.isChecked():
-			self.CarrierConcentration.Initialize_HoleConcentration_Plot()
-		
-		if self.carrierconcentration_electrons_checkbox.isChecked():
-			self.CarrierConcentration.Initialize_ElectronConcentration_Plot()
-		"""
 		self.CarrierConcentration.Initialize_CarrierConcentration_Plot()
 
 		# Plot the equilibrium Fermi energy
 		if self.DefectsDiagram.intrinsic_defect_plots != {}:
 			self.Update_Equilibrium_Fermi_Energy_Temperature()
 	
-	
-	
-	
-	
+
 	
 	###############################################################################################
 	################################### Equilibrium Fermi Energy ##################################
@@ -175,14 +149,4 @@ class Window_CarrierConcentration(QWidget):
 			self.equilibrium_fermi_energy_display.setStyleSheet("""QLineEdit { background-color: white; color: black }""")
 
 		self.DefectsDiagram.Plot_Equilibrium_Fermi_Energy(equilibrium_fermi_energy=total_equilibrium_fermi_energy)
-
-
-
-
-
-
-
-
-
-
 

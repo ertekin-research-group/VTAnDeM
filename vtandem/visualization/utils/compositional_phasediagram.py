@@ -16,8 +16,6 @@ for element in periodictable.elements:
 	all_elements.append(str(element))
 		
 
-
-#def Create_Compositional_PhaseDiagram(compounds_info, elements_list):
 def Create_Compositional_PhaseDiagram(compounds_info, elements_list, main_compound_info, main_compound):
 	
 	# Copy main compound bulk info to compounds_info (phase stability analysis will be done using Bulk info in Defects_Tracker.json)
@@ -73,51 +71,6 @@ def Create_Compositional_PhaseDiagram(compounds_info, elements_list, main_compou
 
 
 
-
-"""
-def Plot_Compositional_PhaseDiagram(axes, type, lines, labels, fontdict, label_stable=True):
-	
-	# Plot settings
-	linewidth = 1
-	markersize = 5
-	
-	# Plot compositional phase diagram
-	count = 1
-	newlabels = []
-	if type == "ternary":
-		for x, y in lines:
-			axes.plot(x, y, "bo-", linewidth=linewidth, markeredgecolor="b", markerfacecolor="r", markersize=markersize)
-		for coords in sorted(labels.keys()):
-			entry = labels[coords]
-			label = entry.name
-			if label_stable:
-				if len(entry.composition.elements) == 1:
-					axes.text(coords[0], coords[1], label, fontdict=fontdict)
-				else:
-					axes.text(coords[0], coords[1], str(count), fontdict=fontdict)
-					newlabels.append("{} : {}".format(count, label))
-					count += 1
-	elif type == "quaternary":
-		for x, y, z in lines:
-			axes.plot(x, y, z, "bo-", linewidth=linewidth, markeredgecolor="b", markerfacecolor="r", markersize=markersize)
-		for coords in sorted(labels.keys()):
-			entry = labels[coords]
-			label = entry.name
-			if label_stable:
-				if len(entry.composition.elements) == 1:
-					axes.text(coords[0], coords[1], coords[2], label, fontdict=fontdict)
-				else:
-					axes.text(coords[0], coords[1], coords[2], str(count), fontdict=fontdict)
-					newlabels.append("{} : {}".format(count, label))
-					count += 1
-	
-	# Remove Cartesian axes
-	axes.axis("off")
-	
-	return newlabels
-"""
-
-
 def Plot_Compositional_PhaseDiagram(axes, type, lines, labels, fontdict):
 	
 	# Plot settings
@@ -158,5 +111,4 @@ def Plot_Compositional_PhaseDiagram(axes, type, lines, labels, fontdict):
 	axes.axis("off")
 	
 	return newlabels
-
 

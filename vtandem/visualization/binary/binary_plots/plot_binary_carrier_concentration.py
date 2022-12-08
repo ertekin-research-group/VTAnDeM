@@ -20,9 +20,3 @@ class Plot_Binary_Carrier_Concentration(Plot_CarrierConcentration):
 		# Inherit all variables (plot object, etc.) from parent object (Plot_CarrierConcentration)
 		super().__init__(elements_list = self.elements_list)
 
-
-
-
-
-
-

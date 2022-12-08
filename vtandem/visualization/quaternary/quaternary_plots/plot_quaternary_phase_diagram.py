@@ -111,9 +111,3 @@ class ChemicalPotential_Quaternary_PhaseDiagramProjected2D_TripleView(ChemicalPo
 		self.fourth_element = fourth_element
 		self.elements_list = [self.first_element, self.second_element, self.third_element, self.fourth_element]
 
-
-
-
-
-
-

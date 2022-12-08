@@ -127,52 +127,7 @@ class ChemicalPotential_Quaternary_PhaseDiagram3D(Plot_ChemicalPotential_PhaseDi
 		return A_matrix, b_vector
 	
 	
-	"""
-	def Draw_Mu4_Outline_Region(self, verts, ininc, adj):
-		
-		verts_z = (self.main_compound_enthalpy - self.main_compound_info["dft_"+self.dependent_element]*self.mu4 \
-					- self.main_compound_info["dft_"+self.element_x]*verts[:,0] \
-					- self.main_compound_info["dft_"+self.element_y]*verts[:,1] ) \
-					/ self.main_compound_info["dft_"+self.element_z]
-		
-		verts_z = verts_z.reshape((len(verts),1))
-		plane_vertices = np.hstack((verts, verts_z))
-		
-		print("verts: ", verts)
-		print("plane_vertices: ", plane_vertices)
-		print("ininc: ", ininc)
-		print("adj: ", adj)
-		
-		for i, ininc_i in enumerate(ininc):
-			
-			if len(ininc_i) < 3:
-				continue
-			
-			ininc_i = self.Sort_Plane_Vertices(ininc_i, adj)
-			
-			print("ininc_i: ", ininc_i)
-			
-			x = []
-			y = []
-			z = []
-			for v in ininc_i:
-				x.append(plane_vertices[v][0])
-				y.append(plane_vertices[v][1])
-				z.append(plane_vertices[v][2])
-			x.append(plane_vertices[ininc_i[0]][0])
-			y.append(plane_vertices[ininc_i[0]][1])
-			z.append(plane_vertices[ininc_i[0]][2])
-			coord = [list(zip(x, y, z))]
-			
-			try:
-				self.path.remove()
-			except:
-				pass
-			
-			self.path = Line3DCollection(coord, lw=4, color='k')
-			self.chemicalpotential_phasediagram_plot_axes.add_collection3d(self.path)
-	"""
-	
+
 	def Draw_Mu4_Outline_Region(self, verts, ininc, adj):
 		
 		# Remove current mu4 outline
@@ -229,9 +184,7 @@ class ChemicalPotential_Quaternary_PhaseDiagram3D(Plot_ChemicalPotential_PhaseDi
 		self.path = Line3DCollection(coord, lw=4, color='k')
 		self.chemicalpotential_phasediagram_plot_axes.add_collection3d(self.path)
 	
-	
-	
-	
+
 	
 	def Draw_Mu4_Outline(self):
 		
@@ -240,11 +193,5 @@ class ChemicalPotential_Quaternary_PhaseDiagram3D(Plot_ChemicalPotential_PhaseDi
 		self.Draw_Mu4_Outline_Region(phasediagram_projection2d.generators, phasediagram_projection2d.ininc, phasediagram_projection2d.adj)
 		
 		self.chemicalpotential_phasediagram_plot_canvas.draw()
-
-
-
-
-
-
 
 

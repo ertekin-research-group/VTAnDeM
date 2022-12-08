@@ -244,8 +244,3 @@ class ChemicalPotential_PhaseDiagramProjected2D_TripleView:
 		# Draw the phase diagram
 		self.tripleview_phase_diagram_plot_canvas.draw()
 
-
-
-
-
-

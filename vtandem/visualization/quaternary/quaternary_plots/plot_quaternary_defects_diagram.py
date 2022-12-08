@@ -21,9 +21,3 @@ class Plot_Quaternary_DefectsDiagram(Plot_DefectsDiagram):
 		# Inherit all variables (plot object, etc.) from parent object (DefectsDiagram_Plot)
 		super().__init__(elements_list = self.elements_list)
 
-
-
-
-
-
-
