@@ -36,6 +36,8 @@ Installation
 - Download all VTAnDeM files.
 	- `git clone https://github.com/ertekin-research-group/VTAnDeM`
 - Run `python3 setup.py install` in the downloaded VTAnDeM folder.
+- Install all required packages.
+	- `pip install -r requirements.txt`
 
 
 Examples:
