@@ -1,0 +1,8 @@
+numpy>=1.16
+matplotlib>=3.0
+click
+matplotlib-label-lines
+periodictable
+pymatgen>=2019.5.8
+PyQt5>=5.11.3
+git+https://github.com/frssp/PyPolyhedron@master

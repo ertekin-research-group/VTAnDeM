@@ -1,5 +1,5 @@
 
-from setuptools import setup, find_packages
+from setuptools import setup
 
 source_packages = [	"vtandem", \
 					"vtandem.dft", \
@@ -18,6 +18,7 @@ source_packages = [	"vtandem", \
 					"vtandem.visualization.tabs", \
 					"vtandem.visualization.utils"
 					]
+
 source_image_files = [ 	("logo", ("logo/LogoLong.png", "logo/LogoSmall.png")),
 						("icon", ("icon/FolderBrowserIcon.png", "icon/QuestionIcon.png"))
 						]
@@ -37,16 +38,6 @@ setup(
 			"vtandem = vtandem.vtandem:vtandem"
 		]
 	},
-	install_requires=[
-		"numpy>=1.16",
-		"matplotlib>=3.0",
-		"matplotlib-label-lines",
-		"pymatgen",
-		"periodictable",
-		"PyQt5",
-		"click>8.0",
-		"polyhedron @ https://github.com/frssp/PyPolyhedron/archive/master.zip#egg=polyhedron-0.2.1",
-	],
 )
 
 
