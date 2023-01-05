@@ -45,7 +45,6 @@ script_path = os.path.dirname(__file__)
 vtandem_source_path = "/".join(script_path.split("/")[:-1])
 
 
-
 ###############################################################################################################################
 ###############################################################################################################################
 ################################################### Initial VTAnDeM Window ####################################################
@@ -633,6 +632,7 @@ class Material_Selection_Window(QMainWindow):
 		
 		# Set icon for window as VTAnDeM logo
 		self.setWindowIcon(QIcon(vtandem_source_path+"/logo/LogoSmall.png"))
+		#self.setWindowIcon(QIcon("logo/LogoSmall.png"))
 		
 		# Set window title
 		material_selection_window_title = "Material Selection Hub"
@@ -646,6 +646,7 @@ class Material_Selection_Window(QMainWindow):
 		# Show VTAnDeM logo
 		self.vtandem_logo = QLabel()
 		self.vtandem_pixmap = QPixmap(vtandem_source_path+"/logo/LogoLong.png")
+		#self.vtandem_pixmap = QPixmap("logo/LogoLong.png")
 		self.vtandem_pixmap_scaled = self.vtandem_pixmap.scaled(512, 512, Qt.KeepAspectRatio)
 		self.vtandem_logo.setPixmap( self.vtandem_pixmap_scaled )
 		self.initial_dialog_widgets_layout.addWidget(self.vtandem_logo)

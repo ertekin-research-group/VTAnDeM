@@ -168,7 +168,10 @@ class Plot_DefectsDiagram(SaveFigure):
 		
 		# Plot defect formation energy of each intrinsic defect
 		for intrinsic_defect in self.intrinsic_defects_enthalpy_data.keys():
-			defect_label = r""+intrinsic_defect.split("_")[0]+"$_\mathrm{"+intrinsic_defect.split("_")[-1]+"}$"
+			if len(intrinsic_defect.split("_")) == 2:
+				defect_label = r""+intrinsic_defect.split("_")[0]+"$_\mathrm{"+intrinsic_defect.split("_")[1]+"}$"
+			elif len(intrinsic_defect.split("_")) == 3:
+				defect_label = r""+intrinsic_defect.split("_")[0]+"$_\mathrm{"+intrinsic_defect.split("_")[1]+intrinsic_defect.split("_")[2]+"}$"
 			self.intrinsic_defect_plots[intrinsic_defect], = self.defects_diagram_plot_drawing.plot(self.fermi_energy_array - self.EVBM, self.intrinsic_defects_enthalpy_data[intrinsic_defect], label = defect_label)
 		
 		# Create label for each defect
@@ -206,7 +209,10 @@ class Plot_DefectsDiagram(SaveFigure):
 				continue
 
 			# Plot defect formation energy of dopant
-			defect_label = r""+extrinsic_defect.split("_")[0]+"$_\mathrm{"+extrinsic_defect.split("_")[-1]+"}$"
+			if len(extrinsic_defect.split("_")) == 2:
+				defect_label = r""+extrinsic_defect.split("_")[0]+"$_\mathrm{"+extrinsic_defect.split("_")[1]+"}$"
+			elif len(extrinsic_defect.split("_")) == 3:
+				defect_label = r""+extrinsic_defect.split("_")[0]+"$_\mathrm{"+extrinsic_defect.split("_")[1]+extrinsic_defect.split("_")[2]+"}$"
 			self.extrinsic_defect_plots[extrinsic_defect], = self.defects_diagram_plot_drawing.plot(self.fermi_energy_array - self.EVBM, self.extrinsic_defects_enthalpy_data[extrinsic_defect], label = defect_label)
 			
 			# Create label for each defect

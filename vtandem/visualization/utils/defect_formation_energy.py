@@ -17,7 +17,7 @@ def Calculate_IntrinsicDefectFormationEnthalpies(	defects_data, \
 	for defect in defects_data.keys():
 		
 		# Check that the item is truly a defect
-		if ("_" not in defect) and (defect.split("_")[-1] not in mu_elements.keys()):
+		if ("_" not in defect) and (defect.split("_")[1] not in mu_elements.keys()):
 			continue
 		
 		# Intrinsic defect formation_enthalpies
@@ -49,7 +49,7 @@ def Calculate_ExtrinsicDefectFormationEnthalpies(	defects_data, \
 	
 	# Check that the extrinsic defect name truly represents a defect
 	for extrinsic_defect in extrinsic_defects:
-		if ("_" not in extrinsic_defect) and (extrinsic_defect.split("_")[-1] not in mu_elements.keys()):
+		if ("_" not in extrinsic_defect) and (extrinsic_defect.split("_")[1] not in mu_elements.keys()):
 			return
 	
 	# Initialize storage for all charges of the extrinsic defect
