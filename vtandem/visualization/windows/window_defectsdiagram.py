@@ -35,43 +35,7 @@ class Window_DefectsDiagram:
 		self.defectsdiagram_window_layout.addWidget(self.defects_diagram_plot)
 		
 		# Axis limits for defects diagram
-		self.defectsdiagram_viewport = QWidget()
-		self.defectsdiagram_viewport_layout = QHBoxLayout(self.defectsdiagram_viewport)
-		self.defectsdiagram_axislim_boxes = {}
-
-		# X-axis limits for defects diagram
-		defectsdiagram_Xmin_label = QLabel(u"x"+"<sub>min</sub>")
-		defectsdiagram_Xmin_label.setAlignment(Qt.AlignCenter)
-		self.defectsdiagram_viewport_layout.addWidget(defectsdiagram_Xmin_label)
-		self.defectsdiagram_Xmin_box = QLineEdit("0.0")
-		self.defectsdiagram_axislim_boxes["XMin"] = self.defectsdiagram_Xmin_box
-		self.defectsdiagram_Xmin_box.editingFinished.connect(lambda: self.DefectsDiagram.Update_WindowSize("XMin", self.defectsdiagram_axislim_boxes))
-		self.defectsdiagram_viewport_layout.addWidget(self.defectsdiagram_Xmin_box)
-		defectsdiagram_Xmax_label = QLabel(u"x"+"<sub>max</sub>")
-		defectsdiagram_Xmax_label.setAlignment(Qt.AlignCenter)
-		self.defectsdiagram_viewport_layout.addWidget(defectsdiagram_Xmax_label)
-		self.defectsdiagram_Xmax_box = QLineEdit(str(round(self.DefectsDiagram.ECBM-self.DefectsDiagram.EVBM,4)))
-		self.defectsdiagram_axislim_boxes["XMax"] = self.defectsdiagram_Xmax_box
-		self.defectsdiagram_Xmax_box.editingFinished.connect(lambda: self.DefectsDiagram.Update_WindowSize("XMax", self.defectsdiagram_axislim_boxes))
-		self.defectsdiagram_viewport_layout.addWidget(self.defectsdiagram_Xmax_box)
-
-		# Y-axis limits for defects diagram
-		defectsdiagram_Ymin_label = QLabel(u"y"+"<sub>min</sub>")
-		defectsdiagram_Ymin_label.setAlignment(Qt.AlignCenter)
-		self.defectsdiagram_viewport_layout.addWidget(defectsdiagram_Ymin_label)
-		self.defectsdiagram_Ymin_box = QLineEdit("-2.0")
-		self.defectsdiagram_axislim_boxes["YMin"] = self.defectsdiagram_Ymin_box
-		self.defectsdiagram_Ymin_box.editingFinished.connect(lambda: self.DefectsDiagram.Update_WindowSize("YMin", self.defectsdiagram_axislim_boxes))
-		self.defectsdiagram_viewport_layout.addWidget(self.defectsdiagram_Ymin_box)
-		defectsdiagram_Ymax_label = QLabel(u"y"+"<sub>max</sub>")
-		defectsdiagram_Ymax_label.setAlignment(Qt.AlignCenter)
-		self.defectsdiagram_viewport_layout.addWidget(defectsdiagram_Ymax_label)
-		self.defectsdiagram_Ymax_box = QLineEdit("2.0")
-		self.defectsdiagram_axislim_boxes["YMax"] = self.defectsdiagram_Ymax_box
-		self.defectsdiagram_Ymax_box.editingFinished.connect(lambda: self.DefectsDiagram.Update_WindowSize("YMax", self.defectsdiagram_axislim_boxes))
-		self.defectsdiagram_viewport_layout.addWidget(self.defectsdiagram_Ymax_box)
-		self.defectsdiagram_window_layout.addWidget(self.defectsdiagram_viewport)
-		
+		self.Activate_DefectsDiagram_Limits()
 
 		# Synthesis temperature
 		self.defects_synthesis_temperature = QWidget()
@@ -135,6 +99,7 @@ class Window_DefectsDiagram:
 		
 		else:
 			if self.show_carrier_concentration:
+
 				# Add synthesis temperature button
 				self.defectsdiagram_window_layout.addWidget(self.defects_synthesis_temperature)
 		
@@ -169,6 +134,54 @@ class Window_DefectsDiagram:
 			self.DefectsDiagram.Initialize_Extrinsic_DefectsDiagram_Plot()
 	
 	
+
+	###############################################################################################
+	################################### Defects Diagram Limits ####################################
+	###############################################################################################
+	
+	def Activate_DefectsDiagram_Limits(self):
+
+		# Axis limits for defects diagram
+		self.defectsdiagram_viewport = QWidget()
+		self.defectsdiagram_viewport_layout = QHBoxLayout(self.defectsdiagram_viewport)
+		self.defectsdiagram_axislim_boxes = {}
+
+		# X-axis limits for defects diagram
+		defectsdiagram_Xmin_label = QLabel(u"x"+"<sub>min</sub>")
+		defectsdiagram_Xmin_label.setAlignment(Qt.AlignCenter)
+		self.defectsdiagram_viewport_layout.addWidget(defectsdiagram_Xmin_label)
+		self.defectsdiagram_Xmin_box = QLineEdit("0.0")
+		self.defectsdiagram_axislim_boxes["XMin"] = self.defectsdiagram_Xmin_box
+		self.defectsdiagram_Xmin_box.editingFinished.connect(lambda: self.DefectsDiagram.Update_WindowSize("XMin", self.defectsdiagram_axislim_boxes))
+		self.defectsdiagram_viewport_layout.addWidget(self.defectsdiagram_Xmin_box)
+		defectsdiagram_Xmax_label = QLabel(u"x"+"<sub>max</sub>")
+		defectsdiagram_Xmax_label.setAlignment(Qt.AlignCenter)
+		self.defectsdiagram_viewport_layout.addWidget(defectsdiagram_Xmax_label)
+		self.defectsdiagram_Xmax_box = QLineEdit(str(round(self.DefectsDiagram.ECBM-self.DefectsDiagram.EVBM,4)))
+		self.defectsdiagram_axislim_boxes["XMax"] = self.defectsdiagram_Xmax_box
+		self.defectsdiagram_Xmax_box.editingFinished.connect(lambda: self.DefectsDiagram.Update_WindowSize("XMax", self.defectsdiagram_axislim_boxes))
+		self.defectsdiagram_viewport_layout.addWidget(self.defectsdiagram_Xmax_box)
+
+		# Y-axis limits for defects diagram
+		defectsdiagram_Ymin_label = QLabel(u"y"+"<sub>min</sub>")
+		defectsdiagram_Ymin_label.setAlignment(Qt.AlignCenter)
+		self.defectsdiagram_viewport_layout.addWidget(defectsdiagram_Ymin_label)
+		self.defectsdiagram_Ymin_box = QLineEdit("-2.0")
+		self.defectsdiagram_axislim_boxes["YMin"] = self.defectsdiagram_Ymin_box
+		self.defectsdiagram_Ymin_box.editingFinished.connect(lambda: self.DefectsDiagram.Update_WindowSize("YMin", self.defectsdiagram_axislim_boxes))
+		self.defectsdiagram_viewport_layout.addWidget(self.defectsdiagram_Ymin_box)
+		defectsdiagram_Ymax_label = QLabel(u"y"+"<sub>max</sub>")
+		defectsdiagram_Ymax_label.setAlignment(Qt.AlignCenter)
+		self.defectsdiagram_viewport_layout.addWidget(defectsdiagram_Ymax_label)
+		self.defectsdiagram_Ymax_box = QLineEdit("2.0")
+		self.defectsdiagram_axislim_boxes["YMax"] = self.defectsdiagram_Ymax_box
+		self.defectsdiagram_Ymax_box.editingFinished.connect(lambda: self.DefectsDiagram.Update_WindowSize("YMax", self.defectsdiagram_axislim_boxes))
+		self.defectsdiagram_viewport_layout.addWidget(self.defectsdiagram_Ymax_box)
+
+		# Add widget to window
+		self.defectsdiagram_window_layout.addWidget(self.defectsdiagram_viewport)
+	
+
 	
 	def Update_ExtrinsicDefect_DeltaMu(self):
 		

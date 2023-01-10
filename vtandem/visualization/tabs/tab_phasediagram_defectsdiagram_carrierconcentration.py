@@ -347,7 +347,6 @@ class Tab_PhaseDiagram_DefectsDiagram_CarrierConcentration(Window_DefectsDiagram
 		
 		
 		
-		
 		# Redraw red dot on phase diagram
 		if (self.PhaseDiagram.main_compound_plot != None) and (self.PhaseDiagram.competing_compound_plots != {}):
 			self.pressed_point_plot.set_data([self.deltamu_values[self.first_element]], [self.deltamu_values[self.second_element]])
@@ -376,20 +375,16 @@ class Tab_PhaseDiagram_DefectsDiagram_CarrierConcentration(Window_DefectsDiagram
 			# Update chemical potentials in carrier concentration object
 			self.CarrierConcentration.Update_Deltamus(self.deltamu_values)
 
-
 			# Redraw carrier concentration plot
 			self.CarrierConcentration.Update_CarrierConcentration_Plot()
 		
 		
+
 		if self.show_defects_diagram and self.show_carrier_concentration:
 			
 			# Update the equilibrium Fermi energy
 			if self.DefectsDiagram.intrinsic_defect_plots != {}:
 				self.Update_Equilibrium_Fermi_Energy_Temperature()
-	
-	
-	
-	
 	
 	
 	

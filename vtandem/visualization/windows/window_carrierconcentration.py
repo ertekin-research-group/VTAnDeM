@@ -18,7 +18,6 @@ class Window_CarrierConcentration(QWidget):
 		
 		QWidget.__init__(self)
 		
-		
 		###### Main carrier concentration window widget
 		self.carrierconcentration_window = QWidget()										# One of the main sub-widgets is where the user defines the settings of the plots.
 		self.carrierconcentration_window_layout = QVBoxLayout(self.carrierconcentration_window)	# The settings should be placed on top of one another, i.e. vertically.
@@ -34,26 +33,14 @@ class Window_CarrierConcentration(QWidget):
 		self.carrierconcentration_plot = self.CarrierConcentration.carrier_concentration_plot_canvas
 		self.carrierconcentration_window_layout.addWidget(self.carrierconcentration_plot)
 		
-		self.carrierconcentration_viewport = QWidget()
-		self.carrierconcentration_viewport_layout = QHBoxLayout(self.carrierconcentration_viewport)
-		
-		# (WIDGET) Y-axis limits for carrier concentration
-		self.carrierconcentration_Ymin_label = QLabel(u"y"+"<sub>min</sub>")
-		self.carrierconcentration_Ymin_label.setAlignment(Qt.AlignCenter)
-		self.carrierconcentration_viewport_layout.addWidget(self.carrierconcentration_Ymin_label)
-		self.carrierconcentration_Ymin_box = QLineEdit("1E16")
-		self.carrierconcentration_Ymin_box.editingFinished.connect(lambda: self.CarrierConcentration.Update_WindowSize("YMin", self.carrierconcentration_Ymin_box))
-		self.carrierconcentration_viewport_layout.addWidget(self.carrierconcentration_Ymin_box)
-		self.carrierconcentration_Ymax_label = QLabel(u"y"+"<sub>max</sub>")
-		self.carrierconcentration_Ymax_label.setAlignment(Qt.AlignCenter)
-		self.carrierconcentration_viewport_layout.addWidget(self.carrierconcentration_Ymax_label)
-		self.carrierconcentration_Ymax_box = QLineEdit("1E23")
-		self.carrierconcentration_Ymax_box.editingFinished.connect(lambda: self.CarrierConcentration.Update_WindowSize("YMax", self.carrierconcentration_Ymax_box))
-		self.carrierconcentration_viewport_layout.addWidget(self.carrierconcentration_Ymax_box)
-				
-		self.carrierconcentration_window_layout.addWidget(self.carrierconcentration_viewport)
-		
+		# Add y-axis limits boxes
+		self.Activate_CarrierConcentration_YLimits()
+
+		# Add temperature and equilibrium Fermi energy
 		self.Activate_Equilibrium_Fermi_Energy_Settings()
+
+		# Add effective mass boxes
+		self.Activate_EffectiveMass_Settings()
 		
 		# (WIDGET) Save carrier concentration plot as figure
 		self.carrier_concentration_savefigure_button = QPushButton("Save Carrier Concentration Plot")
@@ -88,9 +75,44 @@ class Window_CarrierConcentration(QWidget):
 			self.Update_Equilibrium_Fermi_Energy_Temperature()
 	
 
-	
+
 	###############################################################################################
-	################################### Equilibrium Fermi Energy ##################################
+	################################ Carrier Concentration Limits #################################
+	###############################################################################################
+	
+	def Activate_CarrierConcentration_YLimits(self):
+
+		# (WIDGET) Y-axis limits for carrier concentration
+		self.carrierconcentration_viewport = QWidget()
+		self.carrierconcentration_viewport_layout = QHBoxLayout(self.carrierconcentration_viewport)
+		
+		# Y min label
+		self.carrierconcentration_Ymin_label = QLabel(u"y"+"<sub>min</sub>")
+		self.carrierconcentration_Ymin_label.setAlignment(Qt.AlignCenter)
+		self.carrierconcentration_viewport_layout.addWidget(self.carrierconcentration_Ymin_label)
+		
+		# Y min value
+		self.carrierconcentration_Ymin_box = QLineEdit("1E16")
+		self.carrierconcentration_Ymin_box.editingFinished.connect(lambda: self.CarrierConcentration.Update_WindowSize("YMin", self.carrierconcentration_Ymin_box))
+		self.carrierconcentration_viewport_layout.addWidget(self.carrierconcentration_Ymin_box)
+
+		# Y max label
+		self.carrierconcentration_Ymax_label = QLabel(u"y"+"<sub>max</sub>")
+		self.carrierconcentration_Ymax_label.setAlignment(Qt.AlignCenter)
+		self.carrierconcentration_viewport_layout.addWidget(self.carrierconcentration_Ymax_label)
+		
+		# Y max value
+		self.carrierconcentration_Ymax_box = QLineEdit("1E23")
+		self.carrierconcentration_Ymax_box.editingFinished.connect(lambda: self.CarrierConcentration.Update_WindowSize("YMax", self.carrierconcentration_Ymax_box))
+		self.carrierconcentration_viewport_layout.addWidget(self.carrierconcentration_Ymax_box)
+		
+		# Add widget to window
+		self.carrierconcentration_window_layout.addWidget(self.carrierconcentration_viewport)
+
+	
+
+	###############################################################################################
+	########################## Temperature and Equilibrium Fermi Energy ###########################
 	###############################################################################################
 	
 	def Activate_Equilibrium_Fermi_Energy_Settings(self):
@@ -130,9 +152,12 @@ class Window_CarrierConcentration(QWidget):
 		self.equilibrium_fermi_energy_display.setStyleSheet("""QLineEdit { background-color: white; color: black }""")
 		self.equilibrium_fermi_energy_widget_layout.addWidget(self.equilibrium_fermi_energy_display)
 		
+		# Spacer item
 		self.equilibrium_fermi_energy_widget_layout.addItem(QSpacerItem(50, 20, QSizePolicy.Expanding, QSizePolicy.Minimum))
 		
+		# Add widget to window
 		self.carrierconcentration_window_layout.addWidget(self.equilibrium_fermi_energy_widget)
+	
 	
 	
 	def Update_Equilibrium_Fermi_Energy_Temperature(self):
@@ -149,4 +174,43 @@ class Window_CarrierConcentration(QWidget):
 			self.equilibrium_fermi_energy_display.setStyleSheet("""QLineEdit { background-color: white; color: black }""")
 
 		self.DefectsDiagram.Plot_Equilibrium_Fermi_Energy(equilibrium_fermi_energy=total_equilibrium_fermi_energy)
+
+
+	
+	###############################################################################################
+	############################ Effective Mass, Parabolic Band Model #############################
+	###############################################################################################
+	
+	def Activate_EffectiveMass_Settings(self):
+
+		# (WIDGET) Effective masses of DOS for carrier concentrations
+		self.effective_masses_widget = QWidget()
+		self.effective_masses_widget_layout = QHBoxLayout(self.effective_masses_widget)
+		
+		# Label for hole effective mass
+		hole_effective_mass_label = QLabel(u"m"+"<sub>h</sub>"+"<sup>*</sup> (m"+"<sub>0</sub>"+") = ")
+		hole_effective_mass_label.setAlignment(Qt.AlignCenter)
+		self.effective_masses_widget_layout.addWidget(hole_effective_mass_label)
+
+		# Input for hole effective mass
+		self.hole_effective_mass_input = QLineEdit("0.00000")
+		self.hole_effective_mass_input.editingFinished.connect(lambda: self.CarrierConcentration.Update_EffMass("holes", self.hole_effective_mass_input))
+		self.hole_effective_mass_input.editingFinished.connect(self.Update_Equilibrium_Fermi_Energy_Temperature)
+		self.effective_masses_widget_layout.addWidget(self.hole_effective_mass_input)
+
+		# Label for electron effective mass
+		electron_effective_mass_label = QLabel(u"m"+"<sub>e</sub>"+"<sup>*</sup> (m"+"<sub>0</sub>"+") = ")
+		electron_effective_mass_label.setAlignment(Qt.AlignCenter)
+		self.effective_masses_widget_layout.addWidget(electron_effective_mass_label)
+
+		# Input for electron effective mass
+		self.electron_effective_mass_input = QLineEdit("0.00000")
+		self.electron_effective_mass_input.editingFinished.connect(lambda: self.CarrierConcentration.Update_EffMass("electrons", self.electron_effective_mass_input))
+		self.electron_effective_mass_input.editingFinished.connect(self.Update_Equilibrium_Fermi_Energy_Temperature)
+		self.effective_masses_widget_layout.addWidget(self.electron_effective_mass_input)
+
+		# Add widget to window
+		self.carrierconcentration_window_layout.addWidget(self.effective_masses_widget)
+
+
 

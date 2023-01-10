@@ -14,6 +14,8 @@ from vtandem.visualization.utils.carrier_concentration import Calculate_CarrierC
 
 from vtandem.visualization.plots.save_plot import SaveFigure
 
+from PyQt5.QtWidgets import QMessageBox
+
 
 
 class Plot_CarrierConcentration(SaveFigure):
@@ -38,25 +40,28 @@ class Plot_CarrierConcentration(SaveFigure):
 		self.temperature_array = np.arange(200, self.max_temperature+1, self.temperature_stepsize)
 		self.synthesis_temperature = None
 		
+		# DOS info
 		self.energy = None
 		self.gE = None
 		self.energies_ValenceBand		= None
 		self.gE_ValenceBand 			= None
 		self.energies_ConductionBand	= None
 		self.gE_ConductionBand 			= None
-		
+
+		# Effective masses of DOS
+		self.effmass_dict = {"holes": 0.0, "electrons": 0.0}
+
+		# Equilibrium Fermi energy
 		self.intrinsic_equilibrium_fermi_energy = {}
 		self.total_equilibrium_fermi_energy = {}
 		for temperature in self.temperature_array:
 			self.intrinsic_equilibrium_fermi_energy[temperature] = 0.0
 			self.total_equilibrium_fermi_energy[temperature] = 0.0
 		
-		
 		# Initialize all mu values
 		self.mu_elements = {}
 		for element in elements_list:
 			self.mu_elements[element] = {"mu0": 0.0, "deltamu": 0.0}
-
 		
 		# Store user-selected dopant
 		self.dopant = "None"
@@ -83,6 +88,7 @@ class Plot_CarrierConcentration(SaveFigure):
 		SaveFigure.__init__(self, self.carrier_concentration_plot_figure)
 	
 	
+
 	def Activate_CarrierConcentration_Plot_Axes(self):
 		
 		self.carrier_concentration_plot_drawing.set_xlim(200, self.max_temperature)
@@ -98,8 +104,21 @@ class Plot_CarrierConcentration(SaveFigure):
 		self.carrier_concentration_plot_drawing.set_aspect("auto")
 	
 	
+
 	def Update_WindowSize(self, ytype, Ylim_box_object):
 		
+		# Check to make sure y-limit input is legitimate number
+		try:
+			float(Ylim_box_object.text())
+		except:
+			self.Revert_WindowSize_toDefault(ytype, Ylim_box_object)
+			return
+
+		# Check to make sure y-limit input is greater than 0
+		if float(Ylim_box_object.text()) <= 0.0:
+			self.Revert_WindowSize_toDefault(ytype, Ylim_box_object)
+			return
+
 		# Modify defects diagram y-axis
 		if ytype == "YMin":
 			self.ymin = float(Ylim_box_object.text())
@@ -108,7 +127,17 @@ class Plot_CarrierConcentration(SaveFigure):
 		self.carrier_concentration_plot_drawing.set_ylim(self.ymin, self.ymax)
 		self.carrier_concentration_plot_canvas.draw()
 
+
+
+	def Revert_WindowSize_toDefault(self, ytype, Ylim_box_object):
+		ymin_current, ymax_current = self.carrier_concentration_plot_drawing.get_ylim()
+		if ytype == "YMin":
+			Ylim_box_object.setText(str(ymin_current))
+		if ytype == "YMax":
+			Ylim_box_object.setText(str(ymax_current))
 	
+
+
 	def Organize_DOS_Data(self):
 		
 		# Initialize data
@@ -163,11 +192,76 @@ class Plot_CarrierConcentration(SaveFigure):
 		# Reposition band edges to corrected values (NOT ZERO-ED)
 		self.energies_ValenceBand += self.EVBM
 		self.energies_ConductionBand += self.ECBM - np.min(self.energies_ConductionBand)
-		
+
 		# Normalize DOS to be per volume
 		self.gE_ValenceBand /= self.dos_data["Volume"]
 		self.gE_ConductionBand /= self.dos_data["Volume"]
-	
+
+
+
+	def Update_EffMass(self, carrier_type, effmass_input_object):
+
+		# Check to make sure effective mass input is a float
+		try:
+			float(effmass_input_object.text())
+		except:
+			effmass_input_object.setText("0.00000")
+			pass
+
+		# Check to see if effective mass input has changed. If not, don't proceed
+		if self.effmass_dict[carrier_type] == float(effmass_input_object.text()):
+			return
+
+		# Update effective masses
+		self.effmass_dict[carrier_type] = float(effmass_input_object.text())
+		
+		# If effective mass is set to zero, proceed with DFT mode
+		if self.effmass_dict[carrier_type] == 0.0:
+			
+			self.Extract_Relevant_Energies_DOSs()
+			
+			print("DFT mode, calculating carrier concentrations...")
+
+			message_box = QMessageBox()
+			message_box.setText("Recalculating carrier concentrations...")
+			message_box.setWindowTitle("Recalculating...")
+			message_box.show()
+
+			self.Calculate_Hole_Electron_Concentration_Matrices()
+			
+			message_box.close()
+
+			print("Done calculating carrier concentrations.")
+			return
+
+
+		# Otherwise, launch parabolic band mode
+
+		# Update DOSs
+		me = 9.109E-31
+		e = 1.602E-19
+		h = 6.626E-34
+		hbar = h / 2 / np.pi
+		if carrier_type == "holes":
+			self.gE_ValenceBand = np.sqrt(2) * (self.effmass_dict[carrier_type] * me)**(3./2) / np.pi**2 / hbar**3 * np.sqrt((self.EVBM - self.energies_ValenceBand)*e) * 1E-6 * e
+		elif carrier_type == "electrons":
+			self.gE_ConductionBand = np.sqrt(2) * (self.effmass_dict[carrier_type] * me)**(3./2) / np.pi**2 / hbar**3 * np.sqrt((self.energies_ConductionBand - self.ECBM)*e) * 1E-6 * e
+
+		print("Parabolic band mode, carrier concentrations...")
+		
+		message_box = QMessageBox()
+		message_box.setText("Recalculating carrier concentrations...")
+		message_box.setWindowTitle("Recalculating...")
+		message_box.show()
+		
+		self.Calculate_Hole_Electron_Concentration_Matrices()
+		
+		message_box.close()
+		
+		print("Done calculating carrier concentrations.")
+		
+		self.Update_CarrierConcentration_Plot()
+
 
 	
 	def Update_Deltamus(self, deltamu_values):
@@ -176,7 +270,6 @@ class Plot_CarrierConcentration(SaveFigure):
 		# 	deltamu_values: Dictionary of deltamu values, in element:value pairs
 		for element in self.mu_elements.keys():
 			self.mu_elements[element]["deltamu"] = deltamu_values[element]
-
 
 
 

@@ -35,12 +35,10 @@ class Tab_PhaseDiagram_DefectsDiagram_CarrierConcentration(Tab_PhaseDiagram_Defe
 		self.fourth_element = fourth_element
 		self.elements_list = [self.first_element, self.second_element, self.third_element, self.fourth_element]					# Species list (order MAY change)
 		
-		
 		self.PhaseDiagram = ChemicalPotential_Quaternary_PhaseDiagramProjected2D(self, main_compound = main_compound, first_element = first_element, second_element = second_element, third_element = third_element, fourth_element = fourth_element)
 		
 		if show_defects_diagram:
 			self.DefectsDiagram = Plot_Quaternary_DefectsDiagram(main_compound = main_compound, first_element = first_element, second_element = second_element, third_element = third_element, fourth_element = fourth_element)
-		
 		
 		if show_carrier_concentration:
 			self.CarrierConcentration = Plot_Quaternary_Carrier_Concentration(main_compound = main_compound, first_element = first_element, second_element = second_element, third_element = third_element, fourth_element = fourth_element)
