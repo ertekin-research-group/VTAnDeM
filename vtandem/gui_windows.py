@@ -762,10 +762,15 @@ class Material_Selection_Window(QMainWindow):
 				self.defects_diagram_checkbox.setEnabled(True)
 				self.defects_diagram_checkbox.setChecked(True)
 				self.defects_diagram_checkbox.setStyleSheet("color: black")
+				"""
 				if (compound_name in self.dos_data.keys()) and (self.dos_data[compound_name] != {}):
 					self.carrier_concentration_checkbox.setEnabled(True)
 					self.carrier_concentration_checkbox.setChecked(True)
 					self.carrier_concentration_checkbox.setStyleSheet("color: black")
+				"""
+				self.carrier_concentration_checkbox.setEnabled(True)
+				self.carrier_concentration_checkbox.setChecked(True)
+				self.carrier_concentration_checkbox.setStyleSheet("color: black")
 			else:
 				self.defects_diagram_checkbox.setEnabled(False)
 				self.defects_diagram_checkbox.setChecked(False)

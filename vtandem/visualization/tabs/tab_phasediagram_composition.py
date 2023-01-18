@@ -61,7 +61,11 @@ class Tab_Compositional_PhaseDiagram(Window_DefectsDiagram, Window_CarrierConcen
 			
 			self.CarrierConcentration.defects_data = defects_data
 			self.CarrierConcentration.main_compound_info = main_compound_info
-			self.CarrierConcentration.dos_data = dos_data[self.main_compound]
+			#self.CarrierConcentration.dos_data = dos_data[self.main_compound]
+			try:
+				self.CarrierConcentration.dos_data = dos_data[self.main_compound]
+			except:
+				self.CarrierConcentration.dos_data = {"DOS": {}, "Volume": 0.0}
 			
 			for element in self.elements_list:
 				self.CarrierConcentration.mu_elements[element]["mu0"] = compounds_info[element]["mu0"]
@@ -73,9 +77,10 @@ class Tab_Compositional_PhaseDiagram(Window_DefectsDiagram, Window_CarrierConcen
 			# Fermi energies should sample outside band gap, in case EFeq is not in gap
 			self.CarrierConcentration.fermi_energy_array = np.linspace(self.DefectsDiagram.EVBM-1.0, self.DefectsDiagram.ECBM+1.0, 2000)
 			self.CarrierConcentration.Activate_CarrierConcentration_Plot_Axes()
-			self.CarrierConcentration.Organize_DOS_Data()
-			self.CarrierConcentration.Extract_Relevant_Energies_DOSs()
-			self.CarrierConcentration.Calculate_Hole_Electron_Concentration_Matrices()
+			if self.CarrierConcentration.dos_data["DOS"] != {}:
+				self.CarrierConcentration.Organize_DOS_Data()
+				self.CarrierConcentration.Extract_Relevant_Energies_DOSs()
+				self.CarrierConcentration.Calculate_Hole_Electron_Concentration_Matrices()
 			
 			# Update carrier concentration in response to clicking on phase diagram
 			self.Compositional_PhaseDiagram.composition_phasediagram_plot_figure.canvas.mpl_connect('button_press_event', self.Update_CarrierConcentration_Plot_Function)
@@ -102,7 +107,6 @@ class Tab_Compositional_PhaseDiagram(Window_DefectsDiagram, Window_CarrierConcen
 			Window_DefectsDiagram.__init__(self, show_dopant=False)
 			self.tab3_layout.addWidget(self.defectsdiagram_window)
 		
-
 		if self.show_carrier_concentration:
 			Window_CarrierConcentration.__init__(self)
 			self.tab3_layout.addWidget(self.carrierconcentration_window)

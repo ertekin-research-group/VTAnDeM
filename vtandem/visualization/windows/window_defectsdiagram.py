@@ -354,39 +354,6 @@ class Window_DefectsDiagram:
 		self.defectsdiagram_window_layout.addWidget(self.defectconc_stat_widget)
 
 
-	"""
-	def Activate_DefectConcentration_Statistics(self):
-
-		# (WIDGET) Choice of statistics for defect concentration (Maxwell-Boltzmann or Fermi-Dirac)
-		self.defectconc_stat_widget = QWidget()
-		self.defectconc_stat_widget_layout = QHBoxLayout(self.defectconc_stat_widget)
-
-		# Label for distribution statistics
-		defectconc_stat_label = QLabel("Distribution for Defect Concentration:")
-		defectconc_stat_label.setAlignment(Qt.AlignCenter)
-		self.defectconc_stat_widget_layout.addWidget(defectconc_stat_label)
-
-		# Options bar for distribution statistics
-		self.defectconc_stat_box = QComboBox()
-		self.defectconc_stat_box.addItem("Maxwell-Boltzmann")
-		self.defectconc_stat_box.addItem("Fermi-Dirac")
-		self.defectconc_stat_box.setCurrentIndex(0)
-		self.defectconc_stat_box.activated.connect(lambda: self.CarrierConcentration.Update_DefectConcentration_DistributionStatistics(self.defectconc_stat_box))
-		self.defectconc_stat_box.activated.connect(self.Update_Equilibrium_Fermi_Energy_Temperature)
-		self.defectconc_stat_box.setEnabled(False)
-		self.defectconc_stat_widget_layout.addWidget(self.defectconc_stat_box)
-
-		# Help button
-		self.defectconc_type_question_button = QPushButton()
-		self.defectconc_type_question_button.setIcon(QIcon(vtandem_source_path+"/icon/QuestionIcon.png"))
-		self.defectconc_type_question_button.clicked[bool].connect(self.DefectConcentration_Type_Help_Function)
-		self.defectconc_stat_widget_layout.addWidget(self.defectconc_type_question_button)
-
-		# Add widget to window
-		self.defectsdiagram_window_layout.addWidget(self.defectconc_stat_widget)
-	"""
-
-
 
 	def DefectConcentration_Type_Help_Function(self):
 		dialog_instructions = 	"""
@@ -407,8 +374,9 @@ M.Y. Toriyama, et al., "VTAnDeM: A Python Toolkit for Simultaneously Visualizing
 		self.defectconc_type_message_window.setWindowIcon(QIcon(vtandem_source_path+"/logo/LogoSmall.png"))
 		self.defectconc_type_message_widget = QWidget()
 		self.defectconc_type_message_widget_layout = QVBoxLayout(self.defectconc_type_message_widget)
-		self.defectconc_type_dialog_instructions = QLabel(dialog_instructions)
-		self.defectconc_type_message_widget_layout.addWidget(self.defectconc_type_dialog_instructions)
+		defectconc_type_dialog_instructions = QLabel(dialog_instructions)
+		defectconc_type_dialog_instructions.setTextInteractionFlags(Qt.TextSelectableByMouse)
+		self.defectconc_type_message_widget_layout.addWidget(defectconc_type_dialog_instructions)
 		self.defectconc_type_message_window.setCentralWidget(self.defectconc_type_message_widget)
 		self.defectconc_type_message_window.show()
 	

@@ -59,6 +59,7 @@ class Plot_CarrierConcentration(SaveFigure):
 
 		# Effective masses of DOS
 		self.effmass_dict = {"holes": 1.0, "electrons": 1.0}
+		#self.effmass_dict = {"holes": 0.99, "electrons": 0.99}
 
 		# Distribution statistics for defect concentration
 		self.defectconc_stat = "Maxwell-Boltzmann"
@@ -200,7 +201,7 @@ class Plot_CarrierConcentration(SaveFigure):
 		self.gE_ValenceBand = np.asarray(gE_ValenceBand)
 		self.energies_ConductionBand = np.asarray(energies_ConductionBand)
 		self.gE_ConductionBand = np.asarray(gE_ConductionBand)
-		
+
 		# Reposition band edges to corrected values (NOT ZERO-ED)
 		self.energies_ValenceBand += self.EVBM
 		self.energies_ConductionBand += self.ECBM - np.min(self.energies_ConductionBand)
@@ -235,7 +236,8 @@ class Plot_CarrierConcentration(SaveFigure):
 			effmass_input_holes.setEnabled(True)
 			effmass_input_electrons.setEnabled(True)
 
-			self.Update_CarrierConcentrations_EffMasses(effmass_input_holes, effmass_input_electrons)
+			#self.Update_CarrierConcentrations_EffMasses(effmass_input_holes, effmass_input_electrons)
+			self.Update_EffMass(effmass_input_holes, effmass_input_electrons, override=True)
 
 		else:
 
@@ -243,8 +245,11 @@ class Plot_CarrierConcentration(SaveFigure):
 			sys.exit("DOS (dos_type) must be either 'Real DOS' or 'Parabolix Approx.'. Exiting... ")
 
 
-	def Check_EffMass_Input(self, carrier_type, effmass_input_object):
+	def Check_EffMass_Input(self, carrier_type, effmass_input_object, override):
 		
+		if override:
+			return True
+
 		# Check to make sure effective mass input is a float
 		try:
 			float(effmass_input_object.text())
@@ -270,11 +275,11 @@ class Plot_CarrierConcentration(SaveFigure):
 
 
 
-	def Update_EffMass(self, effmass_input_holes, effmass_input_electrons):
+	def Update_EffMass(self, effmass_input_holes, effmass_input_electrons, override=False):
 
 		# Check whether we should recalculate carrier concentrations
-		effmass_check_holes = self.Check_EffMass_Input("holes", effmass_input_holes)
-		effmass_check_electrons = self.Check_EffMass_Input("electrons", effmass_input_electrons)
+		effmass_check_holes = self.Check_EffMass_Input("holes", effmass_input_holes, override)
+		effmass_check_electrons = self.Check_EffMass_Input("electrons", effmass_input_electrons, override)
 
 		# If any check fails, don't proceed (avoid recalculation)
 		if (not effmass_check_holes) and (not effmass_check_electrons):
@@ -304,24 +309,6 @@ class Plot_CarrierConcentration(SaveFigure):
 
 	def Recalculate_CarrierConcentrations(self):
 
-		"""
-		message_box = QMessageBox()
-		message_box.setText("Recalculating carrier concentrations...")
-		message_box.setWindowTitle("Recalculating...")
-		message_box.show()
-
-		dos_type_message_window = QMainWindow()
-		dos_type_message_window.setWindowTitle("Help")
-		#dos_type_message_window.setWindowIcon(QIcon(vtandem_source_path+"/logo/LogoSmall.png"))
-		dos_type_message_widget = QWidget()
-		dos_type_message_widget_layout = QVBoxLayout(dos_type_message_widget)
-		dos_type_dialog_instructions = QLabel(dialog_instructions)
-		dos_type_message_widget_layout.addWidget(dos_type_dialog_instructions)
-		dos_type_message_window.setCentralWidget(dos_type_message_widget)
-		dos_type_message_window.show()
-		"""
-
-
 		message_box = QMainWindow()
 		message_box.setWindowTitle("Help")
 		message_box.setWindowIcon(QIcon(vtandem_source_path+"/logo/LogoSmall.png"))
@@ -346,8 +333,6 @@ class Plot_CarrierConcentration(SaveFigure):
 
 		# Update distribution statistics (Maxwell-Boltzmann or Fermi-Dirac)
 		self.defectconc_stat = stat_box.currentText()
-
-		print(self.defectconc_stat)
 
 		# Update carrier concentrations (provided a plot exists)
 		if self.carrier_concentration_intrinsic_defect_hole_plot is not None:
