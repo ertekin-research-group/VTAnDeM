@@ -156,11 +156,15 @@ class Tab_Compositional_PhaseDiagram(Window_DefectsDiagram, Window_CarrierConcen
 		if self.Compositional_PhaseDiagram.phaseregion_selected is None:
 			# NOTE: These objects only exists when self.show_carrier_concentration = True
 			self.defects_synthesis_temperature_box.setEnabled(False)
+			self.defectconc_stat_box.setEnabled(False)
 			self.temperature_selection_box.setEnabled(False)
+			self.dos_option_box.setEnabled(False)
 			return
 		else:
 			self.defects_synthesis_temperature_box.setEnabled(True)
+			self.defectconc_stat_box.setEnabled(True)
 			self.temperature_selection_box.setEnabled(True)
+			self.dos_option_box.setEnabled(True)
 		
 		# Update elements and chemical potentials
 		for element in self.elements_list:

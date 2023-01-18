@@ -235,3 +235,12 @@ class Tab_Binary_DefectsDiagram_CarrierConcentration(Window_DefectsDiagram_Binar
 			# Allow synthesis temperature to be set
 			self.defects_synthesis_temperature_box.setEnabled(True)
 
+			# Allow defect concentration distribution statistics to be set
+			self.defectconc_stat_box.setEnabled(True)
+
+			# Allow temperature where the equilibrium EF is calculated to be set
+			self.temperature_selection_box.setEnabled(True)
+
+			# Allow the DOS type to be set (DFT vs. parabolic band)
+			self.dos_option_box.setEnabled(True)
+

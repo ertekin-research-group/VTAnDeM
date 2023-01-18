@@ -69,5 +69,5 @@ class Window_DefectsDiagram_Binary(Window_DefectsDiagram):
 		# (WIDGET) Button to generate defects diagram
 		self.generate_defects_diagram_plot_button_widget = QPushButton("Generate Defects Diagram")
 		self.generate_defects_diagram_plot_button_widget.clicked[bool].connect(self.Generate_DefectsDiagram_Plot_Function_Binary)
-		self.defectsdiagram_window_layout.insertWidget(5, self.generate_defects_diagram_plot_button_widget)
+		self.defectsdiagram_window_layout.insertWidget(6, self.generate_defects_diagram_plot_button_widget)
 

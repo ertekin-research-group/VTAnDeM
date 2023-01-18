@@ -9,13 +9,19 @@ from scipy import integrate
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 
-# Import functions for calculating carrier concentration
+# Import functions for carrier concentration
 from vtandem.visualization.utils.carrier_concentration import Calculate_CarrierConcentration, Calculate_FreeHole_FreeElectron_Concentrations
-
 from vtandem.visualization.plots.save_plot import SaveFigure
 
-from PyQt5.QtWidgets import QMessageBox
+"""
+from PyQt5.QtWidgets import QMessageBox, QWidget, QMainWindow
+from PyQt5.QtGui import QIcon
+"""
+from PyQt5.QtWidgets import *
+from PyQt5.QtGui import *
 
+script_path = os.path.dirname(__file__)
+vtandem_source_path = "/".join(script_path.split("/")[:-1])
 
 
 class Plot_CarrierConcentration(SaveFigure):
@@ -48,8 +54,14 @@ class Plot_CarrierConcentration(SaveFigure):
 		self.energies_ConductionBand	= None
 		self.gE_ConductionBand 			= None
 
+		# Type of DOS (DFT or Effective Mass)
+		self.dos_type = "DFT"
+
 		# Effective masses of DOS
-		self.effmass_dict = {"holes": 0.0, "electrons": 0.0}
+		self.effmass_dict = {"holes": 1.0, "electrons": 1.0}
+
+		# Distribution statistics for defect concentration
+		self.defectconc_stat = "Maxwell-Boltzmann"
 
 		# Equilibrium Fermi energy
 		self.intrinsic_equilibrium_fermi_energy = {}
@@ -199,68 +211,147 @@ class Plot_CarrierConcentration(SaveFigure):
 
 
 
-	def Update_EffMass(self, carrier_type, effmass_input_object):
+	def Update_DOS_Data(self, dos_option_box, effmass_input_holes, effmass_input_electrons):
 
+		# Check to see if the DOS option changed
+		if dos_option_box.currentText() == self.dos_type:
+			return
+
+		# Set type of DOS used (DFT or parabolic assumption)
+		self.dos_type = dos_option_box.currentText()
+
+		if self.dos_type == "Real DOS":
+
+			effmass_input_holes.setEnabled(False)
+			effmass_input_electrons.setEnabled(False)
+
+			self.Extract_Relevant_Energies_DOSs()
+			
+			self.Recalculate_CarrierConcentrations()
+
+		elif self.dos_type == "Parabolic Approx.":
+
+			# Enable effective mass inputs
+			effmass_input_holes.setEnabled(True)
+			effmass_input_electrons.setEnabled(True)
+
+			self.Update_CarrierConcentrations_EffMasses(effmass_input_holes, effmass_input_electrons)
+
+		else:
+
+			# Exit the software if neither (for developers)
+			sys.exit("DOS (dos_type) must be either 'Real DOS' or 'Parabolix Approx.'. Exiting... ")
+
+
+	def Check_EffMass_Input(self, carrier_type, effmass_input_object):
+		
 		# Check to make sure effective mass input is a float
 		try:
 			float(effmass_input_object.text())
 		except:
-			effmass_input_object.setText("0.00000")
+			effmass_input_object.setText("1.00")
 			pass
 
 		# Check to see if effective mass input has changed. If not, don't proceed
 		if self.effmass_dict[carrier_type] == float(effmass_input_object.text()):
+			return False
+
+		# Check to make sure that a plot has been generated
+		if self.carrier_concentration_intrinsic_defect_hole_plot is None:
+			effmass_input_object.setText("1.00")
+			return False
+
+		# Check to make sure that the effective mass is positive
+		if float(effmass_input_object.text()) <= 0.0:
+			effmass_input_object.setText(str(self.effmass_dict[carrier_type]))
+			return False
+
+		return True
+
+
+
+	def Update_EffMass(self, effmass_input_holes, effmass_input_electrons):
+
+		# Check whether we should recalculate carrier concentrations
+		effmass_check_holes = self.Check_EffMass_Input("holes", effmass_input_holes)
+		effmass_check_electrons = self.Check_EffMass_Input("electrons", effmass_input_electrons)
+
+		# If any check fails, don't proceed (avoid recalculation)
+		if (not effmass_check_holes) and (not effmass_check_electrons):
 			return
+
+		self.Update_CarrierConcentrations_EffMasses(effmass_input_holes, effmass_input_electrons)
+
+
+
+	def Update_CarrierConcentrations_EffMasses(self, effmass_input_holes, effmass_input_electrons):
 
 		# Update effective masses
-		self.effmass_dict[carrier_type] = float(effmass_input_object.text())
-		
-		# If effective mass is set to zero, proceed with DFT mode
-		if self.effmass_dict[carrier_type] == 0.0:
-			
-			self.Extract_Relevant_Energies_DOSs()
-			
-			print("DFT mode, calculating carrier concentrations...")
-
-			message_box = QMessageBox()
-			message_box.setText("Recalculating carrier concentrations...")
-			message_box.setWindowTitle("Recalculating...")
-			message_box.show()
-
-			self.Calculate_Hole_Electron_Concentration_Matrices()
-			
-			message_box.close()
-
-			print("Done calculating carrier concentrations.")
-			return
-
-
-		# Otherwise, launch parabolic band mode
+		self.effmass_dict["holes"] = float(effmass_input_holes.text())
+		self.effmass_dict["electrons"] = float(effmass_input_electrons.text())
 
 		# Update DOSs
 		me = 9.109E-31
 		e = 1.602E-19
 		h = 6.626E-34
 		hbar = h / 2 / np.pi
-		if carrier_type == "holes":
-			self.gE_ValenceBand = np.sqrt(2) * (self.effmass_dict[carrier_type] * me)**(3./2) / np.pi**2 / hbar**3 * np.sqrt((self.EVBM - self.energies_ValenceBand)*e) * 1E-6 * e
-		elif carrier_type == "electrons":
-			self.gE_ConductionBand = np.sqrt(2) * (self.effmass_dict[carrier_type] * me)**(3./2) / np.pi**2 / hbar**3 * np.sqrt((self.energies_ConductionBand - self.ECBM)*e) * 1E-6 * e
+		self.gE_ValenceBand = np.sqrt(2) * (self.effmass_dict["holes"] * me)**(3./2) / np.pi**2 / hbar**3 * np.sqrt((self.EVBM - self.energies_ValenceBand)*e) * 1E-6 * e
+		self.gE_ConductionBand = np.sqrt(2) * (self.effmass_dict["electrons"] * me)**(3./2) / np.pi**2 / hbar**3 * np.sqrt((self.energies_ConductionBand - self.ECBM)*e) * 1E-6 * e
 
-		print("Parabolic band mode, carrier concentrations...")
-		
+		self.Recalculate_CarrierConcentrations()
+
+
+
+	def Recalculate_CarrierConcentrations(self):
+
+		"""
 		message_box = QMessageBox()
 		message_box.setText("Recalculating carrier concentrations...")
 		message_box.setWindowTitle("Recalculating...")
 		message_box.show()
+
+		dos_type_message_window = QMainWindow()
+		dos_type_message_window.setWindowTitle("Help")
+		#dos_type_message_window.setWindowIcon(QIcon(vtandem_source_path+"/logo/LogoSmall.png"))
+		dos_type_message_widget = QWidget()
+		dos_type_message_widget_layout = QVBoxLayout(dos_type_message_widget)
+		dos_type_dialog_instructions = QLabel(dialog_instructions)
+		dos_type_message_widget_layout.addWidget(dos_type_dialog_instructions)
+		dos_type_message_window.setCentralWidget(dos_type_message_widget)
+		dos_type_message_window.show()
+		"""
+
+
+		message_box = QMainWindow()
+		message_box.setWindowTitle("Help")
+		message_box.setWindowIcon(QIcon(vtandem_source_path+"/logo/LogoSmall.png"))
+		message_box_widget = QWidget()
+		message_box_widget_layout = QVBoxLayout(message_box_widget)
+		message_box_message = QLabel("Recalculating carrier concentrations...")
+		message_box_widget_layout.addWidget(message_box_message)
+		message_box.setCentralWidget(message_box_widget)
+		message_box.show()
 		
+		# Recalculate carrier concentrations
 		self.Calculate_Hole_Electron_Concentration_Matrices()
 		
 		message_box.close()
 		
-		print("Done calculating carrier concentrations.")
-		
-		self.Update_CarrierConcentration_Plot()
+		if self.carrier_concentration_intrinsic_defect_hole_plot is not None:
+			self.Update_CarrierConcentration_Plot()
+
+
+
+	def Update_DefectConcentration_DistributionStatistics(self, stat_box):
+
+		# Update distribution statistics (Maxwell-Boltzmann or Fermi-Dirac)
+		self.defectconc_stat = stat_box.currentText()
+
+		print(self.defectconc_stat)
+
+		# Update carrier concentrations (provided a plot exists)
+		if self.carrier_concentration_intrinsic_defect_hole_plot is not None:
+			self.Update_CarrierConcentration_Plot()
 
 
 	
@@ -306,7 +397,8 @@ class Plot_CarrierConcentration(SaveFigure):
 																																																																			dopant_deltamu = self.dopant_deltamu, \
 																																																																			hole_concentrations_dict = self.hole_concentrations_dict, \
 																																																																			electron_concentrations_dict = self.electron_concentrations_dict, \
-																																																																			synthesis_temperature = self.synthesis_temperature )
+																																																																			synthesis_temperature = self.synthesis_temperature, \
+																																																																			defectconc_stat = self.defectconc_stat )
 		
 		# Update equilibrium Fermi energy
 		self.intrinsic_equilibrium_fermi_energy = intrinsic_equilibrium_fermi_energy_temperature
@@ -357,7 +449,8 @@ class Plot_CarrierConcentration(SaveFigure):
 																																																																			dopant_deltamu = self.dopant_deltamu, \
 																																																																			hole_concentrations_dict = self.hole_concentrations_dict, \
 																																																																			electron_concentrations_dict = self.electron_concentrations_dict, \
-																																																																			synthesis_temperature = self.synthesis_temperature )
+																																																																			synthesis_temperature = self.synthesis_temperature, \
+																																																																			defectconc_stat = self.defectconc_stat )
 		
 		# Update equilibrium Fermi energy
 		self.intrinsic_equilibrium_fermi_energy = intrinsic_equilibrium_fermi_energy_temperature

@@ -35,8 +35,56 @@ class Import_Object:
 			for line in oszicar_file:
 				if "F=" in line:
 					total_energy = float(line.split()[2])
+		else:
+			sys.exit("OUTCAR/OSZICAR file does not exist in '"+directory_name+"'. Exiting...")
 
 		return total_energy
+
+	####################################################################################################################
+	################################################ Get Number of Atoms ###############################################
+	####################################################################################################################
+
+	def Get_Atoms(self, directory_name):
+		atom_types = []
+		atom_counts = []
+		if "OUTCAR" in os.listdir(directory_name):
+			outcar_file = open(directory_name+"/OUTCAR").readlines()
+			for line in outcar_file:
+				if ("POTCAR" not in line) and ("ions per type" not in line):
+					continue
+				
+				if "POTCAR" in line:
+					atom_type = line.split()[2].split("_")[0]
+					if atom_type not in atom_types:
+						atom_types.append(atom_type)
+				elif "ions per type" in line:
+					for count in line.split()[4:]:
+						atom_counts.append(count)
+		else:
+			sys.exit("OUTCAR file does not exist in '"+directory_name+"'. Exiting...")
+
+		if len(atom_types) != len(atom_counts):
+			sys.exit("Number of atom types do not match in OUTCAR file in '"+directory_name+"'. Exiting...")
+
+		print(atom_types, atom_counts)
+
+		return atom_types, atom_counts
+	
+
+	
+	####################################################################################################################
+	#################################################### Get Volume ####################################################
+	####################################################################################################################
+
+	def Get_Volume(self, directory_name):
+		if "OUTCAR" in os.listdir(directory_name):
+			outcar_file = open(directory_name+"/OUTCAR").readlines()
+			for line in outcar_file:
+				if "volume of cell" in line:
+					return float(line.split()[-1])
+		else:
+			sys.exit("OUTCAR file does not exist in '"+directory_name+"'. Exiting...")
+
 	
 
 	####################################################################################################################
@@ -97,14 +145,10 @@ class Compounds_Import(Import_Object):
 		# Establish list of elements (should only be one item in list)
 		element_data["elements_list"] = [element_name]
 		
-		# Find stoichiometry of element in POSCAR/CONTCAR (which exists thanks to our initial checks)
-		try:
-			structure_file = open(directory_name+"/POSCAR").readlines()
-		except:
-			structure_file = open(directory_name+"/CONTCAR").readlines()
-			pass
+		# Find stoichiometry of element in OUTCAR (which exists thanks to our initial checks)
+		atom_types, atom_counts = self.Get_Atoms(directory_name)
 		element_data[element_name] = 1.0
-		element_data["dft_"+element_name] = float(structure_file[6].strip())
+		element_data["dft_"+element_name] = float(atom_counts[0])
 		element_data["formula_units"] = element_data["dft_"+element_name]
 		element_data["number_species"] = 1
 		
@@ -162,14 +206,8 @@ class Compounds_Import(Import_Object):
 		# List of elements in compound
 		compound_data["elements_list"] = elements_list
 		
-		# Find stoichiometry of compound listed in POSCAR/CONTCAR (which exists thanks to our initial checks)
-		try:
-			structure_file = open(directory_name+"/CONTCAR").readlines()
-		except:
-			structure_file = open(directory_name+"/POSCAR").readlines()
-			pass
-		species = structure_file[5].split()
-		number_species = structure_file[6].split()
+		# Find stoichiometry of compound listed in OUTCAR (which exists thanks to our initial checks)
+		species, number_species = self.Get_Atoms(directory_name)
 		for element, number in zip(species, number_species):
 			compound_data["dft_"+element] = float(number)
 			compound_data["formula_units"] = compound_data["dft_"+element]/compound_data[element]
@@ -194,14 +232,9 @@ class Compounds_Import(Import_Object):
 		if not os.path.isdir(directory_name):
 			sys.exit("\033[91mWARNING\033[0m: Cannot find directory '"+directory_name+"'. Exiting...")
 		
-		# Check if POSCAR or CONTCAR exists
-		if ("POSCAR" not in os.listdir(directory_name)) and ("CONTCAR" not in os.listdir(directory_name)):
-			sys.exit("\033[91mWARNING\033[0m: Cannot find structure file (neither POSCAR nor CONTCAR) of '"+name+"'. Exiting...")
-
-		# Check if OUTCAR exists
-		if ("OUTCAR" not in os.listdir(directory_name)) and ("OSZICAR" not in os.listdir(directory_name)):
-			sys.exit("\033[91mWARNING\033[0m: Cannot find OUTCAR/OSZICAR file of '"+name+"'. Exiting...")
-
+		if "OUTCAR" not in os.listdir(directory_name):
+			sys.exit("\033[91mWARNING\033[0m: Cannot find OUTCAR file of '"+name+"'. Exiting...")
+		
 		# Check if the compound already exists in the database
 		if ( name in self.compounds_info["Compounds"].keys() ) or (name in self.compounds_info["Elements"].keys() ):
 			print("'"+name+"'' is already in the database. The imported data will replace the old data.")
@@ -308,7 +341,7 @@ class Defects_Import(Import_Object):
 			if ("OUTCAR" not in os.listdir(directory_name+"/"+directory)) and ("OSZICAR" not in os.listdir(directory_name+"/"+directory)):
 				print("WARNING: Cannot find OUTCAR/OSZICAR file for defect '"+defect_name+"' with charge state '"+directory.split("q")[-1]+"' in '"+directory_name+"/"+directory+"'. Skipping...")
 				continue
-
+			
 			# Name of charge state (add "+" if positive)
 			charge_state = directory.split("q")[-1]
 			if (float(charge_state) > 0.0) and ("+" not in charge_state):
@@ -367,7 +400,7 @@ class Defects_Import(Import_Object):
 				elif defect_name.split("_")[1] == specie:
 					self.defects_data[compound_name][defect_name]["n_"+specie] = -1
 		
-		# Record site multiplicity (from bulk POSCAR/CONTCAR file)
+		# Record site multiplicity (from bulk file)
 		self.defects_data[compound_name][defect_name]["site_multiplicity"] = self.site_multiplicities[ defect_name.split("_")[1] ]
 	
 	
@@ -381,19 +414,11 @@ class Defects_Import(Import_Object):
 		if compound_name not in self.defects_data.keys():
 			self.defects_data[compound_name] = {}
 		
-		# Open POSCAR/CONTCAR file
-		try:
-			structure_file = open(bulk_folder+"/CONTCAR").readlines()
-		except:
-			structure_file = open(bulk_folder+"/POSCAR").readlines()
-			pass
-		
 		# Initialize
 		self.defects_data[compound_name]["Bulk"] = {}
 		
 		# Update atom counts
-		atom_types = structure_file[5].split()
-		atom_counts = structure_file[6].split()
+		atom_types, atom_counts = self.Get_Atoms(bulk_folder)
 		for type, count in zip(atom_types, atom_counts):
 			self.defects_data[compound_name]["Bulk"]["dft_"+type] = float(count)
 		
@@ -410,11 +435,8 @@ class Defects_Import(Import_Object):
 		self.defects_data[compound_name]["Bulk"]["BandGap"] = bandgap
 		self.defects_data[compound_name]["Bulk"]["VBM"] = vbm
 		
-		# Find volume of compound from lattice vectors in POSCAR/CONTCAR
-		lattice_vector_x = np.asarray([float(i) for i in structure_file[2].split()])
-		lattice_vector_y = np.asarray([float(i) for i in structure_file[3].split()])
-		lattice_vector_z = np.asarray([float(i) for i in structure_file[4].split()])
-		volume = np.dot(lattice_vector_x, np.cross(lattice_vector_y, lattice_vector_z))
+		# Find volume of compound in OUTCAR
+		volume = self.Get_Volume(bulk_folder)
 		self.defects_data[compound_name]["Bulk"]["Volume"] = volume*1E-24
 		
 		# Update site multiplicities
@@ -428,20 +450,13 @@ class Defects_Import(Import_Object):
 	
 	def Update_Site_Multiplicities(self, compound_name, bulk_folder):
 		
-		# Open file
-		try:
-			structure_file = open(bulk_folder+"/POSCAR").readlines()
-		except:
-			structure_file = open(bulk_folder+"/CONTCAR").readlines()
-		
 		# Get atom names and number of each atom in structure
-		atom_types = structure_file[5].split()
-		number_atoms = structure_file[6].split()
-		
-		# Check that POSCAR/CONTCAR contains the correct atom types
+		atom_types, number_atoms = self.Get_Atoms(bulk_folder)
+
+		# Check that the OUTCAR contains the correct atom types
 		for atom_type in atom_types:
 			if atom_type not in self.possible_defect_site_list:
-				sys.exit("\033[91mWARNING\033[0m: Unexpected atom found in POSCAR/CONTCAR file for '"+compound_name+"'. Exiting...")
+				sys.exit("\033[91mWARNING\033[0m: Unexpected atom found in OUTCAR file for '"+compound_name+"'. Exiting...")
 		
 		# Update site multiplicities dictionary
 		for atom_type, natoms in zip(atom_types, number_atoms):
@@ -523,9 +538,7 @@ class Defects_Import(Import_Object):
 		if "Bulk" not in os.listdir(directory_name):
 			sys.exit("\033[91mWARNING\033[0m: A folder named 'Bulk' must exist in '"+directory_name+"'. Exiting...")
 		
-		# Check if POSCAR/CONTCAR, OUTCAR, and vasprun.xml are in the 'Bulk' folder
-		if ("POSCAR" not in os.listdir(directory_name+"/Bulk")) and ("CONTCAR" not in os.listdir(directory_name+"/Bulk")):
-			sys.exit("\033[91mWARNING\033[0m: POSCAR/CONTCAR missing from 'Bulk' folder. Exiting...")
+		# Check if OUTCAR and vasprun.xml are in the 'Bulk' folder
 		if "OUTCAR" not in os.listdir(directory_name+"/Bulk"):
 			sys.exit("\033[91mWARNING\033[0m: OUTCAR missing from 'Bulk' folder. Exiting...")
 		if "vasprun.xml" not in os.listdir(directory_name+"/Bulk"):
@@ -543,8 +556,6 @@ class Defects_Import(Import_Object):
 				sys.exit("Aborting importing defects of "+compound_name+".")
 
 
-	
-	
 	
 	####################################################################################################################
 	############################################# Update Defects Database ##############################################

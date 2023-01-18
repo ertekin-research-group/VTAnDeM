@@ -4,11 +4,15 @@ __author__ = 'Michael_Lidia_Jiaxing_Elif'
 
 
 import numpy as np
+import os
 
 import PyQt5
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
+
+script_path = os.path.dirname(__file__)
+vtandem_source_path = "/".join(script_path.split("/")[:-3])
 
 title_font = 16
 
@@ -41,7 +45,7 @@ class Window_CarrierConcentration(QWidget):
 
 		# Add effective mass boxes
 		self.Activate_EffectiveMass_Settings()
-		
+
 		# (WIDGET) Save carrier concentration plot as figure
 		self.carrier_concentration_savefigure_button = QPushButton("Save Carrier Concentration Plot")
 		self.carrier_concentration_savefigure_button.clicked[bool].connect(lambda: self.CarrierConcentration.SaveFigure())
@@ -135,6 +139,7 @@ class Window_CarrierConcentration(QWidget):
 			self.temperature_selection_box.addItem(str(int(temperature)))
 		self.temperature_selection_box.setCurrentIndex(2)
 		self.temperature_selection_box.activated.connect(self.Update_Equilibrium_Fermi_Energy_Temperature)
+		self.temperature_selection_box.setEnabled(False)
 		self.equilibrium_fermi_energy_widget_layout.addWidget(self.temperature_selection_box)
 		
 		# Spacer item
@@ -168,15 +173,18 @@ class Window_CarrierConcentration(QWidget):
 		
 		self.equilibrium_fermi_energy_display.setText(str(total_equilibrium_fermi_energy))
 		
-		if (str(total_equilibrium_fermi_energy) == "< EVBM") or (str(total_equilibrium_fermi_energy) == "> ECBM"):
-			self.equilibrium_fermi_energy_display.setStyleSheet("""QLineEdit { background-color: white; color: red }""")
-		else:
-			self.equilibrium_fermi_energy_display.setStyleSheet("""QLineEdit { background-color: white; color: black }""")
-
 		self.DefectsDiagram.Plot_Equilibrium_Fermi_Energy(equilibrium_fermi_energy=total_equilibrium_fermi_energy)
 
+		print("Negative formation energy?", self.DefectsDiagram.negative_formation_energy)
 
-	
+		if (self.defectconc_stat_box.currentText() == "Maxwell-Boltzmann") and self.DefectsDiagram.negative_formation_energy:
+			QMessageBox.about(self, "WARNING", "Negative defect formation energy detected.\nChanging to Fermi-Dirac statistics.")
+			self.defectconc_stat_box.setCurrentIndex(1) # Switch to Fermi-Dirac
+			self.CarrierConcentration.Update_DefectConcentration_DistributionStatistics(self.defectconc_stat_box)
+			self.Update_Equilibrium_Fermi_Energy_Temperature()
+
+
+
 	###############################################################################################
 	############################ Effective Mass, Parabolic Band Model #############################
 	###############################################################################################
@@ -185,17 +193,95 @@ class Window_CarrierConcentration(QWidget):
 
 		# (WIDGET) Effective masses of DOS for carrier concentrations
 		self.effective_masses_widget = QWidget()
+		self.effective_masses_widget_layout = QVBoxLayout(self.effective_masses_widget)
+		
+		# Label for "Calculated from:"
+		dos_calculated_label = QLabel("Carrier concentrations calculated from:")
+		dos_calculated_label.setAlignment(Qt.AlignCenter)
+		self.effective_masses_widget_layout.addWidget(dos_calculated_label)
+
+		# Widgets for inputs
+		self.effective_mass_inputs_widget = QWidget()
+		self.effective_mass_inputs_widget_layout = QHBoxLayout(self.effective_mass_inputs_widget)
+
+		# Options bar for DFT vs. parabolic band
+		self.dos_option_box = QComboBox()
+		self.dos_option_box.addItem("Real DOS")
+		self.dos_option_box.addItem("Parabolic Approx.")
+		self.dos_option_box.setCurrentIndex(0)
+		self.dos_option_box.setEnabled(False)
+		self.effective_mass_inputs_widget_layout.addWidget(self.dos_option_box)
+
+		# Help button
+		self.dos_type_question_button = QPushButton()
+		self.dos_type_question_button.setIcon(QIcon(vtandem_source_path+"/icon/QuestionIcon.png"))
+		self.dos_type_question_button.clicked[bool].connect(self.DOS_Type_Help_Function)
+		self.effective_mass_inputs_widget_layout.addWidget(self.dos_type_question_button)
+
+		# Label for hole effective mass
+		hole_effective_mass_label = QLabel(u"m"+"<sub>h</sub>"+"<sup>*</sup> (m"+"<sub>0</sub>"+") = ")
+		hole_effective_mass_label.setAlignment(Qt.AlignCenter)
+		self.effective_mass_inputs_widget_layout.addWidget(hole_effective_mass_label)
+
+		# Input for hole effective mass
+		self.hole_effective_mass_input = QLineEdit("1.00")
+		self.hole_effective_mass_input.setEnabled(False)
+		self.effective_mass_inputs_widget_layout.addWidget(self.hole_effective_mass_input)
+
+		# Label for electron effective mass
+		electron_effective_mass_label = QLabel(u"m"+"<sub>e</sub>"+"<sup>*</sup> (m"+"<sub>0</sub>"+") = ")
+		electron_effective_mass_label.setAlignment(Qt.AlignCenter)
+		self.effective_mass_inputs_widget_layout.addWidget(electron_effective_mass_label)
+
+		# Input for electron effective mass
+		self.electron_effective_mass_input = QLineEdit("1.00")
+		self.electron_effective_mass_input.setEnabled(False)
+		self.effective_mass_inputs_widget_layout.addWidget(self.electron_effective_mass_input)
+
+		# Add functionalities to effective mass inputs
+		self.dos_option_box.activated.connect(lambda: self.CarrierConcentration.Update_DOS_Data(self.dos_option_box, self.hole_effective_mass_input, self.electron_effective_mass_input))
+		self.hole_effective_mass_input.editingFinished.connect(lambda: self.CarrierConcentration.Update_EffMass(self.hole_effective_mass_input, self.electron_effective_mass_input))
+		self.hole_effective_mass_input.editingFinished.connect(self.Update_Equilibrium_Fermi_Energy_Temperature)
+		self.electron_effective_mass_input.editingFinished.connect(lambda: self.CarrierConcentration.Update_EffMass(self.hole_effective_mass_input, self.electron_effective_mass_input))
+		self.electron_effective_mass_input.editingFinished.connect(self.Update_Equilibrium_Fermi_Energy_Temperature)
+
+		# Add inputs widget to overarching widget
+		self.effective_masses_widget_layout.addWidget(self.effective_mass_inputs_widget)
+
+		# Add widget to window
+		self.carrierconcentration_window_layout.addWidget(self.effective_masses_widget)
+
+
+
+	"""
+	def Activate_EffectiveMass_Settings(self):
+
+		# (WIDGET) Effective masses of DOS for carrier concentrations
+		self.effective_masses_widget = QWidget()
 		self.effective_masses_widget_layout = QHBoxLayout(self.effective_masses_widget)
 		
+		# Options bar for DFT vs. parabolic band
+		self.dos_option_box = QComboBox()
+		self.dos_option_box.addItem("Real DOS")
+		self.dos_option_box.addItem("Parabolic Approx.")
+		self.dos_option_box.setCurrentIndex(0)
+		self.dos_option_box.setEnabled(False)
+		self.effective_masses_widget_layout.addWidget(self.dos_option_box)
+
+		# Help button
+		self.dos_type_question_button = QPushButton()
+		self.dos_type_question_button.setIcon(QIcon(vtandem_source_path+"/icon/QuestionIcon.png"))
+		self.dos_type_question_button.clicked[bool].connect(self.DOS_Type_Help_Function)
+		self.effective_masses_widget_layout.addWidget(self.dos_type_question_button)
+
 		# Label for hole effective mass
 		hole_effective_mass_label = QLabel(u"m"+"<sub>h</sub>"+"<sup>*</sup> (m"+"<sub>0</sub>"+") = ")
 		hole_effective_mass_label.setAlignment(Qt.AlignCenter)
 		self.effective_masses_widget_layout.addWidget(hole_effective_mass_label)
 
 		# Input for hole effective mass
-		self.hole_effective_mass_input = QLineEdit("0.00000")
-		self.hole_effective_mass_input.editingFinished.connect(lambda: self.CarrierConcentration.Update_EffMass("holes", self.hole_effective_mass_input))
-		self.hole_effective_mass_input.editingFinished.connect(self.Update_Equilibrium_Fermi_Energy_Temperature)
+		self.hole_effective_mass_input = QLineEdit("1.00")
+		self.hole_effective_mass_input.setEnabled(False)
 		self.effective_masses_widget_layout.addWidget(self.hole_effective_mass_input)
 
 		# Label for electron effective mass
@@ -204,13 +290,46 @@ class Window_CarrierConcentration(QWidget):
 		self.effective_masses_widget_layout.addWidget(electron_effective_mass_label)
 
 		# Input for electron effective mass
-		self.electron_effective_mass_input = QLineEdit("0.00000")
-		self.electron_effective_mass_input.editingFinished.connect(lambda: self.CarrierConcentration.Update_EffMass("electrons", self.electron_effective_mass_input))
-		self.electron_effective_mass_input.editingFinished.connect(self.Update_Equilibrium_Fermi_Energy_Temperature)
+		self.electron_effective_mass_input = QLineEdit("1.00")
+		self.electron_effective_mass_input.setEnabled(False)
 		self.effective_masses_widget_layout.addWidget(self.electron_effective_mass_input)
+
+		# Add functionalities to effective mass inputs
+		self.dos_option_box.activated.connect(lambda: self.CarrierConcentration.Update_DOS_Data(self.dos_option_box, self.hole_effective_mass_input, self.electron_effective_mass_input))
+		self.hole_effective_mass_input.editingFinished.connect(lambda: self.CarrierConcentration.Update_EffMass(self.hole_effective_mass_input, self.electron_effective_mass_input))
+		self.hole_effective_mass_input.editingFinished.connect(self.Update_Equilibrium_Fermi_Energy_Temperature)
+		self.electron_effective_mass_input.editingFinished.connect(lambda: self.CarrierConcentration.Update_EffMass(self.hole_effective_mass_input, self.electron_effective_mass_input))
+		self.electron_effective_mass_input.editingFinished.connect(self.Update_Equilibrium_Fermi_Energy_Temperature)
 
 		# Add widget to window
 		self.carrierconcentration_window_layout.addWidget(self.effective_masses_widget)
+	"""
+
+
+
+
+	def DOS_Type_Help_Function(self):
+		dialog_instructions = 	"""
+The free electron and hole concentrations can be calculated using either:
+	- Real DOS (i.e. calculated using DFT), or
+	- Parabolic Approximation (i.e. using the DOS of a single parabolic band).\n
+For more info, see:
+M.Y. Toriyama, et al., "How to analyse a density of states," Mater. Today. Elec. 1, 100002 (2022).
+M.Y. Toriyama, et al., "VTAnDeM: A Python Toolkit for Simultaneously Visualizing Phase Stability, Defect Energetics, and Carrier Concentrations of Materials," Submitted.
+								"""
+
+		self.dos_type_message_window = QMainWindow()
+		self.dos_type_message_window.setWindowTitle("Help")
+		self.dos_type_message_window.setWindowIcon(QIcon(vtandem_source_path+"/logo/LogoSmall.png"))
+		self.dos_type_message_widget = QWidget()
+		self.dos_type_message_widget_layout = QVBoxLayout(self.dos_type_message_widget)
+		self.dos_type_dialog_instructions = QLabel(dialog_instructions)
+		self.dos_type_message_widget_layout.addWidget(self.dos_type_dialog_instructions)
+		self.dos_type_message_window.setCentralWidget(self.dos_type_message_widget)
+		self.dos_type_message_window.show()
+	
+
+
 
 
 

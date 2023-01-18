@@ -405,9 +405,9 @@ class Tab_PhaseDiagram_DefectsDiagram_CarrierConcentration(Window_DefectsDiagram
 																	#	The "set" function checks the self.elements_list and omits any that are repeated.
 																	#	If any are repeated, then the chosen species are not unique.
 			QMessageBox.about(self, "WARNING", "Pick UNIQUE elements!")
-			self.fourth_element_slider.setEnabled(False)	# Disable the slider temporarily, until the user chooses unique elements to plot
+			if len(self.elements_list) == 4:
+				self.fourth_element_slider.setEnabled(False)	# Disable the slider temporarily, until the user chooses unique elements to plot
 			return
-		
 		
 		# Set up the new plot
 		self.PhaseDiagram.phase_diagram_plot_drawing.remove()
@@ -430,16 +430,15 @@ class Tab_PhaseDiagram_DefectsDiagram_CarrierConcentration(Window_DefectsDiagram
 		if self.show_defects_diagram:
 			
 			self.dopant_selection_box.setEnabled(True)
-			
 			self.Update_DefectsDiagram_Plot_Elements_Function()	# Found in tab_quaternary.../tab_ternary... script
-			
 			self.Generate_DefectsDiagram_Plot_Function()
-		
-		
 		
 		if self.show_carrier_concentration:
 			
 			self.defects_synthesis_temperature_box.setEnabled(True)
+			self.defectconc_stat_box.setEnabled(True)
+			self.temperature_selection_box.setEnabled(True)
+			self.dos_option_box.setEnabled(True)
 			self.Generate_CarrierConcentration_Plot_Function()
 	
 	

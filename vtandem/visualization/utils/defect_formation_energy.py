@@ -31,7 +31,6 @@ def Calculate_IntrinsicDefectFormationEnthalpies(	defects_data, \
 				for element in mu_elements.keys():
 					defect_formation_enthalpy -= defects_data[defect]["n_"+element] * ( mu_elements[element]["mu0"] + mu_elements[element]["deltamu"] )
 				intrinsic_defects_enthalpy_data[defect][charge] = defect_formation_enthalpy
-				#print(defect, charge, defect_formation_enthalpy[0])
 	
 	# Return dictionary of formation enthalpies of each defect
 	return intrinsic_defects_enthalpy_data
@@ -88,9 +87,9 @@ def Find_MinimumDefectFormationEnthalpies(defect_formation_enthalpy_data):
 	for defect in defect_formation_enthalpy_data.keys():
 		defect_formation_energy_minimum = np.fromiter(map(min, zip(*defect_formation_enthalpy_data[defect].values())), dtype=np.float)
 		minimum_defect_formation_enthalpy_data[defect] = defect_formation_energy_minimum
-		#print(defect, defect_formation_energy_minimum[0])
 	
 	# Return dictionary of minimum formation enthalpies of each defect
 	return minimum_defect_formation_enthalpy_data
+
 
 

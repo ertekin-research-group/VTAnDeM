@@ -8,10 +8,12 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from labellines import labelLine, labelLines
 
+"""
 import PyQt5
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
+"""
 
 from vtandem.visualization.utils.defect_formation_energy import *
 
@@ -73,6 +75,9 @@ class Plot_DefectsDiagram(SaveFigure):
 		# Equilibrium Fermi energy vertical line
 		self.equilibrium_fermi_energy_plot = None
 		self.equilibrium_fermi_energy_tick = self.defects_diagram_plot_drawing.twiny()
+
+		# Track if any negative formation energies at the equilibrium Fermi energy
+		self.negative_formation_energy = False
 	
 	
 	
@@ -110,7 +115,6 @@ class Plot_DefectsDiagram(SaveFigure):
 	
 	
 	
-	
 	def Update_WindowSize(self, axis_type, axislim_boxes):
 		
 		# Check if input is legitimate
@@ -140,6 +144,7 @@ class Plot_DefectsDiagram(SaveFigure):
 		# 	deltamu_values: Dictionary of deltamu values, in element:value pairs
 		for element in self.mu_elements.keys():
 			self.mu_elements[element]["deltamu"] = deltamu_values[element]
+
 
 
 	def Calculate_DefectFormations(self):
@@ -261,13 +266,35 @@ class Plot_DefectsDiagram(SaveFigure):
 		# Draw defects diagram canvas
 		self.defects_diagram_plot_canvas.draw()
 
-
-
-
-
-
-
-
+		# Calculate formation energies at equilibrium EF
+		intrinsic_defects_enthalpy_data = Calculate_IntrinsicDefectFormationEnthalpies(	self.defects_data, \
+																						self.main_compound_info, \
+																						equilibrium_fermi_energy + self.EVBM, \
+																						self.mu_elements	)
+		
+		if self.dopant != "None":
+			extrinsic_defects_enthalpy_data = Calculate_ExtrinsicDefectFormationEnthalpies(	self.defects_data, \
+																							self.main_compound_info, \
+																							equilibrium_fermi_energy + self.EVBM, \
+																							self.mu_elements, \
+																							self.extrinsic_defects, \
+																							self.dopant, \
+																							self.dopant_mu0, \
+																							self.dopant_deltamu	)
+		
+		# Check if any formation energies are negative at equilibrium EF
+		self.negative_formation_energy = False
+		for defect in intrinsic_defects_enthalpy_data.keys():
+			for charge_state in intrinsic_defects_enthalpy_data[defect].keys():
+				if intrinsic_defects_enthalpy_data[defect][charge_state] < 0.0:
+					self.negative_formation_energy = True
+					break
+		if (self.dopant != "None") and (not self.negative_formation_energy):
+			for defect in extrinsic_defects_enthalpy_data.keys():
+				for charge_state in extrinsic_defects_enthalpy_data[defect].keys():
+					if extrinsic_defects_enthalpy_data[defect][charge_state] < 0.0:
+						self.negative_formation_energy = True
+						break
 
 
 

@@ -4,7 +4,7 @@ __author__ = 'Michael_Lidia_Jiaxing_Elif'
 
 
 import numpy as np
-import os
+import os, sys
 from scipy import integrate
 
 from vtandem.visualization.utils.defect_formation_energy import *
@@ -56,7 +56,8 @@ def Calculate_Defect_Carrier_Concentration(	defects_data, \
 											dopant, \
 											dopant_mu0, \
 											dopant_deltamu, \
-											synthesis_temperature = None ):
+											synthesis_temperature = None, \
+											defectconc_stat = "Maxwell-Boltzmann" ):
 	
 	k = 8.6173303E-5
 	
@@ -83,13 +84,23 @@ def Calculate_Defect_Carrier_Concentration(	defects_data, \
 			# Prefactor
 			N = defects_data[intrinsic_defect]["site_multiplicity"] / volume
 			
-			# Defect concentration
+			# Defect concentrations (weighted by charge state)
 			for temperature in temperature_array:
+
+				# Get correct temperature (synthesis or measurement)
 				if synthesis_temperature is None:
-					defect_carrier_concentration = float(charge) * N * np.exp( -intrinsic_defects_enthalpy_data[intrinsic_defect][charge] / (k * temperature) )
+					temp_for_defectconc = temperature
 				elif synthesis_temperature is not None:
-					defect_carrier_concentration = float(charge) * N * np.exp( -intrinsic_defects_enthalpy_data[intrinsic_defect][charge] / (k * synthesis_temperature) )
-				
+					temp_for_defectconc = synthesis_temperature
+
+				# Get correct distribution statistics
+				if defectconc_stat == "Maxwell-Boltzmann":
+					defect_carrier_concentration = float(charge) * N * np.exp( -intrinsic_defects_enthalpy_data[intrinsic_defect][charge] / (k * temp_for_defectconc) )
+				elif defectconc_stat == "Fermi-Dirac":
+					defect_carrier_concentration = float(charge) * N / ( 1. + np.exp( intrinsic_defects_enthalpy_data[intrinsic_defect][charge] / (k * temp_for_defectconc) ) )
+				else:
+					sys.exit("Distribution statistics for defect concentration must be either 'Maxwell-Boltzmann' or 'Fermi-Dirac'. Exiting...")
+
 				intrinsic_defect_carrier_concentration_temperature[temperature] += defect_carrier_concentration
 	
 	# Check if the user-selected dopant is "None"
@@ -147,7 +158,8 @@ def Calculate_CarrierConcentration(	EVBM, \
 									dopant_deltamu, \
 									hole_concentrations_dict, \
 									electron_concentrations_dict, \
-									synthesis_temperature = None ):
+									synthesis_temperature = None, \
+									defectconc_stat = "Maxwell-Boltzmann" ):
 	
 	# Calculate defect carrier concentration (for intrinsic defects and extrinsic defects)
 	intrinsic_defect_carrier_concentration_temperature, extrinsic_defect_carrier_concentration_temperature = Calculate_Defect_Carrier_Concentration(	defects_data = defects_data, \
@@ -160,7 +172,8 @@ def Calculate_CarrierConcentration(	EVBM, \
 																																						dopant = dopant, \
 																																						dopant_mu0 = dopant_mu0, \
 																																						dopant_deltamu = dopant_deltamu, \
-																																						synthesis_temperature = synthesis_temperature )
+																																						synthesis_temperature = synthesis_temperature, \
+																																						defectconc_stat = defectconc_stat )
 
 	# Carrier concentrations from intrinsic defects only
 	intrinsic_defect_hole_concentration = []

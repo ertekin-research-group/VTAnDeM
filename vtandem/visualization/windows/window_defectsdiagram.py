@@ -4,11 +4,15 @@ __author__ = 'Michael_Lidia_Jiaxing_Elif'
 
 
 import numpy as np
+import os
 
 import PyQt5
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
+
+script_path = os.path.dirname(__file__)
+vtandem_source_path = "/".join(script_path.split("/")[:-3])
 
 title_font = 16
 
@@ -96,6 +100,12 @@ class Window_DefectsDiagram:
 				self.dopant_properties_widget_layout.addWidget(self.defects_synthesis_temperature)
 				
 			self.defectsdiagram_window_layout.addWidget(self.dopant_properties_widget)
+
+			if self.show_carrier_concentration:
+
+				# Add defect concentration statistics checkboxes
+				self.Activate_DefectConcentration_Statistics()
+		
 		
 		else:
 			if self.show_carrier_concentration:
@@ -103,13 +113,16 @@ class Window_DefectsDiagram:
 				# Add synthesis temperature button
 				self.defectsdiagram_window_layout.addWidget(self.defects_synthesis_temperature)
 		
+				# Add defect concentration statistics checkboxes
+				self.Activate_DefectConcentration_Statistics()
+		
 		# (WIDGET) Save defects diagram as figure
 		self.defects_diagram_savefigure_button = QPushButton("Save Defects Diagram Figure")
 		self.defects_diagram_savefigure_button.clicked[bool].connect(lambda: self.DefectsDiagram.SaveFigure())
 		self.defectsdiagram_window_layout.addWidget(self.defects_diagram_savefigure_button)
 	
 	
-		
+	
 	###############################################################################################
 	################################# Generate Defects Diagram ####################################
 	###############################################################################################
@@ -297,3 +310,105 @@ class Window_DefectsDiagram:
 		if self.DefectsDiagram.intrinsic_defect_plots != {}:
 			self.Update_Equilibrium_Fermi_Energy_Temperature()
 
+
+
+	###############################################################################################
+	########################### Distribution for Defect Concentrations ############################
+	###############################################################################################
+	
+	def Activate_DefectConcentration_Statistics(self):
+
+		# (WIDGET) Choice of statistics for defect concentration (Maxwell-Boltzmann or Fermi-Dirac)
+		self.defectconc_stat_widget = QWidget()
+		self.defectconc_stat_widget_layout = QVBoxLayout(self.defectconc_stat_widget)
+
+		# Label for distribution statistics
+		defectconc_stat_label = QLabel("Distribution for Defect Concentration:")
+		defectconc_stat_label.setAlignment(Qt.AlignCenter)
+		self.defectconc_stat_widget_layout.addWidget(defectconc_stat_label)
+
+		# Widget for inputs
+		self.defectconc_stat_inputs_widget = QWidget()
+		self.defectconc_stat_inputs_widget_layout = QHBoxLayout(self.defectconc_stat_inputs_widget)
+
+		# Options bar for distribution statistics
+		self.defectconc_stat_box = QComboBox()
+		self.defectconc_stat_box.addItem("Maxwell-Boltzmann")
+		self.defectconc_stat_box.addItem("Fermi-Dirac")
+		self.defectconc_stat_box.setCurrentIndex(0)
+		self.defectconc_stat_box.activated.connect(lambda: self.CarrierConcentration.Update_DefectConcentration_DistributionStatistics(self.defectconc_stat_box))
+		self.defectconc_stat_box.activated.connect(self.Update_Equilibrium_Fermi_Energy_Temperature)
+		self.defectconc_stat_box.setEnabled(False)
+		self.defectconc_stat_inputs_widget_layout.addWidget(self.defectconc_stat_box)
+
+		# Help button
+		self.defectconc_type_question_button = QPushButton()
+		self.defectconc_type_question_button.setIcon(QIcon(vtandem_source_path+"/icon/QuestionIcon.png"))
+		self.defectconc_type_question_button.clicked[bool].connect(self.DefectConcentration_Type_Help_Function)
+		self.defectconc_stat_inputs_widget_layout.addWidget(self.defectconc_type_question_button)
+
+		# Add inputs widget to overarching widget
+		self.defectconc_stat_widget_layout.addWidget(self.defectconc_stat_inputs_widget)
+
+		# Add widget to window
+		self.defectsdiagram_window_layout.addWidget(self.defectconc_stat_widget)
+
+
+	"""
+	def Activate_DefectConcentration_Statistics(self):
+
+		# (WIDGET) Choice of statistics for defect concentration (Maxwell-Boltzmann or Fermi-Dirac)
+		self.defectconc_stat_widget = QWidget()
+		self.defectconc_stat_widget_layout = QHBoxLayout(self.defectconc_stat_widget)
+
+		# Label for distribution statistics
+		defectconc_stat_label = QLabel("Distribution for Defect Concentration:")
+		defectconc_stat_label.setAlignment(Qt.AlignCenter)
+		self.defectconc_stat_widget_layout.addWidget(defectconc_stat_label)
+
+		# Options bar for distribution statistics
+		self.defectconc_stat_box = QComboBox()
+		self.defectconc_stat_box.addItem("Maxwell-Boltzmann")
+		self.defectconc_stat_box.addItem("Fermi-Dirac")
+		self.defectconc_stat_box.setCurrentIndex(0)
+		self.defectconc_stat_box.activated.connect(lambda: self.CarrierConcentration.Update_DefectConcentration_DistributionStatistics(self.defectconc_stat_box))
+		self.defectconc_stat_box.activated.connect(self.Update_Equilibrium_Fermi_Energy_Temperature)
+		self.defectconc_stat_box.setEnabled(False)
+		self.defectconc_stat_widget_layout.addWidget(self.defectconc_stat_box)
+
+		# Help button
+		self.defectconc_type_question_button = QPushButton()
+		self.defectconc_type_question_button.setIcon(QIcon(vtandem_source_path+"/icon/QuestionIcon.png"))
+		self.defectconc_type_question_button.clicked[bool].connect(self.DefectConcentration_Type_Help_Function)
+		self.defectconc_stat_widget_layout.addWidget(self.defectconc_type_question_button)
+
+		# Add widget to window
+		self.defectsdiagram_window_layout.addWidget(self.defectconc_stat_widget)
+	"""
+
+
+
+	def DefectConcentration_Type_Help_Function(self):
+		dialog_instructions = 	"""
+The concentration of each defect can be calculated using either:
+	- Maxwell-Boltzmann distribution, or
+	- Fermi-Dirac distribution.\n
+While the Maxwell-Boltzmann distribution is more often used to calculate defect concentrations, the Fermi-Dirac distribution is a more general formulation which correctly 
+accounts for configurational entropy in the limit of high defect concentrations (i.e. when the formation energy of a defect is low or negative). Accordingly, when a negative 
+defect formation energy is detected, Fermi-Dirac statistics are used to calculate defect concentrations. \n
+For more info, see:
+R.A. Johnson, "Use of Fermi-Dirac Statistics for defects in solids," Phys. Rev. B 24, 12 (1981).
+T. Zacherle, et al., "Ab initio analysis of the defect structure of ceria," Phys. Rev. B 87, 134104 (2013).
+M.Y. Toriyama, et al., "VTAnDeM: A Python Toolkit for Simultaneously Visualizing Phase Stability, Defect Energetics, and Carrier Concentrations of Materials," Submitted.
+								"""
+
+		self.defectconc_type_message_window = QMainWindow()
+		self.defectconc_type_message_window.setWindowTitle("Help")
+		self.defectconc_type_message_window.setWindowIcon(QIcon(vtandem_source_path+"/logo/LogoSmall.png"))
+		self.defectconc_type_message_widget = QWidget()
+		self.defectconc_type_message_widget_layout = QVBoxLayout(self.defectconc_type_message_widget)
+		self.defectconc_type_dialog_instructions = QLabel(dialog_instructions)
+		self.defectconc_type_message_widget_layout.addWidget(self.defectconc_type_dialog_instructions)
+		self.defectconc_type_message_window.setCentralWidget(self.defectconc_type_message_widget)
+		self.defectconc_type_message_window.show()
+	
