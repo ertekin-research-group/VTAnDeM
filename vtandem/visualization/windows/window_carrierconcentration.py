@@ -264,9 +264,9 @@ class Window_CarrierConcentration(QWidget):
 		dialog_instructions = 	"""
 The free electron and hole concentrations can be calculated using either:
 	- Real DOS (i.e. calculated using DFT), or
-	- Parabolic Approximation (i.e. using the DOS of a single parabolic band).\n
+	- Parabolic Band Approximation (i.e. using the DOS of a single parabolic band).\n
 For more info, see:
-M.Y. Toriyama, et al., "How to analyse a density of states," Mater. Today. Elec. 1, 100002 (2022).
+M.Y. Toriyama, et al., "How to analyse a density of states," Mater. Today. Electron. 1, 100002 (2022).
 M.Y. Toriyama, et al., "VTAnDeM: A Python Toolkit for Simultaneously Visualizing Phase Stability, Defect Energetics, and Carrier Concentrations of Materials," Submitted.
 								"""
 
