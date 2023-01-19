@@ -40,15 +40,15 @@ Installation
 	- `pip install -r requirements.txt`
 
 
-Examples:
+Examples
 ---------
 Example VTAnDeM projects can be found in the `Examples` folder for the following materials:
-1. Mg<sub>2</sub>Si
+1. Cu<sub>2</sub>HgGeTe<sub>4</sub>
 2. Hg<sub>2</sub>GeTe<sub>4</sub>
-3. Cu<sub>2</sub>HgGeTe<sub>4</sub>
+3. Mg<sub>2</sub>Si
+4. Y<sub>2</sub>Te<sub>3</sub>
 
-
-Usage:
+Usage
 ------
 VTAnDeM must be called from the command terminal. The steps are as follows:
 1. Create a **VTAnDeM project** in a directory of your choice.
@@ -126,7 +126,7 @@ VTAnDeM must be called from the command terminal. The steps are as follows:
 	(Note that this step is not necessary if you opened the VTAnDeM UI in step 2.i)
 
 
-Help:
+Help
 -----
 Help with the necessary data structure can be found readily on the command terminal.
 
