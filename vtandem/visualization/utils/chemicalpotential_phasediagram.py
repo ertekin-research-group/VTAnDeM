@@ -141,8 +141,8 @@ def Calculate_PhaseDiagram_Projected2D(main_compound, elements_dict: dict, compo
 	
 	stability_minimum_bound.append(main_compound_deltamu_second_element)
 	stability_maximum_bound.append(np.zeros(len(main_compound_deltamu_first_element)))
-	stability_absolute_minimum = np.fromiter(map(max, zip(*itertools.chain(stability_minimum_bound))), dtype=np.float)
-	stability_absolute_maximum = np.fromiter(map(min, zip(*itertools.chain(stability_maximum_bound))), dtype=np.float)
+	stability_absolute_minimum = np.fromiter(map(max, zip(*itertools.chain(stability_minimum_bound))), dtype=float)
+	stability_absolute_maximum = np.fromiter(map(min, zip(*itertools.chain(stability_maximum_bound))), dtype=float)
 	
 	main_compound_deltamu_first_element_cutoff = []
 	stability_minimum_cutoff = []

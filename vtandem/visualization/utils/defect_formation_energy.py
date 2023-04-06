@@ -85,7 +85,7 @@ def Find_MinimumDefectFormationEnthalpies(defect_formation_enthalpy_data):
 	
 	# Find minimum formation enthalpies
 	for defect in defect_formation_enthalpy_data.keys():
-		defect_formation_energy_minimum = np.fromiter(map(min, zip(*defect_formation_enthalpy_data[defect].values())), dtype=np.float)
+		defect_formation_energy_minimum = np.fromiter(map(min, zip(*defect_formation_enthalpy_data[defect].values())), dtype=float)
 		minimum_defect_formation_enthalpy_data[defect] = defect_formation_energy_minimum
 	
 	# Return dictionary of minimum formation enthalpies of each defect

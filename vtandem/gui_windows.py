@@ -1159,8 +1159,7 @@ class Binary_Main_VTAnDeM_Window(QMainWindow):
 		# Obtain DOS data
 		self.dos_data = Obtain_DOS_Data(filepath = filepath)
 		
-		
-		
+
 		self.Tab1_PhasesDefectsCarriers_Object = Tab_Binary_DefectsDiagram_CarrierConcentration(self, main_compound = main_compound, first_element = first_element, second_element = second_element, compounds_info = self.compounds_info, defects_data = self.defects_data, main_compound_info = self.main_compound_info, dos_data = self.dos_data, show_defects_diagram = show_defects_diagram, show_carrier_concentration = show_carrier_concentration)
 
 		# Check for dopants in defects database
