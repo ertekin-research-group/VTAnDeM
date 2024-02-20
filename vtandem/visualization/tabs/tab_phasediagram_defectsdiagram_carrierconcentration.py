@@ -191,7 +191,6 @@ class Tab_PhaseDiagram_DefectsDiagram_CarrierConcentration(Window_DefectsDiagram
 			
 			# Set up carrier concentration plot object
 			# Note: We create the CarrierConcentration object in tab_quaternary.../tab_ternary...
-			
 			self.CarrierConcentration.defects_data = defects_data
 			self.CarrierConcentration.main_compound_info = main_compound_info
 			#self.CarrierConcentration.dos_data = dos_data[self.main_compound]

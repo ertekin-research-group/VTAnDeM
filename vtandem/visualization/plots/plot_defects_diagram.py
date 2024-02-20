@@ -110,7 +110,8 @@ class Plot_DefectsDiagram(SaveFigure):
 		
 		# Settings for equilibrium Fermi energy
 		self.equilibrium_fermi_energy_tick.set_xlim(self.axis_lims["XMin"], self.axis_lims["XMax"])
-		self.equilibrium_fermi_energy_tick.set_xticks([-100])
+		self.equilibrium_fermi_energy_tick.set_xticks([0])
+		self.equilibrium_fermi_energy_tick.set_xticklabels([])
 		self.equilibrium_fermi_energy_tick.tick_params(axis='both', labelsize=self.font['size']-2)
 	
 	
@@ -197,7 +198,8 @@ class Plot_DefectsDiagram(SaveFigure):
 			self.intrinsic_defect_plots[intrinsic_defect].set_ydata(self.intrinsic_defects_enthalpy_data[intrinsic_defect])
 		
 		# Remove labels before redrawing them at new positions
-		self.defects_diagram_plot_drawing.texts.clear()
+		for label_text in self.defects_diagram_plot_drawing.texts:
+			label_text.remove()
 		labelLines(list(self.intrinsic_defect_plots.values()), align = False, xvals = np.linspace(0.0, self.ECBM-self.EVBM, len(self.intrinsic_defect_plots.keys())+2)[1:len(self.intrinsic_defect_plots.keys())+1], fontsize = 10, bbox = dict(facecolor = 'white', alpha = 0.8, edgecolor = 'white', pad = 0.5))
 		
 		# Draw defects diagram canvas
@@ -258,8 +260,9 @@ class Plot_DefectsDiagram(SaveFigure):
 		
 		# Place EF^eq text
 		try:
+			self.equilibrium_fermi_energy_tick.set_xlim(self.axis_lims["XMin"], self.axis_lims["XMax"])
 			self.equilibrium_fermi_energy_tick.set_xticks([equilibrium_fermi_energy])
-			self.equilibrium_fermi_energy_tick.set_xticklabels([r"$E_{f}^{eq}$"])
+			self.equilibrium_fermi_energy_tick.set_xticklabels([r"$\mathit{E_{\rm F}^{\rm eq}}$"])
 		except:
 			pass
 
